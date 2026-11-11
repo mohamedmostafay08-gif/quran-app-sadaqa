@@ -1,5 +1,6 @@
 // المساحة، التخزين الدائم، وحذف الملفات الصوتية
 import { db } from '../db.js';
+import { getReciter } from '../audio/player.js';
 
 export const AUDIO_CACHE = 'audio-v1';
 
@@ -38,7 +39,8 @@ export async function deleteSurah(reciterId, s, urls) {
 export async function deleteReciter(reciterId) {
   const cache = await caches.open(AUDIO_CACHE);
   const keys = await cache.keys();
-  await Promise.all(keys.filter((r) => r.url.includes(`/${reciterId}/`)).map((r) => cache.delete(r)));
+  const server = getReciter(reciterId).server;
+  await Promise.all(keys.filter((r) => r.url.startsWith(server)).map((r) => cache.delete(r)));
   const all = await db.all('downloads');
   await Promise.all(all.filter((d) => d.reciter === reciterId).map((d) => db.del('downloads', d.id)));
 }

@@ -1,27 +1,26 @@
 // تنزيل سور/قراء كاملة للأوفلاين مع طابور وتقدم وإلغاء
 import { db } from '../db.js';
-import { ayahUrl } from '../audio/player.js';
-import { getSurahMeta } from '../data.js';
+import { surahUrl, timingUrl } from '../audio/player.js';
 import { AUDIO_CACHE, requestPersist, deleteSurah as removeFiles } from './storage.js';
 
-const CONCURRENCY = 4;
+const CONCURRENCY = 2;
 const queue = [];          // [{ reciter, surah }]
 let active = null;         // { reciter, surah, done, total, bytes, abort }
 const listeners = new Set();
 const emit = () => { for (const fn of listeners) fn(status()); };
 
 export const subscribe = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
+let soon = 0;
+const emitSoon = () => { if (!soon) soon = setTimeout(() => { soon = 0; emit(); }, 250); };
+
 export const status = () => ({
-  active: active && { reciter: active.reciter, surah: active.surah, done: active.done, total: active.total },
+  active: active && { reciter: active.reciter, surah: active.surah, done: active.done + (active.fraction || 0), total: active.total },
   queued: queue.map((q) => ({ ...q })),
 });
 
-/** روابط ملفات السورة (البسملة من ملف الفاتحة 1 لكل السور عدا الفاتحة والتوبة) */
+/** ملفات السورة: الصوت الكامل + توقيت الآيات (التوقيت صغير ويبقى عند الحذف) */
 export function surahUrls(reciter, s, { forDelete = false } = {}) {
-  const n = getSurahMeta(s).ayahCount;
-  const urls = Array.from({ length: n }, (_, i) => ayahUrl(reciter, s, i + 1));
-  if (!forDelete && s !== 1 && s !== 9) urls.unshift(ayahUrl(reciter, 1, 1));
-  return urls;
+  return forDelete ? [surahUrl(reciter, s)] : [surahUrl(reciter, s), timingUrl(reciter, s)];
 }
 
 export function isQueued(reciter, s) {
@@ -88,9 +87,27 @@ async function run({ reciter, surah }) {
         } else {
           const res = await fetch(url, { mode: 'cors', signal: abort.signal });
           if (!res.ok) throw new Error(res.status);
-          const blob = await res.blob();
-          await cache.put(url, new Response(blob, { headers: { 'Content-Type': 'audio/mpeg', 'Content-Length': String(blob.size) } }));
-          active.bytes += blob.size;
+          const type = url.endsWith('.mp3') ? 'audio/mpeg' : 'application/json';
+          const total = +(res.headers.get('content-length') || 0);
+          // حفظ متدفق مع تقدم بالبايت (ملف السورة قد يتجاوز 100 م.ب)
+          let loaded = 0;
+          const reader = res.body.getReader();
+          const stream = new ReadableStream({
+            async pull(ctrl) {
+              const { done, value } = await reader.read();
+              if (done) { ctrl.close(); return; }
+              loaded += value.length;
+              if (total && type === 'audio/mpeg') { active.fraction = loaded / total; emitSoon(); }
+              ctrl.enqueue(value);
+            },
+            cancel() { reader.cancel(); },
+          });
+          const headers = { 'Content-Type': type };
+          if (total) headers['Content-Length'] = String(total);
+          await cache.put(url, new Response(stream, { headers }));
+          if (abort.signal.aborted) { await cache.delete(url); return; }
+          active.bytes += loaded;
+          active.fraction = 0;
         }
         active.done++;
       } catch (e) {

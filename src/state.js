@@ -5,7 +5,7 @@ export const DEFAULTS = {
   theme: 'auto',          // auto | light | dark | sepia
   fontScale: 1,           // 0.8 .. 2
   layout: 'flow',         // flow (متصل كالمصحف) | list (آية في سطر)
-  reciter: 'Alafasy_128kbps',
+  reciter: '123',          // معرّف القارئ في mp3quran (123 = مشاري العفاسي)
   rate: 1,                // سرعة التشغيل
   repeat: 1,              // تكرار كل آية
   autoNext: true,         // متابعة السورة التالية

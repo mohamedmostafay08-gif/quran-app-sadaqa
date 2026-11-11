@@ -1,132 +1,222 @@
-// محرك الصوت: تشغيل آية آية من EveryAyah مع طابور، تكرار، سرعة، وتحميل مسبق
+// محرك الصوت: تلاوة السورة كاملة (متصلة بدون فواصل) من mp3quran.net
+// مع توقيت كل آية لتظليل الآية المقروءة، والتكرار، والنطاقات، ومقارنة القراء — كلها بالقفز داخل نفس الملف.
 import * as settings from '../state.js';
 import { getSurahMeta } from '../data.js';
 import { setupMediaSession, updateMediaSession } from './mediaSession.js';
 
-const AUDIO_BASE = 'https://everyayah.com/data/';
+const TIMING_API = 'https://www.mp3quran.net/api/v3/ayat_timing';
 const pad = (n) => String(n).padStart(3, '0');
+export const DEFAULT_RECITER = '123'; // مشاري العفاسي
 
 let reciters = [];
 export async function loadReciters() {
   const res = await fetch(new URL('../../public/data/reciters.json', import.meta.url));
   reciters = await res.json();
+  for (const r of reciters) r.style = r.style === 'المجود' ? 'مجوّد' : r.style;
+  // ترحيل إعداد القارئ القديم (معرّفات EveryAyah) إلى القائمة الجديدة
+  if (!reciters.some((r) => r.id === settings.get('reciter'))) settings.set('reciter', DEFAULT_RECITER);
   return reciters;
 }
 export const getReciters = () => reciters;
 export const getReciter = (id) => reciters.find((r) => r.id === id) || reciters[0];
 
-export function ayahUrl(reciterId, s, a) {
-  return `${AUDIO_BASE}${reciterId}/${pad(s)}${pad(a)}.mp3`;
+export const surahUrl = (reciterId, s) => `${getReciter(reciterId).server}${pad(s)}.mp3`;
+export const timingUrl = (reciterId, s) => `${TIMING_API}?surah=${s}&read=${reciterId}`;
+
+// ---- توقيتات الآيات ----
+const timingCache = new Map();
+/** يرجع مصفوفة [start, end] بالثواني؛ الفهرس 0 = البسملة/الاستعاذة قبل الآية الأولى */
+export async function getTimings(reciterId, s) {
+  const key = `${reciterId}:${s}`;
+  if (timingCache.has(key)) return timingCache.get(key);
+  const res = await fetch(timingUrl(reciterId, s));
+  if (!res.ok) throw new Error('timing ' + res.status);
+  const data = await res.json();
+  const t = [];
+  for (const x of data) if (x.ayah >= 1) t[x.ayah] = [x.start_time / 1000, x.end_time / 1000];
+  const count = getSurahMeta(s).ayahCount;
+  for (let a = 1; a <= count; a++) if (!t[a]) throw new Error('timing incomplete');
+  t[0] = [0, t[1][0]];
+  timingCache.set(key, t);
+  if (timingCache.size > 30) timingCache.delete(timingCache.keys().next().value);
+  return t;
 }
 
 // ---- الحالة ----
 const st = {
   status: 'idle',      // idle | loading | playing | paused
   surah: null,
-  ayah: null,          // 0 = البسملة
+  ayah: null,          // 0 = البسملة (ما قبل الآية الأولى)
   reciter: null,
-  only: false,         // تكرار آية واحدة
+  only: false,         // تكرار آية واحدة ثم التوقف
   repeatLeft: 0,
   compare: null,       // { list: [reciterIds], idx }
   error: null,
-  range: null,         // { from:{surah,ayah}, to:{surah,ayah}, loop } نطاق (ورد / حفظ)
+  range: null,         // { from:{surah,ayah}, to:{surah,ayah}, loop, times } نطاق (ورد / حفظ)
   completed: null,     // آخر نطاق اكتمل تشغيله (لتسجيل الورد)
+  loops: 0,
 };
 const listeners = new Set();
 const emit = () => { for (const fn of listeners) fn(st); updateMediaSession(st); };
 
 const audio = new Audio();
 audio.preload = 'auto';
-const preloader = new Audio();
-preloader.preload = 'auto';
 let sleepFade = 1;
+let timings = null;     // توقيتات الملف المحمّل
+let loadedKey = null;   // reciter:surah للملف المحمّل
+let loadSeq = 0;
+let switching = false;  // أثناء تبديل الملف/القفز: تجاهل مراقبة الحدود حتى يبدأ التشغيل فعليًا
 
-function src(s, a, reciterId = st.reciter) {
-  // الآية 0 = البسملة (تُقرأ من ملف الفاتحة 1 كما في EveryAyah)
-  return a === 0 ? ayahUrl(reciterId, 1, 1) : ayahUrl(reciterId, s, a);
+const needsBasmala = (s) => s !== 1 && s !== 9;
+const currentReciter = () => (st.compare ? st.compare.list[st.compare.idx] : st.reciter);
+const startOf = (a) => timings[a][0];
+const endOf = (a) => timings[a][1];
+
+function ayahAt(t) {
+  if (!timings) return null;
+  const n = timings.length - 1;
+  // بحث ثنائي على بدايات الآيات
+  let lo = 0, hi = n;
+  while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (timings[mid][0] <= t + 0.02) lo = mid; else hi = mid - 1; }
+  return lo;
 }
 
-function needsBasmala(s) { return s !== 1 && s !== 9; }
+function fail(msg) {
+  st.status = 'paused';
+  st.error = msg || (navigator.onLine ? 'تعذر تشغيل الصوت' : 'لا يوجد اتصال، والسورة غير منزّلة');
+  emit();
+}
 
+/** يحمّل ملف السورة (لو لزم) ثم يقفز لبداية الآية ويشغّل */
 async function load(s, a) {
-  st.surah = s; st.ayah = a; st.status = 'loading'; st.error = null;
-  const reciterId = st.compare ? st.compare.list[st.compare.idx] : st.reciter;
-  audio.src = src(s, a, reciterId);
+  const my = ++loadSeq;
+  const reciterId = currentReciter();
+  const key = `${reciterId}:${s}`;
+  st.surah = s; st.ayah = a; st.error = null;
+  switching = true;
+  if (key !== loadedKey) {
+    audio.pause();
+    timings = null;
+    st.status = 'loading';
+    emit();
+    try {
+      const t = await getTimings(reciterId, s);
+      if (my !== loadSeq) return;
+      timings = t;
+    } catch (e) {
+      if (my !== loadSeq) return;
+      return fail(navigator.onLine ? 'تعذر تحميل توقيت الآيات' : null);
+    }
+    loadedKey = key;
+    audio.src = surahUrl(reciterId, s);
+  }
   audio.playbackRate = settings.get('rate');
   audio.volume = sleepFade;
-  emit();
+  await seek(startOf(a));
+  if (my !== loadSeq) return;
   try {
     await audio.play();
+    if (my === loadSeq) switching = false;
   } catch (e) {
-    if (e.name === 'AbortError') return;
-    st.status = 'paused';
-    st.error = navigator.onLine ? 'تعذر تشغيل الصوت' : 'لا يوجد اتصال، والآية غير منزّلة';
+    if (e.name === 'AbortError' || my !== loadSeq) return;
+    switching = false;
+    fail();
+  }
+}
+
+function seek(sec) {
+  return new Promise((resolve) => {
+    const set = () => { try { audio.currentTime = sec; } catch { /* */ } resolve(); };
+    if (audio.readyState >= 1) set();
+    else audio.addEventListener('loadedmetadata', set, { once: true });
+  });
+}
+
+// ---- المراقبة الدقيقة لحدود الآيات ----
+// timeupdate يأتي كل ~250ms؛ نستخدم requestAnimationFrame أثناء التشغيل لدقة القفز عند التكرار/النطاقات
+let rafId = 0;
+function loop() {
+  tick();
+  if (!audio.paused) rafId = requestAnimationFrame(loop);
+}
+audio.addEventListener('timeupdate', tick);
+
+function tick() {
+  if (switching || !timings || st.status === 'idle' || !st.surah) return;
+  const t = audio.currentTime;
+  const cur = st.ayah;
+  // هل تجاوزنا نهاية الآية الحالية؟
+  if (cur != null && cur >= 0 && timings[cur] && t >= endOf(cur) - 0.03) {
+    if (boundary(cur)) return;
+  }
+  const at = ayahAt(t);
+  if (at !== cur && at != null) {
+    // انتقال طبيعي داخل الملف (بدون أي فاصل)
+    if (cur != null && at > cur) st.repeatLeft = st.range?.times || settings.get('repeat');
+    st.ayah = at;
     emit();
-    return;
   }
-  preloadNext();
 }
 
-function nextPos() {
-  const { surah: s, ayah: a } = st;
-  const count = getSurahMeta(s).ayahCount;
-  if (st.range && a !== 0) {
-    const t = st.range.to;
-    if (s > t.surah || (s === t.surah && a >= t.ayah)) {
-      if (st.range.loop) return { s: st.range.from.surah, a: st.range.from.ayah };
-      return null;
-    }
-  }
-  if (a < count) return { s, a: a + 1 };
-  if (s >= 114 || (!settings.get('autoNext') && !st.range)) return null;
-  const ns = s + 1;
-  return { s: ns, a: needsBasmala(ns) ? 0 : 1 };
-}
-
-function preloadNext() {
-  if (st.only || st.compare) return;
-  const n = nextPos();
-  if (n) preloader.src = src(n.s, n.a);
-}
-
-audio.addEventListener('playing', () => { st.status = 'playing'; emit(); });
-audio.addEventListener('pause', () => { if (st.status === 'playing') { st.status = 'paused'; emit(); } });
-audio.addEventListener('waiting', () => { st.status = 'loading'; emit(); });
-audio.addEventListener('error', () => {
-  if (!audio.src) return;
-  st.status = 'paused';
-  st.error = navigator.onLine ? 'تعذر تحميل ملف الصوت' : 'لا يوجد اتصال، والآية غير منزّلة';
-  emit();
-});
-audio.addEventListener('ended', () => {
+/** قرار عند نهاية آية: يرجع true لو تدخّلنا (قفز/إيقاف) */
+function boundary(a) {
   if (st.compare) {
     st.compare.idx++;
-    if (st.compare.idx < st.compare.list.length) return load(st.surah, st.ayah);
+    if (st.compare.idx < st.compare.list.length) { load(st.surah, a); return true; }
     st.compare = null;
-    st.status = 'idle'; emit();
+    audio.pause(); st.status = 'idle'; emit();
+    return true;
+  }
+  if (a !== 0 && st.repeatLeft > 1) {
+    st.repeatLeft--;
+    audio.currentTime = startOf(a);
+    return true;
+  }
+  if (st.only) { audio.pause(); st.status = 'idle'; st.only = false; emit(); return true; }
+  const r = st.range;
+  if (r && a !== 0 && st.surah === r.to.surah && a >= r.to.ayah) {
+    if (r.loop) {
+      st.loops++;
+      st.repeatLeft = r.times || settings.get('repeat');
+      if (r.from.surah === st.surah && loadedKey === `${currentReciter()}:${st.surah}`) { st.ayah = r.from.ayah; audio.currentTime = startOf(r.from.ayah); emit(); }
+      else load(r.from.surah, r.from.ayah);
+      return true;
+    }
+    st.completed = { ...r, at: Date.now() };
+    audio.pause(); st.status = 'idle'; emit();
+    return true;
+  }
+  return false;
+}
+
+audio.addEventListener('playing', () => { st.status = 'playing'; emit(); cancelAnimationFrame(rafId); rafId = requestAnimationFrame(loop); });
+audio.addEventListener('pause', () => { cancelAnimationFrame(rafId); if (st.status === 'playing') { st.status = 'paused'; emit(); } });
+audio.addEventListener('waiting', () => { if (st.status !== 'idle') { st.status = 'loading'; emit(); } });
+audio.addEventListener('error', () => {
+  if (!audio.getAttribute('src')) return;
+  loadedKey = null;
+  fail(navigator.onLine ? 'تعذر تحميل ملف الصوت' : null);
+});
+audio.addEventListener('ended', () => {
+  if (!st.surah || switching) return;
+  const last = getSurahMeta(st.surah).ayahCount;
+  if (boundary(last)) return;
+  const inRange = st.range && (st.surah < st.range.to.surah);
+  if (st.surah < 114 && (settings.get('autoNext') || inRange) && !st.only) {
+    st.repeatLeft = st.range?.times || settings.get('repeat');
+    load(st.surah + 1, needsBasmala(st.surah + 1) ? 0 : 1);
     return;
   }
-  if (st.ayah !== 0 && st.repeatLeft > 1) { st.repeatLeft--; return load(st.surah, st.ayah); }
-  if (st.only) { st.status = 'idle'; emit(); return; }
-  const n = nextPos();
-  if (!n) {
-    if (st.range) st.completed = { ...st.range, at: Date.now() };
-    st.status = 'idle'; emit(); return;
-  }
-  if (st.range?.loop && n.s === st.range.from.surah && n.a === st.range.from.ayah) st.loops = (st.loops || 0) + 1;
-  st.repeatLeft = st.range?.times || settings.get('repeat');
-  load(n.s, n.a);
+  st.status = 'idle'; emit();
 });
 
-settings.subscribe((k, v) => {
-  if (k === 'rate') audio.playbackRate = v;
-});
+settings.subscribe((k, v) => { if (k === 'rate') audio.playbackRate = v; });
 
 export const player = {
   state: () => st,
   subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
 
-  /** يبدأ من آية؛ {only:true} يكرر آية واحدة، {range:{from,to}} نطاق محدد */
+  /** يبدأ من آية؛ {only:true} يكرر آية واحدة، {range:{from,to,loop,times}} نطاق محدد */
   playFrom(s, a, opts = {}) {
     st.reciter = settings.get('reciter');
     st.only = !!opts.only;
@@ -141,30 +231,43 @@ export const player = {
   /** مقارنة القراء: نفس الآية بأكثر من قارئ ورا بعض */
   compare(s, a, list) {
     st.reciter = settings.get('reciter');
-    st.only = true;
+    st.only = false;
     st.range = null;
+    st.repeatLeft = 1;
     st.compare = { list, idx: 0 };
     load(s, a);
   },
   pause() { audio.pause(); },
   resume() { if (st.surah) audio.play().catch(() => {}); },
-  toggle() { st.status === 'playing' ? audio.pause() : (st.status === 'idle' && st.surah ? player.playFrom(st.surah, st.ayah || 1) : player.resume()); },
+  toggle() {
+    if (st.status === 'playing') audio.pause();
+    else if (st.status === 'idle' && st.surah) player.playFrom(st.surah, st.ayah || 1);
+    else player.resume();
+  },
   stop() {
+    loadSeq++;
+    switching = false;
     audio.pause(); audio.removeAttribute('src'); audio.load();
-    Object.assign(st, { status: 'idle', surah: null, ayah: null, compare: null, error: null });
+    loadedKey = null; timings = null;
+    Object.assign(st, { status: 'idle', surah: null, ayah: null, compare: null, error: null, range: null, only: false });
     emit();
   },
   next() {
-    if (!st.surah) return;
+    if (!st.surah || !timings) return;
+    st.repeatLeft = st.range?.times || settings.get('repeat');
     const count = getSurahMeta(st.surah).ayahCount;
-    if (st.ayah < count) load(st.surah, st.ayah + 1);
+    if (st.ayah < count) { st.ayah += 1; audio.currentTime = startOf(st.ayah); emit(); }
     else if (st.surah < 114) load(st.surah + 1, needsBasmala(st.surah + 1) ? 0 : 1);
   },
   prev() {
-    if (!st.surah) return;
-    if (audio.currentTime > 3) { audio.currentTime = 0; return; }
-    if (st.ayah > 1) load(st.surah, st.ayah - 1);
+    if (!st.surah || !timings) return;
+    st.repeatLeft = st.range?.times || settings.get('repeat');
+    const a = st.ayah || 0;
+    if (audio.currentTime - startOf(a) > 3) { audio.currentTime = startOf(a); return; }
+    const first = needsBasmala(st.surah) ? 0 : 1;
+    if (a > first) { st.ayah = a - 1; audio.currentTime = startOf(st.ayah); emit(); }
     else if (st.surah > 1) load(st.surah - 1, getSurahMeta(st.surah - 1).ayahCount);
+    else audio.currentTime = startOf(a);
   },
   setReciter(id) {
     settings.set('reciter', id);

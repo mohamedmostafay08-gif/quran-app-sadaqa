@@ -16,6 +16,7 @@ python3 -m http.server 8080
 ```bash
 node scripts/build-data.js     # نص المصحف + الأجزاء/الصفحات مع فحوصات آلية (Node 18+)
 node scripts/build-extra.js    # الصرف والجذور، التفسير الميسر، التجويد، معاني الكلمات
+node scripts/build-reciters.js # قائمة القراء من mp3quran (التي لها توقيت آيات لكل السور)
 node scripts/stamp-sw.js       # تحديث قائمة الكاش ورقم الإصدار في sw.js — شغّله قبل كل نشر
 ```
 
@@ -48,7 +49,7 @@ src/views/        الشاشات
 - نص المصحف: [Tanzil Project](https://tanzil.net), Uthmani 1.1, CC BY 3.0. النص منقول حرفيًا دون تعديل.
 - الصرف والجذور: [Quranic Arabic Corpus](https://corpus.quran.com) v0.4, GNU GPL (نسخة [mustafa0x/quran-morphology](https://github.com/mustafa0x/quran-morphology)).
 - التفسير الميسر، ومواضع التجويد، ومعاني الكلمات بالإنجليزية: [Quran.com API](https://quran.com).
-- الصوت: [EveryAyah.com](https://everyayah.com) (آية آية). يُحمَّل وقت التشغيل ولا يُضمَّن في المشروع.
+- الصوت: [mp3quran.net](https://mp3quran.net) — تلاوة السورة كاملة متصلة مع توقيت كل آية (ayat_timing) لتظليلها. يُحمَّل وقت التشغيل ولا يُضمَّن في المشروع.
 - الخطوط: Amiri Quran و Noto Kufi Arabic، رخصة SIL OFL.
 
 > بما أن بيانات الصرف مرخصة GPL، فالأسلم نشر كود المشروع برخصة متوافقة (GPL-3.0).

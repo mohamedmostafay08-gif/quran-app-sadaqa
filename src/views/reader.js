@@ -223,7 +223,7 @@ function displaySheet() {
   });
 }
 
-const DEFAULT_COMPARE = ['Alafasy_128kbps', 'Husary_128kbps', 'Minshawy_Murattal_128kbps', 'Abdul_Basit_Murattal_192kbps'];
+const DEFAULT_COMPARE = ['123', '118', '112', '53']; // العفاسي، الحصري، المنشاوي، عبدالباسط
 
 function compareSheet(n, a) {
   const chosen = new Set(DEFAULT_COMPARE);

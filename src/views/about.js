@@ -30,7 +30,7 @@ export function renderAbout() {
         h('dt', 'أحكام التجويد ومعاني الكلمات (إنجليزي)'),
         h('dd', link('https://quran.com', 'Quran.com'), ' API — مواضع الأحكام تُنقل على نص Tanzil بالمحاذاة دون تغيير أي حرف.'),
         h('dt', 'التلاوات'),
-        h('dd', link('https://everyayah.com', 'EveryAyah.com'), ' — ملفات صوتية آية آية.'),
+        h('dd', link('https://mp3quran.net', 'mp3quran.net'), ' — تلاوة السورة كاملة متصلة، مع توقيت كل آية لتظليلها.'),
         h('dt', 'أسماء السور بالإنجليزية'),
         h('dd', link('https://quran.com', 'Quran.com'), ' API.'),
         h('dt', 'الخطوط'),

@@ -18,7 +18,8 @@ async function sizeOf(reciter, s) {
   }
   const r = getReciter(reciter);
   const slow = /مجوّد|تعليمي/.test(r.style) ? 1.7 : 1;
-  return lettersPerSurah[s - 1] * SEC_PER_LETTER * slow * r.kbps * 125;
+  // ملفات mp3quran غالبًا 128 ك.ب/ث
+  return lettersPerSurah[s - 1] * SEC_PER_LETTER * slow * 128 * 125;
 }
 
 export async function renderDownloads(_p, _q, isStale) {

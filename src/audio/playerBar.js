@@ -4,6 +4,7 @@ import { player, getReciters, getReciter } from './player.js';
 import { getSurahMeta } from '../data.js';
 import * as settings from '../state.js';
 import { sheet, toast } from '../ui.js';
+import { normalize } from '../lib/arabic.js';
 import { sleepSheet, sleepState } from './sleepTimer.js';
 
 const RATES = [0.75, 1, 1.25, 1.5];
@@ -74,11 +75,31 @@ export function mountPlayerBar() {
 
 export function reciterSheet() {
   const current = settings.get('reciter');
+  const all = getReciters();
+  const input = h('input.note-input', { type: 'search', placeholder: 'ابحث باسم القارئ…', 'aria-label': 'ابحث باسم القارئ' });
+  const list = h('div');
+  let closeFn;
+  const item = (r) => h('li', h('button.choice', {
+    type: 'button', 'aria-pressed': String(r.id === current),
+    onclick: () => { player.setReciter(r.id); closeFn(); },
+  }, h('span', h('strong', r.nameAr), h('small', r.style)), r.id === current ? icon('check') : null));
+  const draw = () => {
+    const q = normalize(input.value);
+    const match = (r) => !q || normalize(r.nameAr).includes(q);
+    const featured = all.filter((r) => r.featured && match(r));
+    const others = all.filter((r) => !r.featured && match(r));
+    list.replaceChildren(
+      featured.length ? h('h3.list-label', 'الأشهر') : null,
+      featured.length ? h('ul.choice-list', featured.map(item)) : null,
+      others.length ? h('h3.list-label', `كل القراء (${ar(others.length)})`) : null,
+      others.length ? h('ul.choice-list', others.map(item)) : null,
+      !featured.length && !others.length ? h('p.muted', 'لا يوجد قارئ بهذا الاسم.') : null,
+    );
+  };
+  input.addEventListener('input', draw);
+  draw();
   sheet({
     title: 'اختر القارئ',
-    content: (close) => h('ul.choice-list', getReciters().map((r) => h('li', h('button.choice', {
-      type: 'button', 'aria-pressed': String(r.id === current),
-      onclick: () => { player.setReciter(r.id); close(); },
-    }, h('span', h('strong', r.nameAr), h('small', `${r.style}، ${ar(r.kbps)} ك.ب/ث`)), r.id === current ? icon('check') : null)))),
+    content: (close) => { closeFn = close; return h('div', h('p.muted', 'التلاوة متصلة للسورة كاملة، مع تظليل الآية المقروءة.'), input, list); },
   });
 }
