@@ -1,0 +1,231 @@
+/* ===================================================================
+   الطبقة الزجاجية — تُحمَّل بعد components.css
+   المبدأ: الزجاج للإطار (الأشرطة، المشغّل، الأوراق)، ونص المصحف على سطح ثابت مريح.
+   =================================================================== */
+
+:root {
+  --glass-bg: rgba(255, 253, 248, .62);
+  --glass-bg-strong: rgba(255, 253, 248, .82);
+  --glass-border: rgba(255, 255, 255, .7);
+  --glass-edge: rgba(15, 92, 77, .10);
+  --glass-shadow: 0 10px 30px rgba(20, 45, 38, .12), 0 1px 0 rgba(255, 255, 255, .6) inset;
+  --glass-blur: saturate(170%) blur(18px);
+  --card-bg: rgba(255, 253, 248, .72);
+  --pattern: rgba(168, 122, 34, .07);
+  /* ألوان الخلفية حسب وقت اليوم (تُستبدل بـ data-tod) */
+  --amb-1: #eaf3ee; --amb-2: #f7f1e3; --amb-3: #e6efe9;
+}
+:root[data-theme="dark"] {
+  --glass-bg: rgba(20, 31, 28, .58);
+  --glass-bg-strong: rgba(20, 31, 28, .82);
+  --glass-border: rgba(255, 255, 255, .08);
+  --glass-edge: rgba(92, 196, 168, .12);
+  --glass-shadow: 0 10px 30px rgba(0, 0, 0, .45), 0 1px 0 rgba(255, 255, 255, .05) inset;
+  --card-bg: rgba(20, 31, 28, .66);
+  --pattern: rgba(216, 178, 94, .05);
+  --amb-1: #0c1a17; --amb-2: #0f1513; --amb-3: #10201c;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --glass-bg: rgba(20, 31, 28, .58);
+    --glass-bg-strong: rgba(20, 31, 28, .82);
+    --glass-border: rgba(255, 255, 255, .08);
+    --glass-edge: rgba(92, 196, 168, .12);
+    --glass-shadow: 0 10px 30px rgba(0, 0, 0, .45), 0 1px 0 rgba(255, 255, 255, .05) inset;
+    --card-bg: rgba(20, 31, 28, .66);
+    --pattern: rgba(216, 178, 94, .05);
+    --amb-1: #0c1a17; --amb-2: #0f1513; --amb-3: #10201c;
+  }
+}
+:root[data-theme="sepia"] {
+  --glass-bg: rgba(246, 235, 211, .62);
+  --glass-bg-strong: rgba(246, 235, 211, .86);
+  --glass-border: rgba(255, 250, 238, .6);
+  --glass-edge: rgba(122, 75, 18, .12);
+  --card-bg: rgba(246, 235, 211, .74);
+  --pattern: rgba(143, 95, 18, .08);
+  --amb-1: #efe1c2; --amb-2: #ead7b0; --amb-3: #f1e6cd;
+}
+
+/* ألوان الخلفية حسب وقت اليوم (فاتح) */
+:root[data-tod="fajr"]:not([data-theme="dark"]):not([data-theme="sepia"]) { --amb-1: #dde8f3; --amb-2: #efe9f2; --amb-3: #e4eef0; }
+:root[data-tod="day"]:not([data-theme="dark"]):not([data-theme="sepia"]) { --amb-1: #eaf3ee; --amb-2: #f7f1e3; --amb-3: #e6efe9; }
+:root[data-tod="maghrib"]:not([data-theme="dark"]):not([data-theme="sepia"]) { --amb-1: #f6e4d6; --amb-2: #f3ece2; --amb-3: #ece6ee; }
+:root[data-tod="night"]:not([data-theme="dark"]):not([data-theme="sepia"]) { --amb-1: #e3e7ef; --amb-2: #eef0ee; --amb-3: #e1e9e6; }
+/* ليلي: نفس الفكرة بدرجات داكنة */
+:root[data-theme="dark"][data-tod="fajr"] { --amb-1: #0f1a24; --amb-3: #10201c; }
+:root[data-theme="dark"][data-tod="maghrib"] { --amb-1: #221713; --amb-3: #151a22; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme])[data-tod="fajr"] { --amb-1: #0f1a24; --amb-2: #0f1513; --amb-3: #10201c; }
+  :root:not([data-theme])[data-tod="day"] { --amb-1: #0c1a17; --amb-2: #0f1513; --amb-3: #10201c; }
+  :root:not([data-theme])[data-tod="maghrib"] { --amb-1: #221713; --amb-2: #0f1513; --amb-3: #151a22; }
+  :root:not([data-theme])[data-tod="night"] { --amb-1: #0c1a17; --amb-2: #0b1210; --amb-3: #10201c; }
+}
+
+/* ===== الخلفية المحيطة ===== */
+body { background: var(--bg); }
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60% 45% at 85% 0%, var(--amb-1), transparent 70%),
+    radial-gradient(55% 40% at 0% 35%, var(--amb-3), transparent 70%),
+    radial-gradient(70% 50% at 60% 100%, var(--amb-2), transparent 70%),
+    var(--bg);
+  transition: background .8s;
+}
+body::after {
+  /* نقشة نجمة ثمانية خفيفة جدًا */
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-color: var(--pattern);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.2'%3E%3Crect x='30' y='30' width='36' height='36'/%3E%3Crect x='30' y='30' width='36' height='36' transform='rotate(45 48 48)'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 96px 96px repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.2'%3E%3Crect x='30' y='30' width='36' height='36'/%3E%3Crect x='30' y='30' width='36' height='36' transform='rotate(45 48 48)'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 96px 96px repeat;
+}
+/* في القراءة: الخلفية أهدأ */
+body[data-route="surah"]::after { opacity: .4; }
+
+/* ===== السطح الزجاجي ===== */
+.glass, .topbar, .tabbar, .mini-player, .sheet, .full-player {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* الكروت: شبه شفافة بدون blur (أخف على الأداء) */
+.card, .quick, .search-bar, .surah-frame, .continue + .quick-row .quick {
+  background: var(--card-bg);
+  border-color: var(--glass-edge);
+}
+.surah-item:hover, .result:hover { background: var(--card-bg); }
+
+/* ===== الشريط العلوي ===== */
+.topbar {
+  border-width: 0 0 1px;
+  border-color: var(--glass-edge);
+  box-shadow: none;
+  transition: transform .3s var(--ease), opacity .3s;
+}
+
+/* ===== شريط التبويب العائم ===== */
+:root { --tabbar-h: 64px; --float-gap: 12px; }
+.tabbar {
+  left: 50%; right: auto; transform: translateX(-50%);
+  bottom: calc(var(--float-gap) + var(--safe-b));
+  width: min(calc(100% - 24px), 520px);
+  height: var(--tabbar-h); padding: 6px;
+  border-radius: 26px;
+  gap: 2px; align-items: stretch;
+  transition: transform .35s var(--ease), opacity .35s;
+}
+.tabbar a {
+  position: relative; border-radius: 20px; max-width: none;
+  transition: color .2s, background .25s;
+}
+.tabbar a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+.tabbar a:active { transform: scale(.96); }
+.main { padding-bottom: calc(var(--tabbar-h) + var(--float-gap) * 2 + var(--safe-b) + 24px); }
+body:has(.mini-player.show) .main { padding-bottom: calc(var(--tabbar-h) + 64px + var(--float-gap) * 3 + var(--safe-b) + 24px); }
+.toast { bottom: calc(var(--tabbar-h) + var(--float-gap) * 2 + var(--safe-b) + 76px); }
+
+/* ===== المشغّل الكبسولة ===== */
+.mini-player {
+  position: fixed; z-index: 35; left: 50%;
+  bottom: calc(var(--tabbar-h) + var(--float-gap) * 2 + var(--safe-b));
+  width: min(calc(100% - 24px), 520px);
+  height: 60px; border-radius: 22px;
+  display: flex; align-items: center; gap: 8px; padding: 0 8px 0 10px;
+  transform: translate(-50%, 140%); opacity: 0; visibility: hidden;
+  transition: transform .35s var(--ease), opacity .25s, visibility 0s .35s;
+  overflow: hidden;
+}
+.mini-player.show { transform: translate(-50%, 0); opacity: 1; visibility: visible; transition: transform .35s var(--ease), opacity .25s; }
+.mp-open { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; border: 0; background: none; padding: 0 4px; text-align: start; height: 100%; }
+.mp-art { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--on-accent); font-family: var(--font-quran); font-size: 20px; line-height: 1; }
+.mp-text { min-width: 0; display: grid; }
+.mp-text strong { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mp-text small { font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mp-text small.err { color: var(--danger); }
+.mp-play { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; }
+.mp-play svg { width: 18px; height: 18px; }
+.mp-progress { position: absolute; inset: auto 16px 0; height: 2px; border-radius: 2px; overflow: hidden; background: transparent; }
+.mp-progress span { display: block; height: 100%; background: var(--accent); transform-origin: right; transform: scaleX(0); }
+
+/* ===== المشغّل الكامل ===== */
+.fp-wrap { position: fixed; inset: 0; z-index: 55; pointer-events: none; }
+.fp-scrim { position: absolute; inset: 0; background: var(--scrim); opacity: 0; transition: opacity .3s; }
+.full-player {
+  position: absolute; inset: auto 0 0 0; margin: 0 auto; max-width: 560px;
+  height: min(92vh, 760px); height: min(92dvh, 760px);
+  border-radius: 28px 28px 0 0; border-bottom: 0;
+  background: var(--glass-bg-strong);
+  padding: 8px max(20px, env(safe-area-inset-right, 0px)) calc(20px + var(--safe-b)) max(20px, env(safe-area-inset-left, 0px));
+  display: flex; flex-direction: column; gap: 14px;
+  transform: translateY(100%); transition: transform .38s var(--ease);
+  pointer-events: auto; overflow: hidden;
+}
+.fp-wrap.open { pointer-events: auto; }
+.fp-wrap.open .fp-scrim { opacity: 1; }
+.fp-wrap.open .full-player { transform: none; }
+.fp-head { display: flex; align-items: center; justify-content: space-between; }
+.fp-handle { width: 44px; height: 5px; border-radius: 4px; background: var(--border); margin: 4px auto 0; }
+.fp-title { text-align: center; }
+.fp-title h2 { margin: 0; font-family: var(--font-quran); font-weight: 400; font-size: clamp(30px, 9vw, 44px); color: var(--accent); line-height: 1.6; }
+.fp-title p { margin: 0; color: var(--text-2); font-size: 13px; }
+.fp-ayah {
+  flex: 1; min-height: 0; overflow: auto; display: grid; place-items: center;
+  font-family: var(--font-quran); font-size: calc(1.55rem * var(--quran-scale)); line-height: 2.2; text-align: center;
+  padding: 10px 6px; border-radius: 20px; background: var(--card-bg); border: 1px solid var(--glass-edge);
+}
+.fp-ayah p { margin: 0; }
+.fp-ayah .ayah-num { font-size: .9em; }
+.fp-seek { display: grid; gap: 4px; }
+.fp-seek input { width: 100%; accent-color: var(--accent); }
+.fp-times { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.fp-controls { display: flex; align-items: center; justify-content: center; gap: 18px; }
+.fp-controls .icon-btn { width: 56px; height: 56px; }
+.fp-controls .icon-btn svg { width: 28px; height: 28px; }
+.fp-play { width: 76px; height: 76px; border-radius: 50%; border: 0; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 35%, transparent); }
+.fp-play svg { width: 30px; height: 30px; }
+.fp-play .spinner { width: 30px; height: 30px; }
+.fp-extra { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+.fp-extra .pb-chip { min-height: 38px; padding: 0 14px; font-size: 13px; background: var(--card-bg); }
+.fp-reciter { display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--glass-edge); background: var(--card-bg); border-radius: 999px; min-height: 44px; padding: 0 16px; font-weight: 700; margin: 0 auto; }
+
+/* الورقة السفلية زجاجية */
+.sheet { background: var(--glass-bg-strong); border-bottom: 0; }
+
+/* إخفاء المشغّل القديم */
+.player-bar { display: none !important; }
+
+/* ===== القراءة الغامرة: إخفاء الأشرطة أثناء النزول ===== */
+body.immersive .tabbar { transform: translate(-50%, calc(100% + var(--float-gap) + var(--safe-b) + 10px)); opacity: 0; }
+body.immersive .mini-player.show { transform: translate(-50%, calc(var(--tabbar-h) + var(--float-gap))); }
+body.immersive .topbar { transform: translateY(-100%); opacity: 0; }
+
+/* ===== بدون شفافية: للأجهزة الضعيفة ومن يفضّل ذلك ===== */
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .topbar, .tabbar, .mini-player, .sheet, .full-player { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--surface); }
+  .card, .quick, .search-bar, .surah-frame { background: var(--surface); }
+}
+:root.no-glass .glass, :root.no-glass .topbar, :root.no-glass .tabbar, :root.no-glass .mini-player, :root.no-glass .sheet, :root.no-glass .full-player { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--surface); }
+:root.no-glass .card, :root.no-glass .quick, :root.no-glass .search-bar, :root.no-glass .surah-frame { background: var(--surface); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass, .topbar, .tabbar, .mini-player, .sheet, .full-player { background: var(--surface); }
+}
+body.car-mode .mini-player { display: none; }
+.fp-extra a.pb-chip { text-decoration: none; }
+
+/* ===== شريط التنقل الجانبي ===== */
+.scrubber {
+  position: fixed; z-index: 30; inset-inline-end: max(2px, env(safe-area-inset-left, 0px));
+  top: calc(env(safe-area-inset-top, 0px) + 84px); bottom: calc(var(--tabbar-h) + var(--float-gap) * 2 + var(--safe-b) + 76px);
+  width: 28px; opacity: 0; transition: opacity .3s; touch-action: none; cursor: grab;
+}
+.scrubber.show, .scrubber:focus-visible { opacity: 1; }
+.scrubber::before { content: ''; position: absolute; inset: 0 12px; border-radius: 4px; background: var(--glass-edge); }
+.scrub-thumb { position: absolute; inset-inline: 4px; height: 44px; margin-top: -22px; border-radius: 14px; background: var(--glass-bg-strong); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
+.scrub-thumb::after { content: ''; position: absolute; inset: 14px 8px; border-top: 2px solid var(--accent); border-bottom: 2px solid var(--accent); }
+.scrub-bubble { position: absolute; inset-inline-end: 36px; transform: translateY(-50%); white-space: nowrap; padding: 8px 14px; border-radius: 14px; font-size: 13px; font-weight: 700; background: var(--glass-bg-strong); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); opacity: 0; pointer-events: none; }
+.scrubber.drag .scrub-bubble { opacity: 1; }
+body.car-mode .scrubber { display: none; }

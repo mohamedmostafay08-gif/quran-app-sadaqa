@@ -1,7 +1,7 @@
-// المشغل الثابت أسفل الشاشة
+// المشغّل: كبسولة زجاجية صغيرة + مشغّل كامل الشاشة
 import { h, icon, ar } from '../lib/dom.js';
 import { player, getReciters, getReciter } from './player.js';
-import { getSurahMeta } from '../data.js';
+import { getSurahMeta, getSurahText } from '../data.js';
 import * as settings from '../state.js';
 import { sheet, toast } from '../ui.js';
 import { normalize } from '../lib/arabic.js';
@@ -10,11 +10,34 @@ import { sleepSheet, sleepState } from './sleepTimer.js';
 const RATES = [0.75, 1, 1.25, 1.5];
 const REPEATS = [1, 2, 3, 5, 10];
 
+const fmt = (sec) => {
+  if (!isFinite(sec)) return '٠:٠٠';
+  sec = Math.max(0, Math.floor(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return ar(h ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`);
+};
+
+/** المشغّل الكبسولة (صغير، فوق شريط التبويب) + المشغّل الكامل */
 export function mountPlayerBar() {
   const slot = document.getElementById('player-slot');
-  const title = h('a.pb-title', { href: '#/' });
-  const sub = h('button.pb-sub', { type: 'button', onclick: () => reciterSheet() });
-  const playBtn = h('button.pb-play', { type: 'button', onclick: () => player.toggle() });
+  const art = h('span.mp-art', { 'aria-hidden': 'true' });
+  const t1 = h('strong'), t2 = h('small');
+  const mpPlay = h('button.mp-play', { type: 'button', onclick: () => player.toggle() });
+  const mpProgress = h('span');
+  const mini = h('div.mini-player', { role: 'region', 'aria-label': 'مشغل التلاوة' },
+    h('button.mp-open', { type: 'button', 'aria-label': 'فتح المشغل', onclick: () => openFull() }, art, h('span.mp-text', t1, t2)),
+    mpPlay,
+    h('button.icon-btn', { type: 'button', 'aria-label': 'إغلاق المشغل', onclick: () => player.stop() }, icon('close')),
+    h('div.mp-progress', { 'aria-hidden': 'true' }, mpProgress),
+  );
+  slot.append(mini);
+
+  // ---- المشغّل الكامل ----
+  const fpTitle = h('h2'), fpSub = h('p');
+  const fpAyah = h('div.fp-ayah', { lang: 'ar', 'aria-live': 'polite' });
+  const seek = h('input', { type: 'range', min: '0', max: '1000', value: '0', step: '1', 'aria-label': 'موضع التلاوة' });
+  const tNow = h('span'), tAll = h('span');
+  const fpPlay = h('button.fp-play', { type: 'button', onclick: () => player.toggle() });
   const rateBtn = h('button.pb-chip', { type: 'button', 'aria-label': 'سرعة التشغيل', onclick: () => {
     const i = RATES.indexOf(settings.get('rate'));
     settings.set('rate', RATES[(i + 1) % RATES.length]);
@@ -27,45 +50,105 @@ export function mountPlayerBar() {
     toast(v === 1 ? 'بدون تكرار' : `تكرار كل آية ${ar(v)} مرات`);
     render();
   } });
-  const sleepBtn = h('button.pb-chip', { type: 'button', 'aria-label': 'مؤقت النوم', onclick: () => sleepSheet() }, icon('timer'));
-  const bar = h('div.player-bar', { role: 'region', 'aria-label': 'مشغل التلاوة' },
-    h('div.pb-info', title, sub),
-    h('div.pb-controls',
+  const sleepBtn = h('button.pb-chip', { type: 'button', 'aria-label': 'مؤقت النوم', onclick: () => sleepSheet() }, icon('timer'), h('span', 'النوم'));
+  const goBtn = h('a.pb-chip', { href: '#/', onclick: () => closeFull() }, icon('book'), h('span', 'في المصحف'));
+  const recBtn = h('button.fp-reciter', { type: 'button', onclick: () => reciterSheet() });
+  const full = h('div.full-player', { role: 'dialog', 'aria-modal': 'true', 'aria-label': 'المشغل' },
+    h('div.fp-handle', { 'aria-hidden': 'true' }),
+    h('div.fp-head',
+      h('button.icon-btn', { type: 'button', 'aria-label': 'تصغير المشغل', onclick: () => closeFull() }, icon('down')),
+      recBtn,
+      h('button.icon-btn', { type: 'button', 'aria-label': 'إيقاف وإغلاق', onclick: () => { player.stop(); closeFull(); } }, icon('close')),
+    ),
+    h('div.fp-title', fpTitle, fpSub),
+    fpAyah,
+    h('div.fp-seek', seek, h('div.fp-times', tNow, tAll)),
+    h('div.fp-controls',
       h('button.icon-btn', { type: 'button', 'aria-label': 'الآية السابقة', onclick: () => player.prev() }, icon('back')),
-      playBtn,
+      fpPlay,
       h('button.icon-btn', { type: 'button', 'aria-label': 'الآية التالية', onclick: () => player.next() }, icon('forward')),
     ),
-    h('div.pb-extra', rateBtn, repBtn, sleepBtn,
-      h('button.icon-btn.pb-close', { type: 'button', 'aria-label': 'إغلاق المشغل', onclick: () => player.stop() }, icon('close'))),
-    h('div.pb-progress', { 'aria-hidden': 'true' }, h('span')),
+    h('div.fp-extra', rateBtn, repBtn, sleepBtn, goBtn),
   );
-  slot.append(bar);
-  const progress = bar.querySelector('.pb-progress span');
+  const scrim = h('div.fp-scrim', { onclick: () => closeFull() });
+  const wrap = h('div.fp-wrap', { hidden: true }, scrim, full);
+  document.body.append(wrap);
+
+  let isOpen = false;
+  function openFull() {
+    if (!player.state().surah) return;
+    wrap.hidden = false;
+    isOpen = true;
+    requestAnimationFrame(() => wrap.classList.add('open'));
+    render();
+    full.querySelector('.fp-play').focus({ preventScroll: true });
+  }
+  function closeFull() {
+    if (!isOpen) return;
+    isOpen = false;
+    wrap.classList.remove('open');
+    setTimeout(() => { if (!isOpen) wrap.hidden = true; }, 380);
+  }
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) closeFull(); });
+  addEventListener('hashchange', closeFull);
+  // سحب المشغّل لأسفل لتصغيره
+  let y0 = null;
+  full.addEventListener('touchstart', (e) => { if (!e.target.closest('input, .fp-ayah')) y0 = e.touches[0].clientY; }, { passive: true });
+  full.addEventListener('touchend', (e) => { if (y0 != null && e.changedTouches[0].clientY - y0 > 80) closeFull(); y0 = null; }, { passive: true });
+
+  let seeking = false;
+  seek.addEventListener('input', () => { seeking = true; const a = player.audio; tNow.textContent = fmt((seek.value / 1000) * (a.duration || 0)); });
+  seek.addEventListener('change', () => { const a = player.audio; if (a.duration) a.currentTime = (seek.value / 1000) * a.duration; seeking = false; });
+
   player.audio.addEventListener('timeupdate', () => {
     const a = player.audio;
-    progress.style.transform = `scaleX(${a.duration ? a.currentTime / a.duration : 0})`;
+    const f = a.duration ? a.currentTime / a.duration : 0;
+    mpProgress.style.transform = `scaleX(${f})`;
+    if (isOpen && !seeking) { seek.value = String(Math.round(f * 1000)); tNow.textContent = fmt(a.currentTime); tAll.textContent = fmt(a.duration); }
   });
+
+  let shownAyah = null;
+  async function showAyah(st) {
+    const key = `${st.surah}:${st.ayah}`;
+    if (key === shownAyah) return;
+    shownAyah = key;
+    if (st.ayah === 0) { fpAyah.replaceChildren(h('p', getSurahMeta(st.surah).basmala || 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ')); return; }
+    const text = (await getSurahText(st.surah))[st.ayah - 1];
+    if (shownAyah !== key) return;
+    fpAyah.replaceChildren(h('p', text, ' ', h('span.ayah-num', { 'aria-hidden': 'true' }, '۝' + ar(st.ayah))));
+    fpAyah.scrollTop = 0;
+  }
 
   function render() {
     const st = player.state();
     const visible = !!st.surah;
-    bar.classList.toggle('show', visible);
-    document.documentElement.style.setProperty('--player-h', visible ? '76px' : '0px');
-    if (!visible) return;
+    mini.classList.toggle('show', visible);
+    if (!visible) { closeFull(); return; }
     const m = getSurahMeta(st.surah);
-    title.textContent = `سورة ${m.nameAr}، ${st.ayah === 0 ? 'البسملة' : 'الآية ' + ar(st.ayah)}`;
-    title.href = `#/surah/${st.surah}/${st.ayah || 1}`;
+    const where = st.ayah === 0 ? 'البسملة' : 'الآية ' + ar(st.ayah);
     const rid = st.compare ? st.compare.list[st.compare.idx] : st.reciter;
     const sl = sleepState();
-    sub.textContent = st.error ? st.error : (getReciter(rid)?.nameAr || '') + (st.compare ? ` (مقارنة ${ar(st.compare.idx + 1)}/${ar(st.compare.list.length)})` : '') + (sl ? `، نوم ${sl}` : '');
-    sub.classList.toggle('err', !!st.error);
+    const recName = getReciter(rid)?.nameAr || '';
+    art.textContent = m.nameAr.replace(/^ال/, '').slice(0, 2);
+    t1.textContent = `سورة ${m.nameAr}، ${where}`;
+    t2.textContent = st.error ? st.error : recName + (st.compare ? ` (مقارنة ${ar(st.compare.idx + 1)}/${ar(st.compare.list.length)})` : '') + (sl ? `، نوم ${sl}` : '');
+    t2.classList.toggle('err', !!st.error);
     const playing = st.status === 'playing';
-    playBtn.replaceChildren(st.status === 'loading' ? h('span.spinner', { 'aria-hidden': 'true' }) : icon(playing ? 'pause' : 'play'));
-    playBtn.setAttribute('aria-label', playing ? 'إيقاف مؤقت' : 'تشغيل');
+    const playIcon = () => (st.status === 'loading' ? h('span.spinner', { 'aria-hidden': 'true' }) : icon(playing ? 'pause' : 'play'));
+    mpPlay.replaceChildren(playIcon());
+    mpPlay.setAttribute('aria-label', playing ? 'إيقاف مؤقت' : 'تشغيل');
+    if (!isOpen) return;
+    fpPlay.replaceChildren(playIcon());
+    fpPlay.setAttribute('aria-label', playing ? 'إيقاف مؤقت' : 'تشغيل');
+    fpTitle.textContent = `سورة ${m.nameAr}`;
+    fpSub.textContent = st.error ? st.error : `${where} من ${ar(m.ayahCount)}`;
+    recBtn.replaceChildren(icon('user'), h('span', recName));
+    goBtn.href = `#/surah/${st.surah}/${st.ayah || 1}`;
     rateBtn.textContent = `${ar(settings.get('rate'))}×`;
-    repBtn.replaceChildren(...[icon('repeat'), settings.get('repeat') > 1 ? h('span', ar(settings.get('repeat'))) : null].filter(Boolean));
+    repBtn.replaceChildren(...[icon('repeat'), h('span', settings.get('repeat') > 1 ? `${ar(settings.get('repeat'))}×` : 'تكرار')]);
     repBtn.classList.toggle('on', settings.get('repeat') > 1);
     sleepBtn.classList.toggle('on', !!sl);
+    showAyah(st);
   }
   player.subscribe(render);
   settings.subscribe((k) => { if (k === 'reciter' || k === 'rate') render(); });

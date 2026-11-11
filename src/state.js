@@ -15,6 +15,7 @@ export const DEFAULTS = {
   showPageMarks: true,
   tajweed: false,         // ألوان التجويد
   wordTap: false,         // الضغط على الكلمة يعرض معناها
+  keepAwake: true,        // منع انطفاء الشاشة أثناء القراءة
   lastRead: null,         // { surah, ayah, at }
 };
 

@@ -37,6 +37,7 @@ export function renderSettings() {
       h('p.preview', { lang: 'ar' }, 'ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ'),
       h('div.field', h('span', 'طريقة العرض'), seg('layout', [['flow', 'متصل كالمصحف'], ['list', 'آية في سطر']])),
       toggle('showPageMarks', 'علامات الصفحات والأجزاء', 'تظهر بداية كل صفحة وجزء وربع حزب داخل السورة'),
+      toggle('keepAwake', 'إبقاء الشاشة مضاءة أثناء القراءة'),
     ),
     h('section.card',
       h('h2', 'التلاوة'),

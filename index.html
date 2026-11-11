@@ -23,6 +23,7 @@
   <link rel="modulepreload" href="src/db.js">
   <link rel="modulepreload" href="src/features/bookmarks.js">
   <link rel="modulepreload" href="src/features/extra.js">
+  <link rel="modulepreload" href="src/features/immersive.js">
   <link rel="modulepreload" href="src/features/khatma.js">
   <link rel="modulepreload" href="src/features/notes.js">
   <link rel="modulepreload" href="src/features/shareCard.js">
@@ -50,12 +51,15 @@
   <link rel="stylesheet" href="src/styles/base.css">
   <link rel="stylesheet" href="src/styles/themes.css">
   <link rel="stylesheet" href="src/styles/components.css">
+  <link rel="stylesheet" href="src/styles/glass.css">
   <script>
     // تطبيق الثيم قبل الرسم لتجنب الوميض
     try {
       var s = JSON.parse(localStorage.getItem('qa:boot') || '{}');
       if (s.theme) document.documentElement.dataset.theme = s.theme;
       if (s.fontScale) document.documentElement.style.setProperty('--quran-scale', s.fontScale);
+      var hr = new Date().getHours();
+      document.documentElement.dataset.tod = hr >= 4 && hr < 7 ? 'fajr' : hr >= 7 && hr < 16 ? 'day' : hr >= 16 && hr < 19 ? 'maghrib' : 'night';
     } catch (e) {}
   </script>
 </head>

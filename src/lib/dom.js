@@ -44,6 +44,7 @@ function append(el, children) {
 const ICONS = {
   back: '<path d="m9 6 6 6-6 6"/>',
   forward: '<path d="m15 6-6 6 6 6"/>',
+  down: '<path d="m6 9 6 6 6-6"/>',
   play: '<path d="M7 4.5v15l12-7.5z" fill="currentColor" stroke="none"/>',
   pause: '<path d="M7 4h3.5v16H7zM13.5 4H17v16h-3.5z" fill="currentColor" stroke="none"/>',
   next: '<path d="M17 5v14M6 6l9 6-9 6z" fill="currentColor"/>',

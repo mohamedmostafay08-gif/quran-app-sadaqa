@@ -9,6 +9,7 @@ import { player, getReciters } from '../audio/player.js';
 import { getTajweed, getWords, getTafsir, isWordToken, TAJWEED_RULES } from '../features/extra.js';
 import { navigate } from '../router.js';
 import { shareCardSheet } from '../features/shareCard.js';
+import { setupImmersive, gestureHintOnce } from '../features/immersive.js';
 
 export async function renderReader(params, _q, isStale) {
   const n = Math.min(114, Math.max(1, parseInt(params.surah, 10) || 1));
@@ -67,9 +68,23 @@ export async function renderReader(params, _q, isStale) {
     if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
     e.preventDefault();
     const w = e.type === 'click' && wordTap ? e.target.closest('.w[data-w]') : null;
-    if (w) wordSheet(n, +el.dataset.a, +w.dataset.w, w);
-    else ayahSheet(n, +el.dataset.a, el);
+    if (e.type === 'keydown') return ayahSheet(n, +el.dataset.a, el);
+    // ضغطتان سريعتان على الآية = تشغيل منها؛ ضغطة واحدة = القائمة (أو معنى الكلمة)
+    if (tapTimer && tapEl === el) {
+      clearTimeout(tapTimer); tapTimer = null;
+      player.playFrom(n, +el.dataset.a, { noBasmala: true });
+      toast(`تشغيل من الآية ${ar(+el.dataset.a)}`);
+      return;
+    }
+    clearTimeout(tapTimer);
+    tapEl = el;
+    tapTimer = setTimeout(() => {
+      tapTimer = null;
+      if (w) wordSheet(n, +el.dataset.a, +w.dataset.w, w);
+      else ayahSheet(n, +el.dataset.a, el);
+    }, 260);
   };
+  let tapTimer = null, tapEl = null;
   container.addEventListener('click', onActivate);
   container.addEventListener('keydown', onActivate);
 
@@ -143,8 +158,11 @@ export async function renderReader(params, _q, isStale) {
   const unsub = player.subscribe(syncPlayer);
   syncPlayer();
 
+  const stopImmersive = setupImmersive({ n, container });
+  gestureHintOnce();
+
   return {
-    cleanup() { io.disconnect(); unsub(); },
+    cleanup() { io.disconnect(); unsub(); stopImmersive(); clearTimeout(tapTimer); },
   };
 }
 
