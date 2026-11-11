@@ -13,6 +13,8 @@ export const DEFAULTS = {
   autoDownloadNext: false,
   wifiOnly: true,
   showPageMarks: true,
+  tajweed: false,         // ألوان التجويد
+  wordTap: false,         // الضغط على الكلمة يعرض معناها
   lastRead: null,         // { surah, ayah, at }
 };
 

@@ -29,7 +29,7 @@ export async function renderKhatma(_p, _q, isStale) {
   if (past.length) {
     body.append(h('h2.section-title', 'ختمات مكتملة'), h('ul.past-list', past.map((k) => h('li',
       h('strong', k.type === 'listen' ? 'ختمة استماع' : 'ختمة قراءة'),
-      h('span.muted', ` · ${ar(Math.max(1, Math.round((k.finishedAt - k.startDate) / 86400000)))} يومًا · انتهت ${new Date(k.finishedAt).toLocaleDateString('ar-EG')}`),
+      h('span.muted', `، ${ar(Math.max(1, Math.round((k.finishedAt - k.startDate) / 86400000)))} يومًا، انتهت ${new Date(k.finishedAt).toLocaleDateString('ar-EG')}`),
     ))));
   }
   mount(h('div.khatma', topbar({ title: 'الختمة والورد', back: '#/' }), body));
@@ -65,7 +65,7 @@ function khatmaCard(k) {
           h('div.wird-arrow', icon('forward')),
           h('div', h('small', 'إلى'), h('strong', posLabel(range.to)), h('span.muted', `صفحة ${ar(p.toPage)}`)),
         ),
-        h('p.muted', `${ar(p.leftToday)} صفحة اليوم · باقي ${ar(p.daysLeft)} يوم و${ar(p.remainingPages)} صفحة`),
+        h('p.muted', `${ar(p.leftToday)} صفحة اليوم، باقي ${ar(p.daysLeft)} يوم و${ar(p.remainingPages)} صفحة`),
         p.behind > 0 && p.dayIndex > 1 ? h('p.notice', `فاتك جزء من الخطة، فتم توزيع ${ar(p.behind)} صفحة على الأيام الباقية تلقائيًا.`) : null,
         h('div.btn-row',
           h('button.btn', { type: 'button', onclick: start }, icon(isListen ? 'play' : 'book'), isListen ? 'استمع لورد اليوم' : 'اقرأ ورد اليوم'),
@@ -131,7 +131,7 @@ export async function homeWirdCard() {
   }
   const p = K.plan(k);
   return h('a.quick', { href: '#/khatma' }, h('div.ring.sm', { style: { '--p': p.percent }, 'aria-hidden': 'true' }),
-    h('span', h('strong', p.doneToday ? 'أتممت ورد اليوم ✓' : `ورد اليوم: ${ar(p.leftToday)} صفحة`), h('small', `من صفحة ${ar(p.fromPage)} · ${k.type === 'listen' ? 'استماع' : 'قراءة'}`)));
+    h('span', h('strong', p.doneToday ? 'أتممت ورد اليوم ✓' : `ورد اليوم: ${ar(p.leftToday)} صفحة`), h('small', `من صفحة ${ar(p.fromPage)}، ${k.type === 'listen' ? 'استماع' : 'قراءة'}`)));
 }
 
 /** تسجيل ورد الاستماع تلقائيًا عند اكتمال تشغيل النطاق (من أي شاشة) */

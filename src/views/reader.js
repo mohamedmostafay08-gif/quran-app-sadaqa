@@ -6,17 +6,24 @@ import * as bookmarks from '../features/bookmarks.js';
 import * as notes from '../features/notes.js';
 import { mount, topbar, sheet, actionRow, toast } from '../ui.js';
 import { player, getReciters } from '../audio/player.js';
+import { getTajweed, getWords, getTafsir, isWordToken, TAJWEED_RULES } from '../features/extra.js';
+import { navigate } from '../router.js';
 
 export async function renderReader(params, _q, isStale) {
   const n = Math.min(114, Math.max(1, parseInt(params.surah, 10) || 1));
   const target = params.ayah ? parseInt(params.ayah, 10) : null;
   const meta = getSurahMeta(n);
-  const [ayahs, marked, noted] = await Promise.all([getSurahText(n), bookmarks.bookmarkedIn(n), notes.inSurah(n)]);
+  const useTajweed = settings.get('tajweed');
+  const [ayahs, marked, noted, tajweed] = await Promise.all([
+    getSurahText(n), bookmarks.bookmarkedIn(n), notes.inSurah(n),
+    useTajweed ? getTajweed().catch(() => null) : null,
+  ]);
   if (isStale()) return;
+  const wordTap = settings.get('wordTap');
 
   const layout = settings.get('layout');
   const showMarks = settings.get('showPageMarks');
-  const sub = h('p.reader-sub', `الجزء ${ar(juzOf(n, 1))} · صفحة ${ar(pageOf(n, 1))}`);
+  const sub = h('p.reader-sub', `الجزء ${ar(juzOf(n, 1))}، صفحة ${ar(pageOf(n, 1))}`);
 
   const playBtn = h('button.icon-btn.play-main', { type: 'button', 'aria-label': 'تشغيل السورة', onclick: () => togglePlaySurah(n) }, icon('play'));
   const head = topbar({
@@ -26,7 +33,7 @@ export async function renderReader(params, _q, isStale) {
   });
   head.querySelector('.topbar-title').append(sub);
 
-  const container = h(`div.ayahs.${layout}`, { lang: 'ar' });
+  const container = h(`div.ayahs.${layout}`, { lang: 'ar', class: `ayahs ${layout}${useTajweed ? ' tajweed' : ''}${wordTap ? ' word-tap' : ''}` });
   const frag = document.createDocumentFragment();
   ayahs.forEach((text, i) => {
     const a = i + 1;
@@ -37,10 +44,9 @@ export async function renderReader(params, _q, isStale) {
         frag.append(h('div.mark-juz', b.juz ? `الجزء ${ar(b.juz)}` : quarterLabel(b.quarter).replace(/\d+/g, ar)));
       }
     }
-    const cut = text.lastIndexOf(' ');
-    const body = cut > 0 ? text.slice(0, cut + 1) : '';
-    const lastWord = cut > 0 ? text.slice(cut + 1) : text;
     const note = noted.get(a);
+    const parts = ayahNodes(text, tajweed?.ayahs[`${n}:${a}`], tajweed?.rules);
+    const last = parts.pop();
     const span = h('span.ayah', {
       dataset: { a },
       tabindex: '0',
@@ -48,7 +54,7 @@ export async function renderReader(params, _q, isStale) {
       class: ayahClass(marked.has(a), note),
     },
     // آخر كلمة + رقم الآية في وحدة لا تنكسر (حتى لا يسقط الرقم وحده في سطر)
-    body, h('span.ayah-end', lastWord, '\u00A0', h('span.ayah-num', { 'aria-hidden': 'true' }, '\u06DD' + ar(a)), h('span.sr-only', ` (الآية ${a})`)));
+    parts, h('span.ayah-end', last, '\u00A0', h('span.ayah-num', { 'aria-hidden': 'true' }, '\u06DD' + ar(a)), h('span.sr-only', ` (الآية ${a})`)));
     frag.append(span);
     if (layout === 'flow') frag.append(' ');
   });
@@ -59,7 +65,9 @@ export async function renderReader(params, _q, isStale) {
     if (!el) return;
     if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
     e.preventDefault();
-    ayahSheet(n, +el.dataset.a, el);
+    const w = e.type === 'click' && wordTap ? e.target.closest('.w[data-w]') : null;
+    if (w) wordSheet(n, +el.dataset.a, +w.dataset.w, w);
+    else ayahSheet(n, +el.dataset.a, el);
   };
   container.addEventListener('click', onActivate);
   container.addEventListener('keydown', onActivate);
@@ -72,7 +80,7 @@ export async function renderReader(params, _q, isStale) {
     h('section.surah-head',
       h('div.surah-frame',
         h('h2', `سورة ${meta.nameAr}`),
-        h('p', `${meta.revelation === 'Meccan' ? 'مكية' : 'مدنية'} · ${ar(meta.ayahCount)} آية · ترتيب النزول ${ar(meta.order)}`),
+        h('p', `${meta.revelation === 'Meccan' ? 'مكية' : 'مدنية'}، ${ar(meta.ayahCount)} آية، ترتيب النزول ${ar(meta.order)}`),
       ),
       meta.basmala ? h('p.basmala', { lang: 'ar' }, meta.basmala) : null,
     ),
@@ -103,7 +111,7 @@ export async function renderReader(params, _q, isStale) {
     }
     if (!visible.size) return;
     const top = Math.min(...visible);
-    sub.textContent = `الجزء ${ar(juzOf(n, top))} · صفحة ${ar(pageOf(n, top))}`;
+    sub.textContent = `الجزء ${ar(juzOf(n, top))}، صفحة ${ar(pageOf(n, top))}`;
     save(top);
   }, { rootMargin: '-15% 0px -55% 0px' });
   container.querySelectorAll('.ayah').forEach((x) => io.observe(x));
@@ -164,6 +172,8 @@ async function ayahSheet(n, a, el) {
         actionRow('play', 'تشغيل من هذه الآية', () => { close(); player.playFrom(n, a); }),
         actionRow('repeat', 'تكرار هذه الآية', () => { close(); player.playFrom(n, a, { only: true }); }),
         actionRow('compare', 'مقارنة القراء', () => { close(); compareSheet(n, a); }),
+        actionRow('book', 'التفسير الميسر', () => { close(); tafsirSheet(n, a); }),
+        actionRow('info', 'معاني الكلمات وجذورها', () => { close(); wordsListSheet(n, a); }),
         actionRow(isMarked ? 'bookmarkFill' : 'bookmark', isMarked ? 'إزالة العلامة' : 'إضافة علامة', async () => {
           const on = await bookmarks.toggle(n, a);
           el.className = ayahClass(on, await notes.get(n, a));
@@ -196,13 +206,16 @@ function displaySheet() {
         onclick: (e) => {
           settings.set(key, v);
           for (const b of e.currentTarget.parentElement.children) b.setAttribute('aria-checked', String(b === e.currentTarget));
-          if (key === 'layout') dispatchEvent(new HashChangeEvent('hashchange'));
+          if (key === 'layout' || key === 'tajweed' || key === 'wordTap') dispatchEvent(new HashChangeEvent('hashchange'));
         },
       }, label)));
       return h('div.form',
         h('label.field', h('span', 'حجم الخط'), h('div.range-row', h('span.small', 'أ'), scale, h('span.large', 'أ'))),
         h('div.field', h('span', 'الثيم'), seg('theme', [['auto', 'تلقائي'], ['light', 'فاتح'], ['sepia', 'سيبيا'], ['dark', 'ليلي']])),
         h('div.field', h('span', 'طريقة العرض'), seg('layout', [['flow', 'متصل'], ['list', 'آية في سطر']])),
+        h('div.field', h('span', 'ألوان التجويد'), seg('tajweed', [[false, 'بدون'], [true, 'ملوّن']])),
+        h('div.field', h('span', 'الضغط على كلمة'), seg('wordTap', [[false, 'يفتح الآية'], [true, 'يعرض معناها وجذرها']])),
+        settings.get('tajweed') ? tajweedLegend() : null,
       );
     },
   });
@@ -275,4 +288,93 @@ async function noteSheet(n, a, el) {
       ),
     ),
   });
+}
+
+/**
+ * يبني عُقد نص الآية: كل كلمة span.w (data-w = رقمها الصرفي)، وداخلها مقاطع التجويد الملونة.
+ * يرجع مصفوفة: [كلمة، ' '، كلمة، …] — آخر عنصر هو آخر كلمة (لتُلصق برقم الآية).
+ */
+function ayahNodes(text, ranges, rules) {
+  const toks = [];
+  let pos = 0, wi = 0;
+  for (const t of text.split(' ')) {
+    toks.push({ t, start: pos, end: pos + t.length, w: isWordToken(t) ? ++wi : 0 });
+    pos += t.length + 1;
+  }
+  const out = [];
+  toks.forEach((tok, i) => {
+    let inner;
+    if (ranges && ranges.length) {
+      inner = [];
+      let cur = tok.start;
+      for (const [rs, re, r] of ranges) {
+        if (re <= tok.start || rs >= tok.end) continue;
+        const s0 = Math.max(rs, tok.start), e0 = Math.min(re, tok.end);
+        if (s0 > cur) inner.push(text.slice(cur, s0));
+        inner.push(h('span', { class: `tj tj-${rules[r]}` }, text.slice(s0, e0)));
+        cur = e0;
+      }
+      if (cur < tok.end) inner.push(text.slice(cur, tok.end));
+    } else inner = [tok.t];
+    const node = tok.w ? h('span.w', { dataset: { w: tok.w } }, inner) : h('span.wm', inner);
+    if (i < toks.length - 1) out.push(node, ' ');
+    else out.push(node);
+  });
+  return out;
+}
+
+async function wordSheet(n, a, w, el) {
+  const meta = getSurahMeta(n);
+  let words = null;
+  try { words = (await getWords(n))[a - 1]; } catch { /* أوفلاين ولم تُحمّل */ }
+  const info = words?.[w - 1];
+  const rulesHere = [...el.querySelectorAll('.tj')].map((x) => [...x.classList].find((c) => c.startsWith('tj-'))?.slice(3)).filter((r, i, arr) => r && arr.indexOf(r) === i);
+  sheet({
+    title: `سورة ${meta.nameAr}، ${ar(a)}، الكلمة ${ar(w)}`,
+    content: (close) => h('div.word-info',
+      h('p.word-big', { lang: 'ar' }, el.textContent),
+      info ? h('dl.word-dl',
+        info.gloss ? [h('dt', 'المعنى (إنجليزي)'), h('dd', { lang: 'en', dir: 'ltr' }, info.gloss)] : null,
+        [h('dt', 'نوع الكلمة'), h('dd', info.pos + (info.extra ? ` (${info.extra})` : ''))],
+        info.root ? [h('dt', 'الجذر'), h('dd', h('button.root-chip', { type: 'button', onclick: () => { close(); navigate('/search?root=' + encodeURIComponent(info.root)); } }, info.root.split('').join(' '), icon('search')))] : null,
+        info.lemma ? [h('dt', 'الأصل (اللَّمّة)'), h('dd', { lang: 'ar', class: 'lemma' }, info.lemma)] : null,
+      ) : h('p.muted', words === null ? 'بيانات الكلمات غير متاحة حاليًا (تحتاج اتصالًا لأول مرة).' : 'لا تتوفر بيانات لهذه الكلمة.'),
+      rulesHere.length ? h('div.tj-rules', h('h3', 'أحكام التجويد في الكلمة'), rulesHere.map((r) => h('p', h('span', { class: `tj-dot tj-${r}` }), h('strong', TAJWEED_RULES[r]?.name || r), ' — ', TAJWEED_RULES[r]?.desc || ''))) : null,
+      h('button.btn.ghost.block', { type: 'button', onclick: () => { close(); ayahSheet(n, a, el.closest('.ayah')); } }, 'خيارات الآية'),
+    ),
+  });
+}
+
+async function tafsirSheet(n, a) {
+  const meta = getSurahMeta(n);
+  let t;
+  try { t = await getTafsir(n, a); } catch { return toast('التفسير غير متاح بدون إنترنت قبل تحميله'); }
+  sheet({
+    title: `التفسير الميسر، سورة ${meta.nameAr} ${ar(a)}`,
+    content: () => h('div',
+      t.groupFrom ? h('p.muted', `تفسير الآيات من ${ar(t.groupFrom)} مجتمعة:`) : null,
+      h('p.tafsir-text', t.text || 'لا يوجد تفسير لهذه الآية.'),
+      h('p.small-note', 'المصدر: التفسير الميسر — مجمع الملك فهد لطباعة المصحف الشريف.'),
+    ),
+  });
+}
+
+async function wordsListSheet(n, a) {
+  const meta = getSurahMeta(n);
+  let words;
+  try { words = (await getWords(n))[a - 1]; } catch { return toast('بيانات الكلمات غير متاحة بدون إنترنت قبل تحميلها'); }
+  const text = (await getSurahText(n))[a - 1].split(' ').filter(isWordToken);
+  sheet({
+    title: `كلمات الآية، سورة ${meta.nameAr} ${ar(a)}`,
+    content: (close) => !words ? h('p.muted', 'لا تتوفر بيانات كلمات لهذه الآية.') : h('ol.words-list', words.map((w, i) => h('li',
+      h('span.wl-word', { lang: 'ar' }, text[i]),
+      h('span.wl-info', h('span', w.pos), w.gloss ? h('small', { lang: 'en', dir: 'ltr' }, w.gloss) : null),
+      w.root ? h('button.root-chip', { type: 'button', onclick: () => { close(); navigate('/search?root=' + encodeURIComponent(w.root)); } }, w.root) : null,
+    ))),
+  });
+}
+
+export function tajweedLegend() {
+  const shown = ['madda_necessary', 'madda_obligatory', 'madda_permissible', 'madda_normal', 'ghunnah', 'ikhafa', 'idgham_ghunnah', 'idgham_wo_ghunnah', 'iqlab', 'qalaqah', 'ham_wasl'];
+  return h('details.tj-legend', h('summary', 'دليل الألوان'), h('ul', shown.map((r) => h('li', h('span', { class: `tj-dot tj-${r}` }), TAJWEED_RULES[r].name))));
 }

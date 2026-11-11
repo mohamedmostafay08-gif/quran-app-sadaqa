@@ -77,10 +77,10 @@ export async function renderDownloads(_p, _q, isStale) {
       } else if (queued) {
         label = 'في الانتظار'; iconName = 'close'; aria = 'إلغاء'; action = () => dl.cancel(reciter, s);
       } else if (d?.status === 'done') {
-        label = `منزّلة · ${formatBytes(d.bytes)}`; iconName = 'trash'; aria = 'حذف التنزيل';
+        label = `منزّلة، ${formatBytes(d.bytes)}`; iconName = 'trash'; aria = 'حذف التنزيل';
         action = async () => { await dl.deleteSurah(reciter, s); done.delete(s); paint(); refreshUsage(); toast('تم الحذف'); };
       } else {
-        label = d?.status === 'partial' ? `غير مكتملة (${ar(d.files)}/${ar(d.total)}) · ≈ ${formatBytes(sizes[s - 1])}` : `≈ ${formatBytes(sizes[s - 1])}`;
+        label = d?.status === 'partial' ? `غير مكتملة (${ar(d.files)}/${ar(d.total)})، ≈ ${formatBytes(sizes[s - 1])}` : `≈ ${formatBytes(sizes[s - 1])}`;
         iconName = 'download'; aria = 'تنزيل';
         action = () => dl.enqueue(reciter, s);
       }
@@ -111,7 +111,7 @@ export async function renderDownloads(_p, _q, isStale) {
     topbar({ title: 'التنزيلات' }),
     h('section.card',
       h('button.row-btn', { type: 'button', onclick: () => reciterSheet() },
-        h('span', h('strong', r.nameAr), h('small', `${r.style} · المصحف كاملًا ≈ ${formatBytes(totalEst)}`)), icon('forward')),
+        h('span', h('strong', r.nameAr), h('small', `${r.style}، المصحف كاملًا ≈ ${formatBytes(totalEst)}`)), icon('forward')),
       usage,
       persistNote,
       h('div.btn-row',

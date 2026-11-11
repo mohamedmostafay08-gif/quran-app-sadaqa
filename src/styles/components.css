@@ -391,3 +391,55 @@ body:has(.player-bar.show) .main { padding-bottom: calc(var(--tabbar-h) + 100px 
 .memorize > .bar { margin-top: 12px; }
 
 .seg button:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ===== التجويد ===== */
+:root {
+  --tj-madd-lazim: #c0001a; --tj-madd-wajib: #e2332e; --tj-madd-jaiz: #ef7d22; --tj-madd-tabii: #c5833a;
+  --tj-ghunnah: #23974c; --tj-ikhfa: #2f8f8a; --tj-idgham: #6a7b1d; --tj-idgham-no: #8a8f94; --tj-iqlab: #1d8fd6;
+  --tj-qalqalah: #2459c9; --tj-silent: #a3a6a8;
+}
+:root[data-theme="dark"] {
+  --tj-madd-lazim: #ff6b7a; --tj-madd-wajib: #ff7f6e; --tj-madd-jaiz: #ffab5e; --tj-madd-tabii: #e5b277;
+  --tj-ghunnah: #5fd38b; --tj-ikhfa: #5ccdc6; --tj-idgham: #bdd15c; --tj-idgham-no: #a9b0b6; --tj-iqlab: #6cc2ff;
+  --tj-qalqalah: #8fb0ff; --tj-silent: #6d7376;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --tj-madd-lazim: #ff6b7a; --tj-madd-wajib: #ff7f6e; --tj-madd-jaiz: #ffab5e; --tj-madd-tabii: #e5b277;
+    --tj-ghunnah: #5fd38b; --tj-ikhfa: #5ccdc6; --tj-idgham: #bdd15c; --tj-idgham-no: #a9b0b6; --tj-iqlab: #6cc2ff;
+    --tj-qalqalah: #8fb0ff; --tj-silent: #6d7376;
+  }
+}
+.tj-madda_necessary { color: var(--tj-madd-lazim); }
+.tj-madda_obligatory { color: var(--tj-madd-wajib); }
+.tj-madda_permissible { color: var(--tj-madd-jaiz); }
+.tj-madda_normal { color: var(--tj-madd-tabii); }
+.tj-ghunnah { color: var(--tj-ghunnah); }
+.tj-ikhafa, .tj-ikhafa_shafawi { color: var(--tj-ikhfa); }
+.tj-idgham_ghunnah, .tj-idgham_shafawi, .tj-idgham_mutajanisayn, .tj-idgham_mutaqaribayn { color: var(--tj-idgham); }
+.tj-idgham_wo_ghunnah { color: var(--tj-idgham-no); }
+.tj-iqlab { color: var(--tj-iqlab); }
+.tj-qalaqah { color: var(--tj-qalqalah); }
+.tj-ham_wasl, .tj-laam_shamsiyah, .tj-slnt { color: var(--tj-silent); }
+.tj-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: currentColor; margin-inline-end: 8px; vertical-align: middle; }
+.tj-legend summary { cursor: pointer; font-size: 13px; color: var(--text-2); min-height: 36px; display: flex; align-items: center; }
+.tj-legend ul { list-style: none; padding: 0; margin: 4px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px 12px; font-size: 13px; }
+.tj-rules h3 { font-size: 13px; color: var(--text-2); margin: 14px 0 6px; }
+.tj-rules p { margin: 4px 0; font-size: 13px; }
+
+/* ===== كلمة بكلمة ===== */
+.word-tap .w { cursor: pointer; border-radius: 6px; }
+.word-tap .w:hover { background: var(--accent-soft); }
+.word-big { font-family: var(--font-quran); font-size: 2.2rem; text-align: center; margin: 4px 0 8px; line-height: 1.9; }
+.word-dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; margin: 0 0 8px; align-items: center; }
+.word-dl dt { font-size: 12px; color: var(--text-2); font-weight: 700; }
+.word-dl dd { margin: 0; font-size: 15px; }
+.word-dl .lemma { font-family: var(--font-quran); font-size: 1.4rem; }
+.root-chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--accent); color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 4px 12px; font-weight: 700; font-size: 15px; min-height: 36px; }
+.root-chip svg { width: 16px; height: 16px; }
+.words-list { list-style: none; padding: 0; margin: 0; }
+.words-list li { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.wl-word { font-family: var(--font-quran); font-size: 1.5rem; line-height: 1.8; min-width: 70px; }
+.wl-info { display: grid; font-size: 13px; }
+.wl-info small { color: var(--text-2); }
+.tafsir-text { font-size: 16px; line-height: 2; margin: 4px 0 10px; }

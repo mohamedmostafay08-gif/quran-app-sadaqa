@@ -69,7 +69,7 @@ function continueCard(last) {
     h('div',
       h('span.eyebrow', 'أكمل القراءة'),
       h('strong', `سورة ${m.nameAr}`),
-      h('span.muted', `الآية ${ar(last.ayah)} · الجزء ${ar(juzOf(last.surah, last.ayah))} · صفحة ${ar(pageOf(last.surah, last.ayah))}`),
+      h('span.muted', `الآية ${ar(last.ayah)}، الجزء ${ar(juzOf(last.surah, last.ayah))}، صفحة ${ar(pageOf(last.surah, last.ayah))}`),
     ),
     h('span.continue-go', icon('forward')),
   );
@@ -100,7 +100,7 @@ function surahList(surahs, q) {
     h('span.surah-num', { 'aria-hidden': 'true' }, ar(s.id)),
     h('span.surah-main',
       h('strong', `سورة ${s.nameAr}`),
-      h('span.muted', `${s.revelation === 'Meccan' ? 'مكية' : 'مدنية'} · ${ar(s.ayahCount)} آية`),
+      h('span.muted', `${s.revelation === 'Meccan' ? 'مكية' : 'مدنية'}، ${ar(s.ayahCount)} آية`),
     ),
     h('span.surah-en', { lang: 'en', dir: 'ltr' }, s.nameEn),
   ))));
@@ -115,7 +115,7 @@ function juzList() {
     const m = getSurahMeta(st.surah);
     return h('li', h('a.surah-item', { href: `#/surah/${st.surah}/${st.ayah}` },
       h('span.surah-num', { 'aria-hidden': 'true' }, ar(n)),
-      h('span.surah-main', h('strong', `الجزء ${ar(n)}`), h('span.muted', `يبدأ من سورة ${m.nameAr} · الآية ${ar(st.ayah)} · صفحة ${ar(pageOf(st.surah, st.ayah))}`)),
+      h('span.surah-main', h('strong', `الجزء ${ar(n)}`), h('span.muted', `يبدأ من سورة ${m.nameAr}، الآية ${ar(st.ayah)}، صفحة ${ar(pageOf(st.surah, st.ayah))}`)),
       h('span.surah-en', JUZ_NAMES[i]),
     ));
   }));

@@ -62,7 +62,7 @@ export async function renderMemorize(_p, query, isStale) {
       h('ul.mem-list', sum.map((x) => {
         const m = getSurahMeta(x.surah);
         return h('li',
-          h('div', h('strong', `سورة ${m.nameAr}`), h('span.muted', `${ar(x.count)} من ${ar(m.ayahCount)} آية · ${ar(x.mature)} راسخة${x.due ? ` · ${ar(x.due)} مستحقة` : ''}`),
+          h('div', h('strong', `سورة ${m.nameAr}`), h('span.muted', `${ar(x.count)} من ${ar(m.ayahCount)} آية، ${ar(x.mature)} راسخة${x.due ? `، ${ar(x.due)} مستحقة` : ''}`),
             h('div.bar.thin', h('span', { style: { width: `${(x.count / m.ayahCount) * 100}%` } }))),
           h('button.icon-btn', { type: 'button', 'aria-label': `حذف سورة ${m.nameAr} من المحفوظات`, onclick: async (e) => {
             if (!confirm(`حذف سورة ${m.nameAr} من جدول المراجعة؟`)) return;
@@ -163,7 +163,7 @@ async function renderReview(isStale) {
     } }, h('strong', g.label), h('small', srs.intervalLabel(item, g.q).replace(/[\d.]+/g, ar)))));
     const reveal = h('button.btn.block', { type: 'button', onclick: () => { answer.hidden = false; grades.hidden = false; reveal.hidden = true; } }, 'اعرض الآية');
     stage.replaceChildren(
-      h('p.result-ref', `سورة ${m.nameAr} · الآية ${ar(item.ayah)}`),
+      h('p.result-ref', `سورة ${m.nameAr}، الآية ${ar(item.ayah)}`),
       prev ? h('p.review-prev', { lang: 'ar' }, h('small', 'الآية السابقة: '), prev) : h('p.muted', 'أول السورة'),
       h('p.review-cue', { lang: 'ar' }, `${words[0]} …`),
       h('div.btn-row', h('button.btn.ghost', { type: 'button', onclick: () => player.playFrom(item.surah, item.ayah, { only: true, times: 1 }) }, icon('play'), 'استمع')),

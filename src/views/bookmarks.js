@@ -25,7 +25,7 @@ export async function renderBookmarks(_p, query, isStale) {
       const text = (await getSurahText(b.surah))[b.ayah - 1];
       const li = h('li.bm',
         h('a.bm-link', { href: `#/surah/${b.surah}/${b.ayah}` },
-          h('span.result-ref', `سورة ${m.nameAr} · الآية ${ar(b.ayah)}`),
+          h('span.result-ref', `سورة ${m.nameAr}، الآية ${ar(b.ayah)}`),
           h('p.result-text.clamp', { lang: 'ar' }, text),
           h('time.muted', { datetime: new Date(b.createdAt).toISOString() }, fmtDate(b.createdAt)),
         ),
@@ -65,7 +65,7 @@ export async function renderBookmarks(_p, query, isStale) {
       const text = (await getSurahText(n.surah))[n.ayah - 1];
       ul.append(h('li.bm',
         h('a.bm-link', { href: `#/surah/${n.surah}/${n.ayah}` },
-          h('span.result-ref', n.color ? h('span', { class: `dot sw-${n.color}`, 'aria-hidden': 'true' }) : null, `سورة ${m.nameAr} · الآية ${ar(n.ayah)}`),
+          h('span.result-ref', n.color ? h('span', { class: `dot sw-${n.color}`, 'aria-hidden': 'true' }) : null, `سورة ${m.nameAr}، الآية ${ar(n.ayah)}`),
           h('p.result-text.clamp', { lang: 'ar', class: `result-text clamp${n.color ? ` hl-${n.color}` : ''}` }, text),
           n.text ? h('p.note-text', n.text) : null,
           h('time.muted', fmtDate(n.updatedAt)),

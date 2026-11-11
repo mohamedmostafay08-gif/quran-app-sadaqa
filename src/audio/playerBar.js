@@ -52,11 +52,11 @@ export function mountPlayerBar() {
     document.documentElement.style.setProperty('--player-h', visible ? '76px' : '0px');
     if (!visible) return;
     const m = getSurahMeta(st.surah);
-    title.textContent = `سورة ${m.nameAr} · ${st.ayah === 0 ? 'البسملة' : 'الآية ' + ar(st.ayah)}`;
+    title.textContent = `سورة ${m.nameAr}، ${st.ayah === 0 ? 'البسملة' : 'الآية ' + ar(st.ayah)}`;
     title.href = `#/surah/${st.surah}/${st.ayah || 1}`;
     const rid = st.compare ? st.compare.list[st.compare.idx] : st.reciter;
     const sl = sleepState();
-    sub.textContent = st.error ? st.error : (getReciter(rid)?.nameAr || '') + (st.compare ? ` (مقارنة ${ar(st.compare.idx + 1)}/${ar(st.compare.list.length)})` : '') + (sl ? ` · نوم ${sl}` : '');
+    sub.textContent = st.error ? st.error : (getReciter(rid)?.nameAr || '') + (st.compare ? ` (مقارنة ${ar(st.compare.idx + 1)}/${ar(st.compare.list.length)})` : '') + (sl ? `، نوم ${sl}` : '');
     sub.classList.toggle('err', !!st.error);
     const playing = st.status === 'playing';
     playBtn.replaceChildren(st.status === 'loading' ? h('span.spinner', { 'aria-hidden': 'true' }) : icon(playing ? 'pause' : 'play'));
@@ -79,6 +79,6 @@ export function reciterSheet() {
     content: (close) => h('ul.choice-list', getReciters().map((r) => h('li', h('button.choice', {
       type: 'button', 'aria-pressed': String(r.id === current),
       onclick: () => { player.setReciter(r.id); close(); },
-    }, h('span', h('strong', r.nameAr), h('small', `${r.style} · ${ar(r.kbps)} ك.ب/ث`)), r.id === current ? icon('check') : null)))),
+    }, h('span', h('strong', r.nameAr), h('small', `${r.style}، ${ar(r.kbps)} ك.ب/ث`)), r.id === current ? icon('check') : null)))),
   });
 }
