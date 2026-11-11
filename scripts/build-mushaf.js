@@ -60,11 +60,12 @@ async function main() {
   const pageJuz = new Map();
   for (const v of verses) {
     const [s, a] = v.key.split(':').map(Number);
+    let wi = 0; // رقم الكلمة داخل الآية (لربط التجويد والتظليل حتى لو امتدت الآية لصفحتين)
     for (const [text, pg, line, end] of v.words) {
       if (!pages.has(pg)) pages.set(pg, new Map());
       const lines = pages.get(pg);
       if (!lines.has(line)) lines.set(line, []);
-      lines.get(line).push(end ? [text, s, a, 1] : [text, s, a]);
+      lines.get(line).push(end ? [text, s, a, 1] : [text, s, a, 0, wi++]);
       if (!pageJuz.has(pg)) pageJuz.set(pg, v.juz);
     }
   }

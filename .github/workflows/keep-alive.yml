@@ -1,0 +1,19 @@
+# يبقي مشروع Supabase المجاني نشطًا (يتوقف بعد ٧ أيام بدون أي طلبات)، حتى لا تتعطل روابط الختمات الجماعية
+name: keep-alive
+on:
+  schedule:
+    - cron: '17 6 * * 1,4'   # الاثنين والخميس
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST \
+            'https://lskfbmkesxxgqytjsftk.supabase.co/rest/v1/rpc/khatma_get' \
+            -H 'apikey: sb_publishable_4yIAdvDsyTja323tcEVUvQ_KLxQYg7P' \
+            -H 'Content-Type: application/json' \
+            -d '{"p_id":"keepalive","p_device":"keepalive"}')
+          echo "HTTP $code"
+          test "$code" = "200" || test "$code" = "204"

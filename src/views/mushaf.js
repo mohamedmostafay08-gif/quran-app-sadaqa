@@ -3,12 +3,15 @@ import { h, icon, ar } from '../lib/dom.js';
 import { getSurahMeta, juzOf, pageOf } from '../data.js';
 import * as settings from '../state.js';
 import * as bookmarks from '../features/bookmarks.js';
+import * as notes from '../features/notes.js';
 import { player } from '../audio/player.js';
-import { mount, topbar, toast } from '../ui.js';
+import { mount, topbar, toast, sheet } from '../ui.js';
 import { navigate } from '../router.js';
-import { ayahSheet } from './reader.js';
+import { ayahSheet, tajweedLegend } from './reader.js';
 
 const BASE = new URL('../../public/data/mushaf/', import.meta.url).href;
+let qpcTajweedP = null;
+const getQpcTajweed = () => (qpcTajweedP ||= fetch(new URL('../../public/data/tajweed-qpc.json', import.meta.url)).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).catch((e) => { qpcTajweedP = null; throw e; }));
 const files = new Map();
 let indexP = null;
 const getIndex = () => (indexP ||= fetch(BASE + 'index.json').then((r) => r.json()));
@@ -54,8 +57,38 @@ export async function renderMushaf(params, _q, isStale) {
   getPage(Math.min(604, n + 1)).catch(() => {}); // تحميل مسبق
 
   const rows = buildLines(lines);
+  const surahIds = [...new Set(lines.flatMap(([, t]) => t.map((x) => x[1])))];
+  // التجويد (ملف إضافي يُحمَّل عند الحاجة) + العلامات والملاحظات للسور الظاهرة
+  const useTajweed = settings.get('tajweed');
+  const [tj, marks, noteMaps] = await Promise.all([
+    useTajweed ? getQpcTajweed().catch(() => null) : null,
+    Promise.all(surahIds.map((s) => bookmarks.bookmarkedIn(s))),
+    Promise.all(surahIds.map((s) => notes.inSurah(s))),
+  ]);
+  if (isStale()) return;
+  const isMarked = (s, a) => marks[surahIds.indexOf(s)]?.has(a);
+  const noteOf = (s, a) => noteMaps[surahIds.indexOf(s)]?.get(a);
+  const wordNode = (text, s, a, wi) => {
+    const note = noteOf(s, a);
+    const cls = 'm-w' + (note?.color ? ` hl-${note.color}` : '');
+    const ranges = tj?.ayahs[`${s}:${a}`]?.filter((x) => x[0] === wi);
+    if (!ranges?.length) return h('span', { class: cls, dataset: { s, a } }, text);
+    const parts = [];
+    let cur = 0;
+    for (const [, st, en, rule] of ranges) {
+      if (st > cur) parts.push(text.slice(cur, st));
+      parts.push(h('span', { class: `tj tj-${tj.rules[rule]}` }, text.slice(st, en)));
+      cur = en;
+    }
+    if (cur < text.length) parts.push(text.slice(cur));
+    return h('span', { class: cls, dataset: { s, a } }, parts);
+  };
+  const endNode = (text, s, a) => {
+    const note = noteOf(s, a);
+    return h('span', { class: 'm-end' + (isMarked(s, a) ? ' bookmarked' : '') + (note?.text ? ' has-note' : ''), dataset: { s, a }, title: isMarked(s, a) ? 'عليها علامة' : null }, text);
+  };
   const firstAyah = lines[0][1][0];
-  const surahsOnPage = [...new Set(lines.flatMap(([, t]) => t.map((x) => x[1])))];
+  const surahsOnPage = surahIds;
   const juz = juzOf(firstAyah[1], firstAyah[2]);
 
   const page = h('div.m-page', { lang: 'ar', class: `m-page${n <= 2 ? ' m-opening' : ''}` });
@@ -65,7 +98,7 @@ export async function renderMushaf(params, _q, isStale) {
     } else if (r.type === 'basmala') {
       page.append(h('div.m-line.m-basmala', BASMALA));
     } else {
-      page.append(h('div.m-line', { class: r.tokens.length <= 4 ? 'm-line m-short' : 'm-line' }, r.tokens.map(([text, s, a, end]) => h(end ? 'span.m-end' : 'span.m-w', { dataset: { s, a } }, text))));
+      page.append(h('div.m-line', { class: r.tokens.length <= 4 ? 'm-line m-short' : 'm-line' }, r.tokens.map(([text, s, a, end, wi]) => (end ? endNode(text, s, a) : wordNode(text, s, a, wi)))));
     }
   }
 
@@ -103,7 +136,10 @@ export async function renderMushaf(params, _q, isStale) {
       title: surahsOnPage.map((s) => getSurahMeta(s).nameAr).join('، '),
       sub: `الجزء ${ar(juz)}`,
       back: '#/',
-      actions: [h('button.icon-btn', { type: 'button', 'aria-label': 'العرض المتصل', title: 'العرض المتصل', onclick: () => { settings.set('readMode', 'scroll'); navigate(`/surah/${firstAyah[1]}/${firstAyah[2]}`); } }, icon('scroll'))],
+      actions: [
+        h('button.icon-btn', { type: 'button', 'aria-label': 'العرض المتصل', title: 'العرض المتصل', onclick: () => { settings.set('readMode', 'scroll'); navigate(`/surah/${firstAyah[1]}/${firstAyah[2]}`); } }, icon('scroll')),
+        h('button.icon-btn', { type: 'button', 'aria-label': 'خيارات العرض', onclick: () => optionsSheet() }, icon('more')),
+      ],
     }),
     h('div.m-wrap', page),
     h('nav.m-nav', { 'aria-label': 'التنقل بين الصفحات' },
@@ -131,4 +167,19 @@ export async function renderMushaf(params, _q, isStale) {
   sync();
 
   return { cleanup() { unsub(); removeEventListener('keydown', onKey); clearTimeout(tapTimer); document.body.classList.remove('immersive'); } };
+}
+
+function optionsSheet() {
+  const seg = (key, opts) => h('div.seg', { role: 'radiogroup' }, opts.map(([v, label]) => h('button', {
+    type: 'button', role: 'radio', 'aria-checked': String(settings.get(key) === v),
+    onclick: (e) => { settings.set(key, v); for (const b of e.currentTarget.parentElement.children) b.setAttribute('aria-checked', String(b === e.currentTarget)); dispatchEvent(new HashChangeEvent('hashchange')); },
+  }, label)));
+  sheet({
+    title: 'خيارات الصفحات',
+    content: () => h('div.form',
+      h('div.field', h('span', 'ألوان التجويد'), seg('tajweed', [[false, 'بدون'], [true, 'ملوّن']])),
+      settings.get('tajweed') ? tajweedLegend() : null,
+      h('div.field', h('span', 'الثيم'), seg('theme', [['auto', 'تلقائي'], ['light', 'أبيض'], ['sepia', 'سيبيا'], ['dark', 'ليلي']])),
+    ),
+  });
 }
