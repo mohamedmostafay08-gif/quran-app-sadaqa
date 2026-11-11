@@ -74,7 +74,7 @@ export function mountPlayerBar() {
 
   let isOpen = false;
   function openFull() {
-    if (!player.state().surah) return;
+    if (!player.state().surah && !player.state().radio) return;
     wrap.hidden = false;
     isOpen = true;
     requestAnimationFrame(() => wrap.classList.add('open'));
@@ -105,6 +105,28 @@ export function mountPlayerBar() {
     if (isOpen && !seeking) { seek.value = String(Math.round(f * 1000)); tNow.textContent = fmt(a.currentTime); tAll.textContent = fmt(a.duration); }
   });
 
+  function renderRadio(st) {
+    const sl = sleepState();
+    const live = st.status === 'playing';
+    art.replaceChildren(icon('radio'));
+    t1.textContent = st.radio.name;
+    t2.textContent = st.error ? st.error : (st.status === 'loading' ? 'جارٍ الاتصال…' : live ? 'بث مباشر' : 'متوقف') + (sl ? `، نوم ${sl}` : '');
+    t2.classList.toggle('err', !!st.error);
+    mpProgress.style.transform = 'scaleX(0)';
+    const playIcon = () => (st.status === 'loading' ? h('span.spinner', { 'aria-hidden': 'true' }) : icon(live ? 'pause' : 'play'));
+    mpPlay.replaceChildren(playIcon());
+    mpPlay.setAttribute('aria-label', live ? 'إيقاف مؤقت' : 'تشغيل');
+    if (!isOpen) return;
+    fpPlay.replaceChildren(playIcon());
+    fpPlay.setAttribute('aria-label', live ? 'إيقاف مؤقت' : 'تشغيل');
+    fpTitle.textContent = st.radio.name;
+    fpSub.textContent = st.error || st.radio.sub || 'إذاعة';
+    sleepBtn.classList.toggle('on', !!sl);
+    shownAyah = 'radio:' + st.radio.id + ':' + live;
+    fpAyah.replaceChildren(h('div.fp-radio', h('span', { class: `live-badge${live ? ' on' : ''}` }, h('i'), live ? 'بث مباشر' : 'متوقف'), icon('radio'),
+      h('a.btn.ghost', { href: '#/radio', onclick: () => closeFull() }, 'كل الإذاعات')));
+  }
+
   let shownAyah = null;
   let fellBackShown = false;
   async function showAyah(st) {
@@ -119,11 +141,15 @@ export function mountPlayerBar() {
     fpAyah.scrollTop = 0;
   }
 
+  const surahOnly = [seek.parentElement, ...full.querySelectorAll('.fp-controls > .icon-btn'), rateBtn, repBtn, goBtn, recBtn];
   function render() {
     const st = player.state();
-    const visible = !!st.surah;
+    const visible = !!st.surah || !!st.radio;
     mini.classList.toggle('show', visible);
+    full.classList.toggle('radio', !!st.radio);
+    for (const x of surahOnly) x.hidden = !!st.radio;
     if (!visible) { closeFull(); return; }
+    if (st.radio) return renderRadio(st);
     const m = getSurahMeta(st.surah);
     const where = st.ayah == null ? 'السورة كاملة' : st.ayah === 0 ? 'البسملة' : 'الآية ' + ar(st.ayah);
     if (st.fellBack && !fellBackShown) { fellBackShown = true; toast(`التكرار يحتاج توقيت الآيات، فاستخدمنا صوت ${getReciter(st.reciter)?.nameAr || ''}`); }
@@ -132,6 +158,7 @@ export function mountPlayerBar() {
     const sl = sleepState();
     const recName = getReciter(rid)?.nameAr || '';
     art.textContent = m.nameAr.replace(/^ال/, '').slice(0, 2);
+    if (shownAyah?.startsWith('radio:')) shownAyah = null;
     t1.textContent = `سورة ${m.nameAr}، ${where}`;
     t2.textContent = st.error ? st.error : recName + (st.compare ? ` (مقارنة ${ar(st.compare.idx + 1)}/${ar(st.compare.list.length)})` : '') + (sl ? `، نوم ${sl}` : '');
     t2.classList.toggle('err', !!st.error);

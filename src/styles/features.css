@@ -171,3 +171,34 @@ body[data-route="welcome"] .main { padding-bottom: 120px; }
 .notify-time { display: flex; gap: 8px; align-items: center; }
 .notify-time input { flex: 1; max-width: 200px; }
 .notify-chips .pb-chip { min-height: 40px; min-width: 64px; font-size: 14px; }
+
+/* ===== الإذاعة ===== */
+.radio-search { margin: 4px 0 6px; }
+.radio-h { font-size: 15px; color: var(--text-2); margin: 18px 4px 8px; }
+.radio-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.radio-list.featured { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.radio-item button { width: 100%; display: flex; align-items: center; gap: 12px; text-align: start; padding: 10px 12px; min-height: 58px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px; color: inherit; }
+.radio-item.big button { min-height: 76px; padding: 12px 14px; }
+.radio-item.on button { border-color: var(--accent); background: var(--accent-soft); }
+.ri-icon { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--accent); }
+.radio-item.big .ri-icon { width: 48px; height: 48px; background: var(--accent); color: var(--on-accent); }
+.ri-icon svg { width: 18px; height: 18px; }
+.ri-text { flex: 1; min-width: 0; display: grid; }
+.ri-text strong { font-size: 15px; }
+.ri-text small { font-size: 12px; color: var(--text-2); }
+.live-dot { flex: none; font-size: 11px; font-weight: 700; color: var(--danger); display: inline-flex; align-items: center; gap: 5px; }
+.live-dot::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: live 1.4s infinite; }
+@keyframes live { 50% { opacity: .25; } }
+.eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 16px; }
+.eq i { width: 3px; background: currentColor; border-radius: 2px; animation: eq 1s infinite ease-in-out; }
+.eq i:nth-child(2) { animation-delay: -.3s; } .eq i:nth-child(3) { animation-delay: -.6s; }
+@keyframes eq { 0%, 100% { height: 4px; } 50% { height: 16px; } }
+@media (prefers-reduced-motion: reduce) { .eq i, .live-dot::before { animation: none; height: 10px; } }
+.fp-radio { display: grid; justify-items: center; gap: 18px; }
+.fp-radio > svg { width: 72px; height: 72px; color: var(--accent); }
+.live-badge { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-ui, inherit); font-size: 14px; font-weight: 700; color: var(--text-2);
+  padding: 6px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); }
+.live-badge i { width: 9px; height: 9px; border-radius: 50%; background: var(--text-3); }
+.live-badge.on { color: var(--danger); } .live-badge.on i { background: var(--danger); animation: live 1.4s infinite; }
+.mp-art svg { width: 22px; height: 22px; }

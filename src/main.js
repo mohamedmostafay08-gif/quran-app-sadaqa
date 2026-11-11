@@ -19,13 +19,14 @@ import { renderMushaf } from './views/mushaf.js';
 import { renderWelcome } from './views/welcome.js';
 import { renderPrayer, renderAdhkarChapter } from './views/prayer.js';
 import { renderGroups, renderGroup } from './views/group.js';
+import { renderRadio } from './views/radio.js';
 import { initInstall, isStandalone } from './features/install.js';
 import { track } from './features/stats.js';
 import { refreshPush } from './features/push.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
-const TAB_FOR = { '/': 'home', '/surah': 'home', '/search': 'search', '/bookmarks': 'bookmarks', '/downloads': 'settings', '/prayer': 'prayer', '/adhkar': 'prayer', '/settings': 'settings', '/about': 'settings', '/khatma': 'home', '/memorize': 'home', '/car': 'home', '/page': 'home', '/group': 'home' };
+const TAB_FOR = { '/': 'home', '/surah': 'home', '/search': 'search', '/bookmarks': 'bookmarks', '/downloads': 'settings', '/prayer': 'prayer', '/adhkar': 'prayer', '/settings': 'settings', '/about': 'settings', '/khatma': 'home', '/memorize': 'home', '/car': 'home', '/page': 'home', '/group': 'home', '/radio': 'home' };
 
 async function boot() {
   const status = document.querySelector('.boot p');
@@ -57,6 +58,7 @@ async function boot() {
   route('/adhkar/:id', renderAdhkarChapter);
   route('/group', renderGroups);
   route('/group/:id', renderGroup);
+  route('/radio', renderRadio);
 
 
   // أول فتح: شاشة الترحيب

@@ -21,6 +21,13 @@ export function setupMediaSession(player) {
 export function updateMediaSession(st) {
   if (!('mediaSession' in navigator)) return;
   const ms = navigator.mediaSession;
+  if (st.radio) {
+    if (typeof MediaMetadata !== 'undefined' && ms.metadata?.title !== st.radio.name) {
+      ms.metadata = new MediaMetadata({ title: st.radio.name, artist: 'بث مباشر', album: 'رتّل — الإذاعة', artwork: [{ src: ICON, sizes: '512x512', type: 'image/png' }] });
+    }
+    ms.playbackState = st.status === 'playing' ? 'playing' : 'paused';
+    return;
+  }
   if (!st.surah) { ms.metadata = null; ms.playbackState = 'none'; return; }
   const m = getSurahMeta(st.surah);
   const reciter = rec?.getReciter(st.compare ? st.compare.list[st.compare.idx] : st.reciter);

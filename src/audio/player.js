@@ -106,6 +106,7 @@ const st = {
   range: null,         // { from:{surah,ayah}, to:{surah,ayah}, loop, times } نطاق (ورد / حفظ)
   completed: null,     // آخر نطاق اكتمل تشغيله (لتسجيل الورد)
   loops: 0,
+  radio: null,         // { id, name, sub, url } أثناء الاستماع لإذاعة مباشرة
 };
 const listeners = new Set();
 const emit = () => { for (const fn of listeners) fn(st); updateMediaSession(st); };
@@ -257,10 +258,12 @@ audio.addEventListener('pause', () => { cancelAnimationFrame(rafId); if (st.stat
 audio.addEventListener('waiting', () => { if (st.status !== 'idle') { st.status = 'loading'; emit(); } });
 audio.addEventListener('error', () => {
   if (!audio.getAttribute('src')) return;
+  if (st.radio) { radioRetry(); return; }
   loadedKey = null;
   fail(navigator.onLine ? 'تعذر تحميل ملف الصوت' : null);
 });
 audio.addEventListener('ended', () => {
+  if (st.radio) { radioRetry(); return; }
   if (!st.surah || switching) return;
   const last = getSurahMeta(st.surah).ayahCount;
   if (!timings) {
@@ -281,6 +284,31 @@ audio.addEventListener('ended', () => {
   st.status = 'idle'; emit();
 });
 
+// ---- الإذاعة: بث مباشر ----
+let radioTries = 0, radioTimer = 0;
+function startRadio() {
+  clearTimeout(radioTimer);
+  // نعيد ضبط الرابط في كل مرة حتى نلحق بالبث الحي بدل ما تم تخزينه قبل الإيقاف
+  audio.src = st.radio.url;
+  audio.playbackRate = 1;
+  audio.volume = sleepFade;
+  st.status = 'loading'; st.error = null; emit();
+  audio.play().catch((e) => { if (e.name !== 'AbortError') fail(navigator.onLine ? 'تعذر تشغيل الإذاعة' : 'الإذاعة تحتاج اتصالًا بالإنترنت'); });
+}
+/** انقطاع البث: إعادة الاتصال تلقائيًا (حتى ٥ مرات) */
+function radioRetry() {
+  if (!st.radio || radioTries >= 5 || st.status === 'paused') { if (st.radio) fail(navigator.onLine ? 'انقطع بث الإذاعة' : 'الإذاعة تحتاج اتصالًا بالإنترنت'); return; }
+  radioTries++;
+  st.status = 'loading'; emit();
+  clearTimeout(radioTimer);
+  radioTimer = setTimeout(() => { if (st.radio) startRadio(); }, 1500 * radioTries);
+}
+audio.addEventListener('playing', () => { radioTries = 0; });
+// البث قد يطلق «waiting» للحظات أثناء التخزين ولا يعيد «playing»؛ نصحّح الحالة عند استمرار التشغيل فعلًا
+audio.addEventListener('timeupdate', () => {
+  if (st.radio && st.status === 'loading' && !audio.paused && audio.readyState >= 3) { st.status = 'playing'; emit(); }
+});
+
 /** السرعة الفعلية: المخصصة للقارئ إن وُجدت، وإلا الافتراضية */
 export function rateFor(reciterId) {
   const r = (settings.get('rateByReciter') || {})[reciterId];
@@ -292,12 +320,12 @@ export function setRate(v) {
   settings.set('rateByReciter', { ...(settings.get('rateByReciter') || {}), [id]: v });
   audio.playbackRate = v;
 }
-settings.subscribe((k) => { if (k === 'rate' || k === 'rateByReciter') audio.playbackRate = rateFor(currentReciter() || settings.get('reciter')); });
+settings.subscribe((k) => { if (!st.radio && (k === 'rate' || k === 'rateByReciter')) audio.playbackRate = rateFor(currentReciter() || settings.get('reciter')); });
 
 // حفظ موضع الاستماع لاستكماله من نفس الثانية
 let lastSave = 0;
 function saveListen(force) {
-  if (!st.surah || st.compare || switching || !audio.getAttribute('src')) return;
+  if (st.radio || !st.surah || st.compare || switching || !audio.getAttribute('src')) return;
   const now = Date.now();
   if (!force && now - lastSave < 5000) return;
   lastSave = now;
@@ -314,6 +342,7 @@ export const player = {
   /** يبدأ من آية؛ {only:true} يكرر آية واحدة، {range:{from,to,loop,times}} نطاق محدد */
   playFrom(s, a, opts = {}) {
     resumeAt = null;
+    st.radio = null;
     st.reciter = settings.get('reciter');
     // تكرار آية أو نطاق داخل سورة يحتاج توقيت الآيات
     st.fellBack = false;
@@ -330,6 +359,7 @@ export const player = {
   /** مقارنة القراء: نفس الآية بأكثر من قارئ ورا بعض */
   compare(s, a, list) {
     resumeAt = null;
+    st.radio = null;
     st.reciter = settings.get('reciter');
     st.only = false;
     st.range = null;
@@ -337,8 +367,16 @@ export const player = {
     st.compare = { list: list.map(timedFallback), idx: 0 };
     load(s, a);
   },
+  /** تشغيل إذاعة مباشرة */
+  playRadio(r) {
+    loadSeq++; switching = false; resumeAt = null; radioTries = 0;
+    loadedKey = null; timings = null;
+    Object.assign(st, { radio: r, surah: null, ayah: null, compare: null, range: null, only: false, untimed: false, fellBack: false });
+    startRadio();
+  },
   pause() { audio.pause(); },
   resume() {
+    if (st.radio) { radioTries = 0; startRadio(); return; }
     if (!st.surah) return;
     if (!audio.getAttribute('src')) { st.reciter = st.reciter || settings.get('reciter'); st.repeatLeft = settings.get('repeat'); load(st.surah, st.ayah || 0); return; }
     audio.play().catch(() => {});
@@ -351,6 +389,7 @@ export const player = {
     emit();
   },
   toggle() {
+    if (st.radio) { if (st.status === 'playing' || st.status === 'loading') { clearTimeout(radioTimer); audio.pause(); st.status = 'paused'; emit(); } else player.resume(); return; }
     if (st.status === 'playing') audio.pause();
     else if (st.status === 'paused' && !audio.getAttribute('src')) player.resume();
     else if (st.status === 'idle' && st.surah) player.playFrom(st.surah, st.ayah || 1);
@@ -360,12 +399,13 @@ export const player = {
     loadSeq++;
     switching = false;
     audio.pause(); audio.removeAttribute('src'); audio.load();
-    loadedKey = null; timings = null; resumeAt = null;
-    Object.assign(st, { status: 'idle', surah: null, ayah: null, compare: null, error: null, range: null, only: false });
+    loadedKey = null; timings = null; resumeAt = null; clearTimeout(radioTimer);
+    Object.assign(st, { status: 'idle', surah: null, ayah: null, compare: null, error: null, range: null, only: false, radio: null });
     settings.set('lastListen', null);
     emit();
   },
   next() {
+    if (st.radio) return;
     if (st.surah && !timings && audio.getAttribute('src')) { if (st.surah < 114) load(st.surah + 1, 0); return; }
     if (!st.surah || !timings) return;
     st.repeatLeft = st.range?.times || settings.get('repeat');
@@ -374,6 +414,7 @@ export const player = {
     else if (st.surah < 114) load(st.surah + 1, needsBasmala(st.surah + 1) ? 0 : 1);
   },
   prev() {
+    if (st.radio) return;
     if (st.surah && !timings && audio.getAttribute('src')) {
       if (audio.currentTime > 5 || st.surah === 1) audio.currentTime = 0; else load(st.surah - 1, 0);
       return;
@@ -389,6 +430,7 @@ export const player = {
   },
   setReciter(id) {
     settings.set('reciter', id);
+    if (st.radio) return;
     if (st.surah && st.status !== 'idle') { st.reciter = id; load(st.surah, st.ayah ?? (needsBasmala(st.surah) ? 0 : 1)); }
   },
   /** لمؤقت النوم: 0..1 */

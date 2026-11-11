@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '9f1d6b8a14';
+const VERSION = 'd38038783e';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -61,6 +61,7 @@ const ASSETS = [
   'src/views/mushaf.js',
   'src/views/notifyCard.js',
   'src/views/prayer.js',
+  'src/views/radio.js',
   'src/views/reader.js',
   'src/views/search.js',
   'src/views/settings.js',
@@ -70,6 +71,7 @@ const ASSETS = [
   'public/data/quran-meta.json',
   'public/data/quran-simple.json',
   'public/data/quran-uthmani.json',
+  'public/data/radios.json',
   'public/data/reciters.json',
   'public/data/surahs.json',
   'public/fonts/amiri-quran.woff2',

@@ -37,6 +37,8 @@ export function renderAbout() {
         h('dd', link('https://quran.com', 'Quran.com'), ' API — مواضع الأحكام تُنقل على نص Tanzil بالمحاذاة دون تغيير أي حرف.'),
         h('dt', 'التلاوات'),
         h('dd', link('https://mp3quran.net', 'mp3quran.net'), ' — تلاوة السورة كاملة متصلة، مع توقيت كل آية لتظليلها.'),
+        h('dt', 'الإذاعة'),
+        h('dd', 'إذاعة القرآن الكريم من القاهرة ومن السعودية (بث مباشر عبر radiojar)، وإذاعات القراء والبرامج من ', link('https://mp3quran.net', 'mp3quran.net'), '.'),
         h('dt', 'أسماء السور بالإنجليزية'),
         h('dd', link('https://quran.com', 'Quran.com'), ' API.'),
         h('dt', 'الأذكار'),

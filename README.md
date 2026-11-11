@@ -21,6 +21,7 @@ node scripts/build-mushaf.js   # وضع الصفحات: نص مجمع الملك
 node scripts/build-adhkar.js   # الأذكار من حصن المسلم (hisnmuslim.com)
 node scripts/build-mushaf-tajweed.js # ألوان التجويد على نص المجمع في وضع الصفحات
 node scripts/build-tafsir-trans.js   # تفسير السعدي + ترجمات المعاني (تنزيل)
+node scripts/build-radios.js        # الإذاعات: القاهرة والسعودية وإذاعات القراء (بث مباشر)
 node scripts/build-seo.js      # صفحات ثابتة للسور (sura/) وsitemap.xml لمحركات البحث (SITE_URL لتغيير الرابط)
 node scripts/stamp-sw.js       # تحديث قائمة الكاش ورقم الإصدار في sw.js — شغّله قبل كل نشر
 ```
