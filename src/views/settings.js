@@ -1,0 +1,60 @@
+// الإعدادات
+import { h, icon, ar } from '../lib/dom.js';
+import * as settings from '../state.js';
+import { getReciter } from '../audio/player.js';
+import { reciterSheet } from '../audio/playerBar.js';
+import { mount, topbar } from '../ui.js';
+
+function seg(key, opts, after) {
+  return h('div.seg', { role: 'radiogroup' }, opts.map(([v, label]) => h('button', {
+    type: 'button', role: 'radio', 'aria-checked': String(settings.get(key) === v),
+    onclick: (e) => {
+      settings.set(key, v);
+      for (const b of e.currentTarget.parentElement.children) b.setAttribute('aria-checked', String(b === e.currentTarget));
+      after?.(v);
+    },
+  }, label)));
+}
+
+function toggle(key, label, hint) {
+  const input = h('input', { type: 'checkbox', role: 'switch', checked: !!settings.get(key) });
+  input.addEventListener('change', () => settings.set(key, input.checked));
+  return h('label.toggle', h('span', h('strong', label), hint ? h('small', hint) : null), input);
+}
+
+export function renderSettings() {
+  const scale = h('input', { type: 'range', min: '0.8', max: '2', step: '0.1', value: String(settings.get('fontScale')), 'aria-label': 'حجم خط المصحف' });
+  scale.addEventListener('input', () => settings.set('fontScale', +scale.value));
+  const recName = h('span', getReciter(settings.get('reciter'))?.nameAr || '');
+  const unsub = settings.subscribe((k) => { if (k === 'reciter') recName.textContent = getReciter(settings.get('reciter'))?.nameAr || ''; });
+
+  mount(h('div.settings',
+    topbar({ title: 'الإعدادات' }),
+    h('section.card',
+      h('h2', 'العرض'),
+      h('div.field', h('span', 'الثيم'), seg('theme', [['auto', 'تلقائي'], ['light', 'فاتح'], ['sepia', 'سيبيا'], ['dark', 'ليلي']])),
+      h('label.field', h('span', 'حجم خط المصحف'), h('div.range-row', h('span.small', 'أ'), scale, h('span.large', 'أ'))),
+      h('p.preview', { lang: 'ar' }, 'ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ'),
+      h('div.field', h('span', 'طريقة العرض'), seg('layout', [['flow', 'متصل كالمصحف'], ['list', 'آية في سطر']])),
+      toggle('showPageMarks', 'علامات الصفحات والأجزاء', 'تظهر بداية كل صفحة وجزء وربع حزب داخل السورة'),
+    ),
+    h('section.card',
+      h('h2', 'التلاوة'),
+      h('button.row-btn', { type: 'button', onclick: () => reciterSheet() }, h('span', h('strong', 'القارئ الافتراضي'), h('small', recName)), icon('forward')),
+      h('div.field', h('span', 'سرعة التشغيل'), seg('rate', [[0.75, `${ar(0.75)}×`], [1, `${ar(1)}×`], [1.25, `${ar(1.25)}×`], [1.5, `${ar(1.5)}×`]])),
+      h('div.field', h('span', 'تكرار كل آية'), seg('repeat', [[1, 'مرة'], [2, ar(2)], [3, ar(3)], [5, ar(5)], [10, ar(10)]])),
+      toggle('autoNext', 'الانتقال للسورة التالية تلقائيًا'),
+      toggle('autoScroll', 'تتبع الآية أثناء التلاوة', 'تمرير الشاشة مع الآية المقروءة'),
+    ),
+    h('section.card',
+      h('h2', 'التنزيل'),
+      toggle('autoDownloadNext', 'تنزيل السورة التالية تلقائيًا', 'أثناء الاستماع، تُنزَّل السورة التالية للقارئ الحالي'),
+      toggle('wifiOnly', 'التنزيل التلقائي على الواي فاي فقط', 'يعتمد على دعم المتصفح لمعرفة نوع الاتصال'),
+      h('a.row-btn', { href: '#/downloads' }, h('span', h('strong', 'إدارة التنزيلات والمساحة')), icon('forward')),
+    ),
+    h('section.card',
+      h('a.row-btn', { href: '#/about' }, h('span', h('strong', 'عن التطبيق'), h('small', 'المصادر والإصدارات والحقوق')), icon('forward')),
+    ),
+  ));
+  return { cleanup: unsub };
+}

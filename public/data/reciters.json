@@ -1,0 +1,18 @@
+[
+  { "id": "Alafasy_128kbps", "nameAr": "مشاري راشد العفاسي", "nameEn": "Mishary Rashid Alafasy", "style": "مرتل", "kbps": 128, "mp3quran": "https://server8.mp3quran.net/afs/" },
+  { "id": "Abdul_Basit_Murattal_192kbps", "nameAr": "عبد الباسط عبد الصمد", "nameEn": "Abdul Basit (Murattal)", "style": "مرتل", "kbps": 192, "mp3quran": "https://server7.mp3quran.net/basit/" },
+  { "id": "Abdul_Basit_Mujawwad_128kbps", "nameAr": "عبد الباسط عبد الصمد", "nameEn": "Abdul Basit (Mujawwad)", "style": "مجوّد", "kbps": 128, "mp3quran": "https://server7.mp3quran.net/basit/Almusshaf-Al-Mojawwad/" },
+  { "id": "Husary_128kbps", "nameAr": "محمود خليل الحصري", "nameEn": "Mahmoud Khalil Al-Husary", "style": "مرتل", "kbps": 128, "mp3quran": "https://server13.mp3quran.net/husr/" },
+  { "id": "Husary_Muallim_128kbps", "nameAr": "الحصري (المعلم)", "nameEn": "Al-Husary (Muallim)", "style": "تعليمي", "kbps": 128, "mp3quran": null },
+  { "id": "Minshawy_Murattal_128kbps", "nameAr": "محمد صديق المنشاوي", "nameEn": "Minshawy (Murattal)", "style": "مرتل", "kbps": 128, "mp3quran": "https://server10.mp3quran.net/minsh/" },
+  { "id": "Minshawy_Mujawwad_192kbps", "nameAr": "محمد صديق المنشاوي", "nameEn": "Minshawy (Mujawwad)", "style": "مجوّد", "kbps": 192, "mp3quran": "https://server10.mp3quran.net/minsh/Almusshaf-Al-Mojawwad/" },
+  { "id": "Abdurrahmaan_As-Sudais_192kbps", "nameAr": "عبد الرحمن السديس", "nameEn": "Abdurrahman As-Sudais", "style": "مرتل", "kbps": 192, "mp3quran": "https://server11.mp3quran.net/sds/" },
+  { "id": "MaherAlMuaiqly128kbps", "nameAr": "ماهر المعيقلي", "nameEn": "Maher Al-Muaiqly", "style": "مرتل", "kbps": 128, "mp3quran": "https://server12.mp3quran.net/maher/" },
+  { "id": "Saood_ash-Shuraym_128kbps", "nameAr": "سعود الشريم", "nameEn": "Saud Ash-Shuraim", "style": "مرتل", "kbps": 128, "mp3quran": "https://server7.mp3quran.net/shur/" },
+  { "id": "Yasser_Ad-Dussary_128kbps", "nameAr": "ياسر الدوسري", "nameEn": "Yasser Ad-Dossari", "style": "مرتل", "kbps": 128, "mp3quran": "https://server11.mp3quran.net/yasser/" },
+  { "id": "Abu_Bakr_Ash-Shaatree_128kbps", "nameAr": "أبو بكر الشاطري", "nameEn": "Abu Bakr Ash-Shatri", "style": "مرتل", "kbps": 128, "mp3quran": "https://server11.mp3quran.net/shatri/" },
+  { "id": "Hudhaify_128kbps", "nameAr": "علي الحذيفي", "nameEn": "Ali Al-Hudhaify", "style": "مرتل", "kbps": 128, "mp3quran": "https://server9.mp3quran.net/hthfi/" },
+  { "id": "Ghamadi_40kbps", "nameAr": "سعد الغامدي", "nameEn": "Saad Al-Ghamdi", "style": "مرتل", "kbps": 40, "mp3quran": "https://server7.mp3quran.net/s_gmd/" },
+  { "id": "Nasser_Alqatami_128kbps", "nameAr": "ناصر القطامي", "nameEn": "Nasser Al-Qatami", "style": "مرتل", "kbps": 128, "mp3quran": "https://server6.mp3quran.net/qtm/" },
+  { "id": "Muhammad_Ayyoub_128kbps", "nameAr": "محمد أيوب", "nameEn": "Muhammad Ayyub", "style": "مرتل", "kbps": 128, "mp3quran": "https://server8.mp3quran.net/ayyub/" }
+]

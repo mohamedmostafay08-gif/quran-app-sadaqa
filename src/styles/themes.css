@@ -1,0 +1,101 @@
+/* فاتح (افتراضي) */
+:root {
+  color-scheme: light;
+  --bg: #f7f4ec;
+  --surface: #fffdf8;
+  --surface-2: #f0ece0;
+  --border: #e3dccb;
+  --text: #1d2523;
+  --text-2: #5d6662;
+  --text-3: #8a918d;
+  --accent: #0f5c4d;
+  --accent-2: #137a66;
+  --accent-soft: #dcebe5;
+  --on-accent: #ffffff;
+  --gold: #a87a22;
+  --gold-soft: #f4e8cc;
+  --ayah-active: #e5f1ea;
+  --ayah-active-line: #137a66;
+  --danger: #b3261e;
+  --shadow: 0 1px 2px rgba(30, 40, 35, .06), 0 6px 20px rgba(30, 40, 35, .07);
+  --scrim: rgba(15, 20, 18, .45);
+  --hl-yellow: #fbe7a1;
+  --hl-green: #cdebd3;
+  --hl-blue: #cfe3f7;
+  --hl-pink: #f6d3df;
+}
+
+/* ليلي */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0d1513;
+  --surface: #141f1c;
+  --surface-2: #1b2824;
+  --border: #26352f;
+  --text: #e7ece9;
+  --text-2: #a9b5b0;
+  --text-3: #75837d;
+  --accent: #5cc4a8;
+  --accent-2: #7fd6be;
+  --accent-soft: #1d3a32;
+  --on-accent: #06221b;
+  --gold: #d8b25e;
+  --gold-soft: #3a3020;
+  --ayah-active: #1a3029;
+  --ayah-active-line: #5cc4a8;
+  --danger: #f2877f;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .35);
+  --scrim: rgba(0, 0, 0, .6);
+  --hl-yellow: #4a4220;
+  --hl-green: #1f4630;
+  --hl-blue: #1f3850;
+  --hl-pink: #4d2535;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]), :root[data-theme="auto"] {
+    color-scheme: dark;
+    --bg: #0d1513;
+    --surface: #141f1c;
+    --surface-2: #1b2824;
+    --border: #26352f;
+    --text: #e7ece9;
+    --text-2: #a9b5b0;
+    --text-3: #75837d;
+    --accent: #5cc4a8;
+    --accent-2: #7fd6be;
+    --accent-soft: #1d3a32;
+    --on-accent: #06221b;
+    --gold: #d8b25e;
+    --gold-soft: #3a3020;
+    --ayah-active: #1a3029;
+    --ayah-active-line: #5cc4a8;
+    --danger: #f2877f;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .35);
+    --scrim: rgba(0, 0, 0, .6);
+    --hl-yellow: #4a4220;
+    --hl-green: #1f4630;
+    --hl-blue: #1f3850;
+    --hl-pink: #4d2535;
+  }
+}
+
+/* سيبيا */
+:root[data-theme="sepia"] {
+  color-scheme: light;
+  --bg: #efe2c6;
+  --surface: #f6ebd3;
+  --surface-2: #e8d8b6;
+  --border: #d8c39b;
+  --text: #3b2c17;
+  --text-2: #6b5634;
+  --text-3: #8d7853;
+  --accent: #7a4b12;
+  --accent-2: #925b18;
+  --accent-soft: #e6d0a6;
+  --on-accent: #fff8ea;
+  --gold: #8f5f12;
+  --gold-soft: #e9d4a4;
+  --ayah-active: #e4cf9f;
+  --ayah-active-line: #7a4b12;
+  --scrim: rgba(40, 25, 5, .45);
+}
