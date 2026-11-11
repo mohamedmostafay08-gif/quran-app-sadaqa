@@ -306,3 +306,88 @@ body:has(.player-bar.show) .main { padding-bottom: calc(var(--tabbar-h) + 100px 
 @media (min-width: 900px) {
   .ayahs { line-height: 2.5; }
 }
+
+/* ===== التظليل والملاحظات ===== */
+.ayah.hl-yellow, .hl-yellow { background: var(--hl-yellow); }
+.ayah.hl-green, .hl-green { background: var(--hl-green); }
+.ayah.hl-blue, .hl-blue { background: var(--hl-blue); }
+.ayah.hl-pink, .hl-pink { background: var(--hl-pink); }
+.ayah.has-note .ayah-num { text-decoration: underline wavy var(--accent) 1px; text-underline-offset: 6px; }
+.sheet-note { background: var(--accent-soft); border-radius: var(--radius-sm); padding: 10px 14px; margin: 0 0 8px; font-size: 14px; white-space: pre-wrap; }
+.note-text { margin: 4px 0; font-size: 14px; white-space: pre-wrap; }
+.note-input, select, .form input[type="number"], .page-input {
+  width: 100%; border: 1px solid var(--border); background: var(--bg); border-radius: var(--radius-sm);
+  padding: 10px 12px; font-size: 16px; min-height: 44px;
+}
+.note-input { resize: vertical; line-height: 1.7; }
+.note-input:focus, select:focus, .form input:focus, .page-input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
+.swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+.swatch { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border); padding: 0; }
+.swatch[aria-checked="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.sw-none { background: linear-gradient(135deg, transparent 46%, var(--danger) 47% 53%, transparent 54%), var(--surface); }
+.sw-yellow { background: var(--hl-yellow); } .sw-green { background: var(--hl-green); } .sw-blue { background: var(--hl-blue); } .sw-pink { background: var(--hl-pink); }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 6px; vertical-align: middle; }
+.result-text.hl-yellow, .result-text.hl-green, .result-text.hl-blue, .result-text.hl-pink { border-radius: 6px; padding: 0 6px; }
+
+/* ===== اختصارات الرئيسية ===== */
+.quick-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 4px 0 6px; }
+.quick-row:empty { display: none; }
+.quick { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); color: var(--text); text-decoration: none; }
+.quick:hover { border-color: var(--accent); }
+.quick > svg { color: var(--accent); width: 26px; height: 26px; }
+.quick > span { display: grid; min-width: 0; }
+.quick strong { font-size: 14px; }
+.quick small { color: var(--text-2); font-size: 12px; }
+
+/* ===== الختمة ===== */
+.ring { --p: 0; flex: none; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(closest-side, var(--surface) 78%, transparent 80% 100%), conic-gradient(var(--accent) calc(var(--p) * 360deg), var(--surface-2) 0); }
+.ring span { font-size: 13px; font-weight: 700; color: var(--accent); }
+.ring.sm { width: 34px; height: 34px; }
+.kc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.kc-head h2 { margin: 2px 0 0; font-size: 18px; color: var(--text); }
+.kc-head .eyebrow { color: var(--accent); font-weight: 700; }
+.wird-range { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding: 12px; border-radius: var(--radius-sm); background: var(--surface-2); }
+.wird-range > div { display: grid; }
+.wird-range small { color: var(--text-3); font-size: 11px; }
+.wird-range strong { font-size: 14px; }
+.wird-arrow { color: var(--text-3); }
+.notice { background: var(--gold-soft); color: var(--text); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 13px; }
+.kc-more { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 8px; }
+.kc-more summary { cursor: pointer; font-size: 13px; color: var(--text-2); min-height: 36px; display: flex; align-items: center; }
+.inline-form { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.inline-form label { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.page-input { width: 100px; }
+.stats { list-style: none; padding: 0; margin: 10px 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.stats li { background: var(--surface-2); border-radius: var(--radius-sm); padding: 10px 4px; display: grid; }
+.stats strong { font-size: 18px; color: var(--accent); }
+.stats span { font-size: 11px; color: var(--text-2); }
+.past-list { list-style: none; padding: 0; margin: 0; }
+.past-list li { padding: 10px 4px; border-bottom: 1px solid var(--border); }
+
+/* ===== الحفظ والمراجعة ===== */
+.big-num { font-size: 40px; font-weight: 700; color: var(--accent); line-height: 1; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mem-list { list-style: none; padding: 0; margin: 0; }
+.mem-list li { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.mem-list li > div { flex: 1; display: grid; gap: 2px; }
+.seg.levels button { font-size: 12px; padding: 0 8px; }
+.practice { font-family: var(--font-quran); font-size: var(--quran-size); line-height: 2.4; padding: 6px 0; }
+.p-ayah { margin: 0 0 6px; padding: 8px 4px; border-bottom: 1px dashed var(--border); }
+.w.hidden { font: inherit; border: 0; border-radius: 8px; background: var(--surface-2); color: var(--text-3); padding: 0 6px; min-width: 2.2em; cursor: pointer; border-bottom: 2px solid var(--border); }
+.w.hidden:hover { background: var(--accent-soft); }
+.w.revealed { color: var(--accent); }
+.review-stage { padding: 16px 0; }
+.review-prev { font-family: var(--font-quran); font-size: calc(1.2rem * var(--quran-scale)); line-height: 2; color: var(--text-2); }
+.review-prev small { font-family: var(--font-ui); font-size: 11px; }
+.review-cue { font-family: var(--font-quran); font-size: var(--quran-size); text-align: center; margin: 18px 0; color: var(--accent); }
+.review-answer { font-family: var(--font-quran); font-size: var(--quran-size); line-height: 2.3; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; }
+.grades { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.grade { display: grid; gap: 2px; padding: 10px 4px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); min-height: 56px; }
+.grade strong { font-size: 14px; }
+.grade small { font-size: 11px; color: var(--text-2); }
+.grade.again strong { color: var(--danger); }
+.grade.good strong, .grade.easy strong { color: var(--accent); }
+.memorize > .bar { margin-top: 12px; }
+
+.seg button:disabled { opacity: .4; cursor: not-allowed; }

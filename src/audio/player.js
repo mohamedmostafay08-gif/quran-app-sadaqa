@@ -29,7 +29,8 @@ const st = {
   repeatLeft: 0,
   compare: null,       // { list: [reciterIds], idx }
   error: null,
-  range: null,         // { from, to } نطاق للحفظ (لاحقًا)
+  range: null,         // { from:{surah,ayah}, to:{surah,ayah}, loop } نطاق (ورد / حفظ)
+  completed: null,     // آخر نطاق اكتمل تشغيله (لتسجيل الورد)
 };
 const listeners = new Set();
 const emit = () => { for (const fn of listeners) fn(st); updateMediaSession(st); };
@@ -69,9 +70,15 @@ async function load(s, a) {
 function nextPos() {
   const { surah: s, ayah: a } = st;
   const count = getSurahMeta(s).ayahCount;
-  if (st.range && a >= st.range.to) return null;
+  if (st.range && a !== 0) {
+    const t = st.range.to;
+    if (s > t.surah || (s === t.surah && a >= t.ayah)) {
+      if (st.range.loop) return { s: st.range.from.surah, a: st.range.from.ayah };
+      return null;
+    }
+  }
   if (a < count) return { s, a: a + 1 };
-  if (!settings.get('autoNext') || s >= 114 || st.range) return null;
+  if (s >= 114 || (!settings.get('autoNext') && !st.range)) return null;
   const ns = s + 1;
   return { s: ns, a: needsBasmala(ns) ? 0 : 1 };
 }
@@ -102,8 +109,12 @@ audio.addEventListener('ended', () => {
   if (st.ayah !== 0 && st.repeatLeft > 1) { st.repeatLeft--; return load(st.surah, st.ayah); }
   if (st.only) { st.status = 'idle'; emit(); return; }
   const n = nextPos();
-  if (!n) { st.status = 'idle'; emit(); return; }
-  st.repeatLeft = settings.get('repeat');
+  if (!n) {
+    if (st.range) st.completed = { ...st.range, at: Date.now() };
+    st.status = 'idle'; emit(); return;
+  }
+  if (st.range?.loop && n.s === st.range.from.surah && n.a === st.range.from.ayah) st.loops = (st.loops || 0) + 1;
+  st.repeatLeft = st.range?.times || settings.get('repeat');
   load(n.s, n.a);
 });
 
@@ -121,7 +132,9 @@ export const player = {
     st.only = !!opts.only;
     st.compare = null;
     st.range = opts.range || null;
-    st.repeatLeft = opts.only ? Math.max(settings.get('repeat'), opts.times || 3) : (opts.times || settings.get('repeat'));
+    st.completed = null;
+    st.loops = 0;
+    st.repeatLeft = opts.only ? Math.max(settings.get('repeat'), opts.times || 3) : (opts.times || opts.range?.times || settings.get('repeat'));
     const start = a === 1 && needsBasmala(s) && !opts.only && !opts.noBasmala ? 0 : a;
     load(s, start);
   },

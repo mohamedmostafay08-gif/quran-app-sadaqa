@@ -5,6 +5,8 @@ import { getSurahs, getSurahMeta, juzStart, juzOf, pageOf } from '../data.js';
 import * as settings from '../state.js';
 import { mount } from '../ui.js';
 import { navigate } from '../router.js';
+import { homeWirdCard } from './khatma.js';
+import * as srs from '../features/srs.js';
 
 let tab = 'surahs';
 
@@ -38,6 +40,13 @@ export function renderHome() {
     }, t === 'surahs' ? 'السور' : 'الأجزاء')),
   );
 
+  const quick = h('div.quick-row');
+  Promise.all([homeWirdCard(), srs.due()]).then(([wird, due]) => {
+    quick.append(
+      wird,
+      h('a.quick', { href: '#/memorize' }, icon('repeat'), h('span', h('strong', 'الحفظ والمراجعة'), h('small', due.length ? `${ar(due.length)} آية للمراجعة اليوم` : 'إخفاء تدريجي وتكرار'))),
+    );
+  });
   const el = h('div.home',
     h('header.hero',
       h('div.hero-mark', { 'aria-hidden': 'true' }, '۞'),
@@ -46,6 +55,7 @@ export function renderHome() {
     ),
     h('form.search-bar', { role: 'search', onsubmit: (e) => e.preventDefault() }, icon('search'), input),
     last ? continueCard(last) : null,
+    quick,
     tabs,
     listWrap,
   );

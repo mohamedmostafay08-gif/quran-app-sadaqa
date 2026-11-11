@@ -12,10 +12,12 @@ import { renderBookmarks } from './views/bookmarks.js';
 import { renderSettings } from './views/settings.js';
 import { renderDownloads } from './views/downloads.js';
 import { renderAbout } from './views/about.js';
+import { renderKhatma, initKhatmaAutoRecord } from './views/khatma.js';
+import { renderMemorize } from './views/memorize.js';
 import { h } from './lib/dom.js';
 import { toast } from './ui.js';
 
-const TAB_FOR = { '/': 'home', '/surah': 'home', '/search': 'search', '/bookmarks': 'bookmarks', '/downloads': 'downloads', '/settings': 'settings', '/about': 'settings' };
+const TAB_FOR = { '/': 'home', '/surah': 'home', '/search': 'search', '/bookmarks': 'bookmarks', '/downloads': 'downloads', '/settings': 'settings', '/about': 'settings', '/khatma': 'home', '/memorize': 'home', '/car': 'home' };
 
 async function boot() {
   const status = document.querySelector('.boot p');
@@ -38,9 +40,12 @@ async function boot() {
   route('/downloads', renderDownloads);
   route('/settings', renderSettings);
   route('/about', renderAbout);
+  route('/khatma', renderKhatma);
+  route('/memorize', renderMemorize);
 
   mountPlayerBar();
   initAutoDownload();
+  initKhatmaAutoRecord();
 
   start((m) => {
     const base = '/' + (m.path.split('/')[1] || '');
