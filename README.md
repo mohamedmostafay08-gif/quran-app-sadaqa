@@ -19,6 +19,8 @@ node scripts/build-extra.js    # الصرف والجذور، التفسير ال
 node scripts/build-reciters.js # قائمة القراء من mp3quran (التي لها توقيت آيات لكل السور)
 node scripts/build-mushaf.js   # وضع الصفحات: نص مجمع الملك فهد مرتبًا بالصفحة والسطر (604 × 15)
 node scripts/build-adhkar.js   # الأذكار من حصن المسلم (hisnmuslim.com)
+node scripts/build-mushaf-tajweed.js # ألوان التجويد على نص المجمع في وضع الصفحات
+node scripts/build-tafsir-trans.js   # تفسير السعدي + ترجمات المعاني (تنزيل)
 node scripts/build-seo.js      # صفحات ثابتة للسور (sura/) وsitemap.xml لمحركات البحث (SITE_URL لتغيير الرابط)
 node scripts/stamp-sw.js       # تحديث قائمة الكاش ورقم الإصدار في sw.js — شغّله قبل كل نشر
 ```
@@ -50,6 +52,15 @@ src/views/        الشاشات
 - كل جهاز له معرّف سري محلي يُخزَّن في السيرفر مُجزّأً (sha256)، فلا يعلّم الجزء «تم» أو يتركه إلا صاحبه.
 - منشئ الختمة يحصل على مفتاح إدارة للحذف. عند اكتمال الثلاثين جزءًا تبدأ دورة جديدة تلقائيًا.
 - كود قاعدة البيانات: `supabase/migrations/20261111_group_khatma.sql`. الرابط والمفتاح العام في `src/features/group.js`.
+
+## الإشعارات (الأذان والورد)
+- الاشتراك يُحفظ عبر الدالتين `push_save` / `push_delete` (الموقع مقرّب لـ ٢ رقم عشري ≈ ١ كم).
+- `pg_cron` يستدعي الدالة الطرفية `supabase/functions/push-tick` كل ٥ دقائق؛ تحسب المواقيت بمكتبة adhan وترسل بـ web-push.
+- مفاتيح VAPID ومفتاح التشغيل محفوظة في Supabase Vault (`vapid_public`, `vapid_private`, `push_tick_key`)، والمفتاح العام نسخة منه في `src/features/push.js`.
+- الكود: `supabase/migrations/20261111_push.sql`.
+
+## الإحصائيات
+عدّاد يومي مجمّع لكل ميزة (`daily_stats` عبر `stat_hit`)، بلا معرّفات، يرسله كل جهاز مرة في اليوم على الأكثر، ويمكن إيقافه من الإعدادات. للاطلاع: `select * from daily_stats order by day desc;` في محرر SQL.
 
 ## إضافة كروم (`extension/`)
 آية اليوم، وبحث سريع، واختصارات للتطبيق، وكلمة `quran` في شريط العنوان (مثال: `quran 2:255` أو `quran الكهف`).
