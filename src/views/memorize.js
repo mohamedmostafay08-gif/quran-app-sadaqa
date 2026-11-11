@@ -3,7 +3,7 @@ import { h, icon, ar } from '../lib/dom.js';
 import { getSurahs, getSurahMeta, getSurahText } from '../data.js';
 import * as srs from '../features/srs.js';
 import { player } from '../audio/player.js';
-import { mount, topbar, toast, empty } from '../ui.js';
+import { mount, topbar, toast, empty, sheet } from '../ui.js';
 import { navigate } from '../router.js';
 import { stripDiacritics } from '../lib/arabic.js';
 
@@ -64,9 +64,13 @@ export async function renderMemorize(_p, query, isStale) {
         return h('li',
           h('div', h('strong', `سورة ${m.nameAr}`), h('span.muted', `${ar(x.count)} من ${ar(m.ayahCount)} آية، ${ar(x.mature)} راسخة${x.due ? `، ${ar(x.due)} مستحقة` : ''}`),
             h('div.bar.thin', h('span', { style: { width: `${(x.count / m.ayahCount) * 100}%` } }))),
-          h('button.icon-btn', { type: 'button', 'aria-label': `حذف سورة ${m.nameAr} من المحفوظات`, onclick: async (e) => {
-            if (!confirm(`حذف سورة ${m.nameAr} من جدول المراجعة؟`)) return;
-            await srs.removeSurah(x.surah); e.currentTarget.closest('li').remove(); toast('تم الحذف');
+          h('button.icon-btn', { type: 'button', 'aria-label': `حذف سورة ${m.nameAr} من المحفوظات`, onclick: (e) => {
+            const li = e.currentTarget.closest('li');
+            sheet({ title: `حذف سورة ${m.nameAr} من المراجعة؟`, content: (close) => h('div',
+              h('p', `ستُحذف ${ar(x.count)} آية من جدول المراجعة مع تقدمك فيها.`),
+              h('div.btn-row',
+                h('button.btn.danger', { type: 'button', onclick: async () => { await srs.removeSurah(x.surah); li.remove(); close(); toast('تم الحذف'); } }, icon('trash'), 'حذف'),
+                h('button.btn.ghost', { type: 'button', onclick: () => close() }, 'تراجع'))) });
           } }, icon('trash')),
         );
       })),
