@@ -106,10 +106,12 @@ export function mountPlayerBar() {
   });
 
   let shownAyah = null;
+  let fellBackShown = false;
   async function showAyah(st) {
     const key = `${st.surah}:${st.ayah}`;
     if (key === shownAyah) return;
     shownAyah = key;
+    if (st.ayah == null) { fpAyah.replaceChildren(h('div.fp-untimed', h('p', `سورة ${getSurahMeta(st.surah).nameAr}`), h('small', 'تلاوة مجوّدة متصلة للسورة كاملة — هذا المصحف بلا توقيت للآيات، فلا تُظلَّل الآية المقروءة.'))); return; }
     if (st.ayah === 0) { fpAyah.replaceChildren(h('p', getSurahMeta(st.surah).basmala || 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ')); return; }
     const text = (await getSurahText(st.surah))[st.ayah - 1];
     if (shownAyah !== key) return;
@@ -123,7 +125,9 @@ export function mountPlayerBar() {
     mini.classList.toggle('show', visible);
     if (!visible) { closeFull(); return; }
     const m = getSurahMeta(st.surah);
-    const where = st.ayah === 0 ? 'البسملة' : 'الآية ' + ar(st.ayah);
+    const where = st.ayah == null ? 'السورة كاملة' : st.ayah === 0 ? 'البسملة' : 'الآية ' + ar(st.ayah);
+    if (st.fellBack && !fellBackShown) { fellBackShown = true; toast(`التكرار يحتاج توقيت الآيات، فاستخدمنا صوت ${getReciter(st.reciter)?.nameAr || ''}`); }
+    if (!st.fellBack) fellBackShown = false;
     const rid = st.compare ? st.compare.list[st.compare.idx] : st.reciter;
     const sl = sleepState();
     const recName = getReciter(rid)?.nameAr || '';
@@ -139,7 +143,7 @@ export function mountPlayerBar() {
     fpPlay.replaceChildren(playIcon());
     fpPlay.setAttribute('aria-label', playing ? 'إيقاف مؤقت' : 'تشغيل');
     fpTitle.textContent = `سورة ${m.nameAr}`;
-    fpSub.textContent = st.error ? st.error : `${where} من ${ar(m.ayahCount)}`;
+    fpSub.textContent = st.error ? st.error : st.ayah == null ? `${ar(m.ayahCount)} آية` : `${where} من ${ar(m.ayahCount)}`;
     recBtn.replaceChildren(icon('user'), h('span', recName));
     goBtn.href = `#/surah/${st.surah}/${st.ayah || 1}`;
     rateBtn.replaceChildren(icon('speed'), h('span', `${ar(rateFor(rid))}×`));
@@ -172,7 +176,7 @@ export function reciterSheet() {
   const item = (r) => h('li', h('button.choice', {
     type: 'button', 'aria-pressed': String(r.id === current),
     onclick: () => { player.setReciter(r.id); closeFn(); },
-  }, h('span', h('strong', r.nameAr), h('small', r.style === 'مرتل' ? 'مرتّل' : r.style)), r.id === current ? icon('check') : null));
+  }, h('span', h('strong', r.nameAr), h('small', (r.style === 'مرتل' ? 'مرتّل' : r.style) + (r.untimed ? ' · بدون تظليل الآيات' : ''))), r.id === current ? icon('check') : null));
   const tabs = h('div.seg', { role: 'tablist', 'aria-label': 'نوع التلاوة' }, STYLES.map(([v, label]) => {
     const n = all.filter((r) => r.style === v).length;
     return h('button', {

@@ -24,7 +24,7 @@ export function updateMediaSession(st) {
   if (!st.surah) { ms.metadata = null; ms.playbackState = 'none'; return; }
   const m = getSurahMeta(st.surah);
   const reciter = rec?.getReciter(st.compare ? st.compare.list[st.compare.idx] : st.reciter);
-  const title = st.ayah === 0 ? `سورة ${m.nameAr} – البسملة` : `سورة ${m.nameAr} – الآية ${st.ayah}`;
+  const title = st.ayah == null ? `سورة ${m.nameAr}` : st.ayah === 0 ? `سورة ${m.nameAr} – البسملة` : `سورة ${m.nameAr} – الآية ${st.ayah}`;
   if (typeof MediaMetadata !== 'undefined' && (!ms.metadata || ms.metadata.title !== title)) {
     ms.metadata = new MediaMetadata({
       title,

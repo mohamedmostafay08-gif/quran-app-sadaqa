@@ -21,6 +21,10 @@ export async function loadReciters() {
 }
 export const getReciters = () => reciters;
 export const getReciter = (id) => reciters.find((r) => r.id === id) || reciters[0];
+/** قراء بلا توقيت آيات (تلاوة متصلة بلا تظليل ولا قفز داخل السورة) */
+export const isUntimed = (id) => !!getReciter(id)?.untimed;
+/** أقرب قارئ له توقيت (للتكرار والحفظ والمقارنة) */
+export const timedFallback = (id) => (isUntimed(id) ? (reciters.find((r) => !r.untimed && r.featured) || reciters[0]).id : id);
 
 export function surahUrl(reciterId, s) {
   const r = getReciter(reciterId);
@@ -115,7 +119,10 @@ async function load(s, a) {
     timings = null;
     st.status = 'loading';
     emit();
-    try {
+    if (isUntimed(reciterId)) {
+      loadedKey = key;
+      audio.src = surahUrl(reciterId, s);
+    } else try {
       const t = await getTimings(reciterId, s);
       if (my !== loadSeq) return;
       timings = t;
@@ -123,12 +130,16 @@ async function load(s, a) {
       if (my !== loadSeq) return;
       return fail(navigator.onLine ? 'تعذر تحميل توقيت الآيات' : null);
     }
-    loadedKey = key;
-    audio.src = surahUrl(reciterId, s);
+    if (!isUntimed(reciterId)) {
+      loadedKey = key;
+      audio.src = surahUrl(reciterId, s);
+    }
   }
+  st.untimed = !timings;
+  if (st.untimed) { st.ayah = null; emit(); }
   audio.playbackRate = rateFor(reciterId);
   audio.volume = sleepFade;
-  await seek(resumeAt != null ? resumeAt : startOf(a));
+  await seek(resumeAt != null ? resumeAt : timings ? startOf(a) : 0);
   resumeAt = null;
   if (my !== loadSeq) return;
   try {
@@ -217,7 +228,15 @@ audio.addEventListener('error', () => {
 audio.addEventListener('ended', () => {
   if (!st.surah || switching) return;
   const last = getSurahMeta(st.surah).ayahCount;
-  if (boundary(last)) return;
+  if (!timings) {
+    // بلا توقيت: حدود النطاق على مستوى السورة
+    const r = st.range;
+    if (r && st.surah >= r.to.surah) {
+      if (r.loop) { st.loops++; load(r.from.surah, 0); return; }
+      st.completed = { ...r, at: Date.now() };
+      st.status = 'idle'; emit(); return;
+    }
+  } else if (boundary(last)) return;
   const inRange = st.range && (st.surah < st.range.to.surah);
   if (st.surah < 114 && (settings.get('autoNext') || inRange) && !st.only) {
     st.repeatLeft = st.range?.times || settings.get('repeat');
@@ -261,6 +280,9 @@ export const player = {
   playFrom(s, a, opts = {}) {
     resumeAt = null;
     st.reciter = settings.get('reciter');
+    // تكرار آية أو نطاق داخل سورة يحتاج توقيت الآيات
+    st.fellBack = false;
+    if ((opts.only || opts.range) && isUntimed(st.reciter)) { st.reciter = timedFallback(st.reciter); st.fellBack = true; }
     st.only = !!opts.only;
     st.compare = null;
     st.range = opts.range || null;
@@ -277,7 +299,7 @@ export const player = {
     st.only = false;
     st.range = null;
     st.repeatLeft = 1;
-    st.compare = { list, idx: 0 };
+    st.compare = { list: list.map(timedFallback), idx: 0 };
     load(s, a);
   },
   pause() { audio.pause(); },
@@ -309,6 +331,7 @@ export const player = {
     emit();
   },
   next() {
+    if (st.surah && !timings && audio.getAttribute('src')) { if (st.surah < 114) load(st.surah + 1, 0); return; }
     if (!st.surah || !timings) return;
     st.repeatLeft = st.range?.times || settings.get('repeat');
     const count = getSurahMeta(st.surah).ayahCount;
@@ -316,6 +339,10 @@ export const player = {
     else if (st.surah < 114) load(st.surah + 1, needsBasmala(st.surah + 1) ? 0 : 1);
   },
   prev() {
+    if (st.surah && !timings && audio.getAttribute('src')) {
+      if (audio.currentTime > 5 || st.surah === 1) audio.currentTime = 0; else load(st.surah - 1, 0);
+      return;
+    }
     if (!st.surah || !timings) return;
     st.repeatLeft = st.range?.times || settings.get('repeat');
     const a = st.ayah || 0;
@@ -327,7 +354,7 @@ export const player = {
   },
   setReciter(id) {
     settings.set('reciter', id);
-    if (st.surah && st.status !== 'idle') { st.reciter = id; load(st.surah, st.ayah); }
+    if (st.surah && st.status !== 'idle') { st.reciter = id; load(st.surah, st.ayah ?? (needsBasmala(st.surah) ? 0 : 1)); }
   },
   /** لمؤقت النوم: 0..1 */
   setFade(v) { sleepFade = v; audio.volume = v; },

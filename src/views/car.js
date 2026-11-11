@@ -25,7 +25,7 @@ export function renderCar() {
     if (st.surah) {
       const m = getSurahMeta(st.surah);
       title.textContent = `سورة ${m.nameAr}`;
-      sub.textContent = `${st.ayah === 0 ? 'البسملة' : 'الآية ' + ar(st.ayah)}، ${getReciter(st.reciter)?.nameAr || ''}`;
+      sub.textContent = `${st.ayah == null ? 'السورة كاملة' : st.ayah === 0 ? 'البسملة' : 'الآية ' + ar(st.ayah)}، ${getReciter(st.reciter)?.nameAr || ''}`;
     } else {
       title.textContent = 'وضع السيارة';
       sub.textContent = 'اضغط تشغيل للمتابعة من آخر موضع';

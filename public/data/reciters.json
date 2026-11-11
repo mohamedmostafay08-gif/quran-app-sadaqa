@@ -708,5 +708,29 @@
   "server": "https://download.quranicaudio.com/qdc/khalil_al_husary/muallim/",
   "pad": false,
   "featured": true
+ },
+ {
+  "id": "m10912",
+  "nameAr": "محمد الطبلاوي",
+  "style": "مجوّد",
+  "server": "https://cdn.mp3quran.net/audio/muhammad-tablawi/r2/",
+  "untimed": true,
+  "featured": false
+ },
+ {
+  "id": "m113",
+  "nameAr": "محمد صديق المنشاوي",
+  "style": "مجوّد",
+  "server": "https://cdn.mp3quran.net/audio/muhammad-minshawi/r2/",
+  "untimed": true,
+  "featured": false
+ },
+ {
+  "id": "m325",
+  "nameAr": "صابر عبدالحكم",
+  "style": "مجوّد",
+  "server": "https://cdn.mp3quran.net/audio/saber-abdulhakam/r5/",
+  "untimed": true,
+  "featured": false
  }
 ]

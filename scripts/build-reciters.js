@@ -90,6 +90,17 @@ async function main() {
     }
     else console.warn('✗ بدون توقيت:', x.nameAr);
   }
+  // مصاحف مجوّدة مشهورة بلا توقيت آيات في أي مصدر: تُشغَّل متصلة للسورة كاملة بلا تظليل
+  const servers = new Set(final.map((r) => r.server.replace(/^https?:\/\/[^/]+/, '')));
+  for (const r of reciters) for (const m of r.moshaf) {
+    if (!/حفص عن عاصم/.test(m.name) || !/مجود/.test(m.name) || +m.surah_total !== 114) continue;
+    const srv = m.server.replace(/\/?$/, '/');
+    if (servers.has(srv.replace(/^https?:\/\/[^/]+/, ''))) continue;
+    const head = await fetch(srv + '001.mp3', { method: 'HEAD' }).catch(() => null);
+    if (!head?.ok) { console.warn('✗ بدون صوت:', r.name, srv); continue; }
+    final.push({ id: 'm' + m.id, nameAr: r.name.replace(/^شيخ /, ''), style: 'مجوّد', server: srv, untimed: true, featured: false });
+    servers.add(srv.replace(/^https?:\/\/[^/]+/, ''));
+  }
   fs.writeFileSync(OUT, JSON.stringify(final, null, 1));
   console.log(`✓ ${final.length} قارئ (${final.filter((r) => r.featured).length} من الأشهر)`);
 }

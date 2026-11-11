@@ -167,3 +167,5 @@ body:has(.mini-player.show) .install-banner { bottom: calc(var(--tabbar-h) + var
 .sheet { z-index: 61; }
 .toast { z-index: 70; }
 .backup-sum { margin: 6px 0; padding-inline-start: 20px; line-height: 1.9; }
+.fp-untimed { display: grid; gap: 10px; }
+.fp-untimed small { font-family: var(--font-ui, inherit); font-size: 14px; line-height: 1.9; color: var(--text-2); }
