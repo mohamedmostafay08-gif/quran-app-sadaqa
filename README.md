@@ -19,6 +19,7 @@ node scripts/build-extra.js    # الصرف والجذور، التفسير ال
 node scripts/build-reciters.js # قائمة القراء من mp3quran (التي لها توقيت آيات لكل السور)
 node scripts/build-mushaf.js   # وضع الصفحات: نص مجمع الملك فهد مرتبًا بالصفحة والسطر (604 × 15)
 node scripts/build-adhkar.js   # الأذكار من حصن المسلم (hisnmuslim.com)
+node scripts/build-seo.js      # صفحات ثابتة للسور (sura/) وsitemap.xml لمحركات البحث (SITE_URL لتغيير الرابط)
 node scripts/stamp-sw.js       # تحديث قائمة الكاش ورقم الإصدار في sw.js — شغّله قبل كل نشر
 ```
 

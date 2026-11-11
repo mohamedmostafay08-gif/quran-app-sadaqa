@@ -160,3 +160,4 @@ body:has(.mini-player.show) .install-banner { bottom: calc(var(--tabbar-h) + var
 .ib-steps li { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; line-height: 1.9; }
 .ib-n { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-weight: 700; }
 .ib-ico, .ib-steps svg { width: 22px; height: 22px; vertical-align: middle; color: var(--accent); display: inline-block; }
+.home-foot { text-align: center; margin: 22px 0 6px; font-size: 13px; } .home-foot a { color: var(--accent); }

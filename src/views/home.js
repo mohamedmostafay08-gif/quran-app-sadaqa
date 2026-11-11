@@ -65,6 +65,7 @@ export function renderHome() {
     quick,
     tabs,
     listWrap,
+    h('p.home-foot', h('a', { href: 'sura/' }, 'السور مكتوبة كاملة (صفحات للقراءة والمشاركة)')),
   );
   renderList();
   mount(el);

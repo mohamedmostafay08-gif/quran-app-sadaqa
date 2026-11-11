@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '27f4c54a0e';
+const VERSION = 'f1c6c920f3';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -377,10 +377,22 @@ self.addEventListener('fetch', (event) => {
 
   // التنقل: index.html من الكاش (التطبيق يعمل بدون نت)
   if (req.mode === 'navigate') {
-    event.respondWith((async () => {
-      const cache = await caches.open(APP_CACHE);
-      return (await cache.match('index.html')) || (await cache.match('./')) || fetch(req);
-    })().catch(() => fetch(req)));
+    const scope = new URL(self.registration.scope);
+    const isShell = url.pathname === scope.pathname || url.pathname === scope.pathname + 'index.html';
+    if (isShell) {
+      // واجهة التطبيق: من الكاش (يعمل بدون إنترنت)
+      event.respondWith((async () => {
+        const cache = await caches.open(APP_CACHE);
+        return (await cache.match('index.html')) || (await cache.match('./')) || fetch(req);
+      })().catch(() => fetch(req)));
+    } else {
+      // صفحات السور الثابتة وغيرها: الشبكة أولًا ثم الكاش
+      event.respondWith((async () => {
+        const cache = await caches.open('pages-v1');
+        try { const res = await fetch(req); if (res.ok) cache.put(req, res.clone()); return res; }
+        catch { return (await cache.match(req)) || Response.error(); }
+      })());
+    }
     return;
   }
 

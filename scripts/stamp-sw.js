@@ -11,7 +11,7 @@ const crypto = require('crypto');
 
 const ROOT = path.resolve(__dirname, '..');
 const INCLUDE = ['index.html', 'manifest.webmanifest', 'src', 'public'];
-const SKIP = [/\.DS_Store$/, /^public\/screenshots\//];
+const SKIP = [/\.DS_Store$/, /^public\/screenshots\//, /^public\/og\.png$/];
 
 function walk(rel) {
   const abs = path.join(ROOT, rel);
