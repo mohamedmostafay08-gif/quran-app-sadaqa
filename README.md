@@ -51,6 +51,12 @@ src/views/        الشاشات
 - منشئ الختمة يحصل على مفتاح إدارة للحذف. عند اكتمال الثلاثين جزءًا تبدأ دورة جديدة تلقائيًا.
 - كود قاعدة البيانات: `supabase/migrations/20261111_group_khatma.sql`. الرابط والمفتاح العام في `src/features/group.js`.
 
+## إضافة كروم (`extension/`)
+آية اليوم، وبحث سريع، واختصارات للتطبيق، وكلمة `quran` في شريط العنوان (مثال: `quran 2:255` أو `quran الكهف`).
+- التجربة محليًا: `chrome://extensions` ← تفعيل «وضع المطوّر» ← «تحميل إضافة غير مضغوطة» ← اختر مجلد `extension`.
+- النشر: اضغط المجلد إلى zip وارفعه في [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole) (رسوم تسجيل لمرة واحدة).
+- الإضافة لا تجمع أي بيانات ولا تطلب أي صلاحيات.
+
 ## النشر
 أي استضافة ملفات ثابتة (Cloudflare Pages أو GitHub Pages أو Netlify). المجلد الجذر هو مجلد النشر، ولا يحتاج خطوة build.
 شغّل `node scripts/stamp-sw.js` قبل كل نشر حتى يتحدث الكاش عند المستخدمين.

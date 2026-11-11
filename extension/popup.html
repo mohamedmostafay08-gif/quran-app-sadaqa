@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>رتّل</title>
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="top">
+    <img src="icons/icon-48.png" alt="" width="32" height="32">
+    <div><strong>رتّل</strong><small>القرآن الكريم</small></div>
+    <span id="hijri" class="hijri"></span>
+  </header>
+  <section class="aotd">
+    <h1>آية اليوم</h1>
+    <p id="ayah" class="ayah" lang="ar">…</p>
+    <p id="ref" class="ref"></p>
+    <div class="row">
+      <button id="open" class="btn" type="button">اقرأ واستمع في رتّل</button>
+      <button id="copy" class="btn ghost" type="button">نسخ</button>
+    </div>
+  </section>
+  <form id="search" class="search" role="search">
+    <input id="q" type="search" placeholder="اسم سورة، أو ٢:٢٥٥، أو كلمات للبحث" aria-label="بحث في القرآن" autocomplete="off">
+    <button class="btn" type="submit">بحث</button>
+  </form>
+  <nav class="links">
+    <a data-path="#/">المصحف</a>
+    <a data-path="#/prayer">مواقيت الصلاة</a>
+    <a data-path="#/prayer?tab=adhkar">الأذكار</a>
+    <a data-path="#/khatma">الختمة</a>
+  </nav>
+  <p class="tip">نصيحة: اكتب <kbd>quran</kbd> ثم مسافة في شريط العنوان، وبعدها اسم سورة أو رقم آية.</p>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
