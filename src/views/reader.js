@@ -10,6 +10,7 @@ import { getTajweed, getWords, getTafsir, getTranslation, getTranslations, isWor
 import { navigate } from '../router.js';
 import { shareCardSheet } from '../features/shareCard.js';
 import { shareAudioSheet } from '../features/shareAudio.js';
+import { track } from '../features/stats.js';
 import { setupImmersive, gestureHintOnce } from '../features/immersive.js';
 
 export async function renderReader(params, _q, isStale) {
@@ -26,6 +27,7 @@ export async function renderReader(params, _q, isStale) {
     transId ? getTranslations().catch(() => []) : [],
   ]);
   const transInfo = trans && transList.find((t) => t.id === transId);
+  if (trans) track('translation');
   if (isStale()) return;
   const wordTap = settings.get('wordTap');
 
@@ -391,6 +393,7 @@ async function wordSheet(n, a, w, el) {
 
 async function tafsirSheet(n, a) {
   const meta = getSurahMeta(n);
+  track('tafsir');
   let which = settings.get('tafsir') in TAFSIRS ? settings.get('tafsir') : 'muyassar';
   const body = h('div.tafsir-body', { 'aria-live': 'polite' });
   const draw = async () => {

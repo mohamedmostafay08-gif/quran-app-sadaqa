@@ -6,6 +6,7 @@ import * as settings from '../state.js';
 import { getReciter, getTimings, surahUrl, timedFallback } from '../audio/player.js';
 import { getSurahMeta } from '../data.js';
 import { AUDIO_CACHE } from '../offline/storage.js';
+import { track } from './stats.js';
 
 const PAD = 0.25; // ثانية قبل وبعد الآية
 
@@ -56,6 +57,7 @@ export function shareAudioSheet(s, a) {
   const ref = `سورة ${meta.nameAr}، الآية ${ar(a)}`;
   const body = h('div.share-audio', h('div.spinner', { 'aria-label': 'جارٍ تجهيز المقطع' }), h('p.muted', 'جارٍ تجهيز المقطع…'));
   sheet({ title: 'مقطع صوتي من الآية', content: () => body });
+  track('share_audio');
   ayahClip(s, a).then(({ file, reciter, fellBack, seconds }) => {
     const url = URL.createObjectURL(file);
     const text = `${ref} — بصوت ${reciter.nameAr}\nمن تطبيق «رتّل»: ${location.origin}${location.pathname}#/surah/${s}/${a}`;

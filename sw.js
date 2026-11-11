@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = 'b82e5e492b';
+const VERSION = '04bba3b08b';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -33,6 +33,7 @@ const ASSETS = [
   'src/features/shareAudio.js',
   'src/features/shareCard.js',
   'src/features/srs.js',
+  'src/features/stats.js',
   'src/lib/arabic.js',
   'src/lib/dom.js',
   'src/main.js',

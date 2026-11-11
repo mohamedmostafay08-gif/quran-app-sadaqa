@@ -19,7 +19,8 @@ import { renderMushaf } from './views/mushaf.js';
 import { renderWelcome } from './views/welcome.js';
 import { renderPrayer, renderAdhkarChapter } from './views/prayer.js';
 import { renderGroups, renderGroup } from './views/group.js';
-import { initInstall } from './features/install.js';
+import { initInstall, isStandalone } from './features/install.js';
+import { track } from './features/stats.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
@@ -65,6 +66,9 @@ async function boot() {
   initAutoDownload();
   initKhatmaAutoRecord();
   initInstall();
+  track(isStandalone() ? 'open_installed' : 'open');
+  player.subscribe((st) => { if (st.status === 'playing') track('listen'); });
+  const ROUTE_EVENT = { surah: 'read', page: 'pages', prayer: 'prayer', group: 'group', memorize: 'memorize' };
 
   start((m) => {
     // أي انتقال يغلق الأوراق السفلية المفتوحة (مثل زر الرجوع في الموبايل)
@@ -76,6 +80,7 @@ async function boot() {
       else a.removeAttribute('aria-current');
     }
     document.body.dataset.route = base.slice(1) || 'home';
+    if (ROUTE_EVENT[base.slice(1)]) track(ROUTE_EVENT[base.slice(1)]);
   });
 }
 

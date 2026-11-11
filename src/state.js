@@ -29,6 +29,7 @@ export const DEFAULTS = {
   myGroups: [],           // الختمات الجماعية على هذا الجهاز
   groupName: '',          // الاسم الظاهر في الختمة الجماعية
   lastBackupAt: null,     // آخر نسخة احتياطية
+  stats: true,            // إحصائيات مجهولة مجمّعة (عدد يومي فقط)
 };
 
 const state = { ...DEFAULTS };
