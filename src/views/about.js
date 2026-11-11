@@ -3,7 +3,7 @@ import { h } from '../lib/dom.js';
 import { getNotice } from '../data.js';
 import { mount, topbar } from '../ui.js';
 
-export const APP_VERSION = '0.3.0';
+export const APP_VERSION = '1.0.0';
 
 export function renderAbout() {
   const n = getNotice() || {};
@@ -23,6 +23,12 @@ export function renderAbout() {
           n.sha256 ? h('code.hash', { dir: 'ltr' }, `sha256: ${n.sha256}`) : null),
         h('dt', 'بيانات الأجزاء والصفحات'),
         h('dd', link('https://tanzil.net/docs/quran_metadata', 'Tanzil Quran Metadata'), ' — ترقيم مصحف المدينة (٦٠٤ صفحات).'),
+        h('dt', 'الصرف والجذور'),
+        h('dd', link('https://corpus.quran.com', 'Quranic Arabic Corpus'), ' v0.4 (رخصة GNU GPL) بنسخة ', link('https://github.com/mustafa0x/quran-morphology', 'quran-morphology'), ' المصححة.'),
+        h('dt', 'التفسير الميسر'),
+        h('dd', 'مجمع الملك فهد لطباعة المصحف الشريف، عبر ', link('https://quran.com', 'Quran.com'), '.'),
+        h('dt', 'أحكام التجويد ومعاني الكلمات (إنجليزي)'),
+        h('dd', link('https://quran.com', 'Quran.com'), ' API — مواضع الأحكام تُنقل على نص Tanzil بالمحاذاة دون تغيير أي حرف.'),
         h('dt', 'التلاوات'),
         h('dd', link('https://everyayah.com', 'EveryAyah.com'), ' — ملفات صوتية آية آية.'),
         h('dt', 'أسماء السور بالإنجليزية'),

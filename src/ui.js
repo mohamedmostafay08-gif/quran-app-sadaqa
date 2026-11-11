@@ -28,17 +28,29 @@ export function toast(msg, ms = 2200) {
   toastTimer = setTimeout(() => t.classList.remove('show'), ms);
 }
 
+const openSheets = new Set();
+/** يغلق كل الأوراق فورًا (عند الانتقال بين الشاشات) */
+export function closeAllSheets() {
+  for (const s of [...openSheets]) s.close(true);
+}
+
 /** ورقة سفلية (Bottom sheet) قابلة للوصول */
 export function sheet({ title, content, onClose }) {
   const root = document.getElementById('sheet-root');
   const prevFocus = document.activeElement;
-  const close = () => {
+  let closed = false;
+  const close = (immediate) => {
+    if (closed) return;
+    closed = true;
+    openSheets.delete(api);
     panel.classList.remove('open');
     scrim.classList.remove('open');
     document.removeEventListener('keydown', onKey);
-    setTimeout(() => { wrap.remove(); prevFocus?.focus?.({ preventScroll: true }); }, 200);
+    if (immediate === true) wrap.remove();
+    else setTimeout(() => { wrap.remove(); prevFocus?.focus?.({ preventScroll: true }); }, 200);
     onClose?.();
   };
+  const api = { close };
   const onKey = (e) => {
     if (e.key === 'Escape') close();
     if (e.key === 'Tab') {
@@ -49,10 +61,10 @@ export function sheet({ title, content, onClose }) {
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
   };
-  const scrim = h('div.scrim', { onclick: close });
+  const scrim = h('div.scrim', { onclick: () => close() });
   const panel = h('div.sheet', { role: 'dialog', 'aria-modal': 'true', 'aria-label': title || 'قائمة' },
     h('div.sheet-handle', { 'aria-hidden': 'true' }),
-    title ? h('div.sheet-head', h('h2', title), h('button.icon-btn', { onclick: close, 'aria-label': 'إغلاق' }, icon('close'))) : null,
+    title ? h('div.sheet-head', h('h2', title), h('button.icon-btn', { onclick: () => close(), 'aria-label': 'إغلاق' }, icon('close'))) : null,
     h('div.sheet-body', typeof content === 'function' ? content(close) : content),
   );
   const wrap = h('div', scrim, panel);
@@ -63,7 +75,9 @@ export function sheet({ title, content, onClose }) {
     panel.classList.add('open');
     (panel.querySelector('.sheet-body button, .sheet-body input, .sheet-body a') || panel).focus?.({ preventScroll: true });
   });
-  return { close, panel };
+  openSheets.add(api);
+  api.panel = panel;
+  return api;
 }
 
 /** صف إجراء داخل الورقة */

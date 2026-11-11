@@ -14,8 +14,9 @@ import { renderDownloads } from './views/downloads.js';
 import { renderAbout } from './views/about.js';
 import { renderKhatma, initKhatmaAutoRecord } from './views/khatma.js';
 import { renderMemorize } from './views/memorize.js';
+import { renderCar } from './views/car.js';
 import { h } from './lib/dom.js';
-import { toast } from './ui.js';
+import { toast, closeAllSheets } from './ui.js';
 
 const TAB_FOR = { '/': 'home', '/surah': 'home', '/search': 'search', '/bookmarks': 'bookmarks', '/downloads': 'downloads', '/settings': 'settings', '/about': 'settings', '/khatma': 'home', '/memorize': 'home', '/car': 'home' };
 
@@ -42,12 +43,15 @@ async function boot() {
   route('/about', renderAbout);
   route('/khatma', renderKhatma);
   route('/memorize', renderMemorize);
+  route('/car', renderCar);
 
   mountPlayerBar();
   initAutoDownload();
   initKhatmaAutoRecord();
 
   start((m) => {
+    // أي انتقال يغلق الأوراق السفلية المفتوحة (مثل زر الرجوع في الموبايل)
+    closeAllSheets();
     const base = '/' + (m.path.split('/')[1] || '');
     const tab = TAB_FOR[base] || 'home';
     for (const a of document.querySelectorAll('.tabbar a')) {

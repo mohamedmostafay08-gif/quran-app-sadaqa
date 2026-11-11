@@ -8,6 +8,7 @@ import { mount, topbar, sheet, actionRow, toast } from '../ui.js';
 import { player, getReciters } from '../audio/player.js';
 import { getTajweed, getWords, getTafsir, isWordToken, TAJWEED_RULES } from '../features/extra.js';
 import { navigate } from '../router.js';
+import { shareCardSheet } from '../features/shareCard.js';
 
 export async function renderReader(params, _q, isStale) {
   const n = Math.min(114, Math.max(1, parseInt(params.surah, 10) || 1));
@@ -186,7 +187,8 @@ async function ayahSheet(n, a, el) {
           catch { toast('تعذر النسخ'); }
           close();
         }),
-        navigator.share ? actionRow('share', 'مشاركة', async () => {
+        actionRow('share', 'بطاقة مشاركة (صورة)', () => { close(); shareCardSheet(n, a); }),
+        navigator.share ? actionRow('share', 'مشاركة كنص', async () => {
           close();
           try { await navigator.share({ text: shareText }); } catch { /* أُلغيت */ }
         }) : null,
