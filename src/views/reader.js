@@ -14,6 +14,7 @@ import { setupImmersive, gestureHintOnce } from '../features/immersive.js';
 export async function renderReader(params, _q, isStale) {
   const n = Math.min(114, Math.max(1, parseInt(params.surah, 10) || 1));
   const target = params.ayah ? parseInt(params.ayah, 10) : null;
+  if (settings.get('readMode') === 'pages') { navigate(`/page/${pageOf(n, target || 1)}`, { replace: true }); return; }
   const meta = getSurahMeta(n);
   const useTajweed = settings.get('tajweed');
   const [ayahs, marked, noted, tajweed] = await Promise.all([
@@ -25,13 +26,16 @@ export async function renderReader(params, _q, isStale) {
 
   const layout = settings.get('layout');
   const showMarks = settings.get('showPageMarks');
+  let currentTop = target || 1;
   const sub = h('p.reader-sub', `الجزء ${ar(juzOf(n, 1))}، صفحة ${ar(pageOf(n, 1))}`);
 
   const playBtn = h('button.icon-btn.play-main', { type: 'button', 'aria-label': 'تشغيل السورة', onclick: () => togglePlaySurah(n) }, icon('play'));
   const head = topbar({
     title: `سورة ${meta.nameAr}`,
     back: '#/',
-    actions: [playBtn, h('button.icon-btn', { type: 'button', 'aria-label': 'خيارات العرض', onclick: () => displaySheet() }, icon('more'))],
+    actions: [playBtn,
+      h('button.icon-btn', { type: 'button', 'aria-label': 'عرض الصفحات (مصحف المدينة)', title: 'عرض الصفحات', onclick: () => { settings.set('readMode', 'pages'); navigate(`/page/${pageOf(n, currentTop || 1)}`); } }, icon('pages')),
+      h('button.icon-btn', { type: 'button', 'aria-label': 'خيارات العرض', onclick: () => displaySheet() }, icon('more'))],
   });
   head.querySelector('.topbar-title').append(sub);
 
@@ -127,6 +131,7 @@ export async function renderReader(params, _q, isStale) {
     }
     if (!visible.size) return;
     const top = Math.min(...visible);
+    currentTop = top;
     sub.textContent = `الجزء ${ar(juzOf(n, top))}، صفحة ${ar(pageOf(n, top))}`;
     save(top);
   }, { rootMargin: '-15% 0px -55% 0px' });
@@ -175,7 +180,7 @@ function togglePlaySurah(n) {
   player.playFrom(n, from);
 }
 
-async function ayahSheet(n, a, el) {
+export async function ayahSheet(n, a, el) {
   const meta = getSurahMeta(n);
   const text = (await getSurahText(n))[a - 1];
   const isMarked = await bookmarks.has(n, a);
@@ -195,7 +200,7 @@ async function ayahSheet(n, a, el) {
         actionRow('info', 'معاني الكلمات وجذورها', () => { close(); wordsListSheet(n, a); }),
         actionRow(isMarked ? 'bookmarkFill' : 'bookmark', isMarked ? 'إزالة العلامة' : 'إضافة علامة', async () => {
           const on = await bookmarks.toggle(n, a);
-          el.className = ayahClass(on, await notes.get(n, a));
+          if (el) el.className = ayahClass(on, await notes.get(n, a));
           toast(on ? 'تمت إضافة العلامة' : 'تمت إزالة العلامة');
           close();
         }),
@@ -296,13 +301,13 @@ async function noteSheet(n, a, el) {
       h('div.btn-row',
         h('button.btn', { type: 'button', onclick: async () => {
           const saved = await notes.save(n, a, { text: ta.value, color });
-          el.className = ayahClass(await bookmarks.has(n, a), saved);
+          if (el) el.className = ayahClass(await bookmarks.has(n, a), saved);
           toast(saved ? 'تم الحفظ' : 'تم الحذف');
           close();
         } }, icon('check'), 'حفظ'),
         current ? h('button.btn.ghost.danger', { type: 'button', onclick: async () => {
           await notes.save(n, a, {});
-          el.className = ayahClass(await bookmarks.has(n, a), null);
+          if (el) el.className = ayahClass(await bookmarks.has(n, a), null);
           toast('تم الحذف'); close();
         } }, icon('trash'), 'حذف') : null,
       ),

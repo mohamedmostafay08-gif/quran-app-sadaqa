@@ -17,6 +17,7 @@ python3 -m http.server 8080
 node scripts/build-data.js     # نص المصحف + الأجزاء/الصفحات مع فحوصات آلية (Node 18+)
 node scripts/build-extra.js    # الصرف والجذور، التفسير الميسر، التجويد، معاني الكلمات
 node scripts/build-reciters.js # قائمة القراء من mp3quran (التي لها توقيت آيات لكل السور)
+node scripts/build-mushaf.js   # وضع الصفحات: نص مجمع الملك فهد مرتبًا بالصفحة والسطر (604 × 15)
 node scripts/stamp-sw.js       # تحديث قائمة الكاش ورقم الإصدار في sw.js — شغّله قبل كل نشر
 ```
 
@@ -50,6 +51,7 @@ src/views/        الشاشات
 - الصرف والجذور: [Quranic Arabic Corpus](https://corpus.quran.com) v0.4, GNU GPL (نسخة [mustafa0x/quran-morphology](https://github.com/mustafa0x/quran-morphology)).
 - التفسير الميسر، ومواضع التجويد، ومعاني الكلمات بالإنجليزية: [Quran.com API](https://quran.com).
 - الصوت: [mp3quran.net](https://mp3quran.net) — تلاوة السورة كاملة متصلة مع توقيت كل آية (ayat_timing) لتظليلها. يُحمَّل وقت التشغيل ولا يُضمَّن في المشروع.
+- وضع الصفحات: نص مجمع الملك فهد (text_qpc_hafs) وترتيب الأسطر من Quran.com، بخط KFGQPC Uthmanic Script HAFS.
 - الخطوط: Amiri Quran و Noto Kufi Arabic، رخصة SIL OFL.
 
 > بما أن بيانات الصرف مرخصة GPL، فالأسلم نشر كود المشروع برخصة متوافقة (GPL-3.0).

@@ -21,6 +21,8 @@ export function renderAbout() {
         h('dt', 'نص المصحف'),
         h('dd', link('https://tanzil.net', 'مشروع تنزيل (Tanzil)'), ` — النص العثماني ${n.version ? `(${n.version})` : ''}، رخصة المشاع الإبداعي CC BY 3.0. النص منقول حرفيًا دون أي تعديل.`,
           n.sha256 ? h('code.hash', { dir: 'ltr' }, `sha256: ${n.sha256}`) : null),
+        h('dt', 'وضع الصفحات (مصحف المدينة)'),
+        h('dd', 'نص مجمع الملك فهد لطباعة المصحف الشريف وخط KFGQPC Uthmanic Script HAFS، مع ترتيب الأسطر والصفحات، عبر ', link('https://quran.com', 'Quran.com'), '.'),
         h('dt', 'بيانات الأجزاء والصفحات'),
         h('dd', link('https://tanzil.net/docs/quran_metadata', 'Tanzil Quran Metadata'), ' — ترقيم مصحف المدينة (٦٠٤ صفحات).'),
         h('dt', 'الصرف والجذور'),

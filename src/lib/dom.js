@@ -45,6 +45,8 @@ const ICONS = {
   back: '<path d="m9 6 6 6-6 6"/>',
   forward: '<path d="m15 6-6 6 6 6"/>',
   down: '<path d="m6 9 6 6 6-6"/>',
+  pages: '<path d="M12 6c-2-1.5-5-2-8-1.5v14c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-14c-3-.5-6 0-8 1.5zM12 6v14"/>',
+  scroll: '<path d="M7 4h10M7 9h10M7 14h10M7 19h6"/>',
   play: '<path d="M7 4.5v15l12-7.5z" fill="currentColor" stroke="none"/>',
   pause: '<path d="M7 4h3.5v16H7zM13.5 4H17v16h-3.5z" fill="currentColor" stroke="none"/>',
   next: '<path d="M17 5v14M6 6l9 6-9 6z" fill="currentColor"/>',

@@ -15,10 +15,11 @@ import { renderAbout } from './views/about.js';
 import { renderKhatma, initKhatmaAutoRecord } from './views/khatma.js';
 import { renderMemorize } from './views/memorize.js';
 import { renderCar } from './views/car.js';
+import { renderMushaf } from './views/mushaf.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
-const TAB_FOR = { '/': 'home', '/surah': 'home', '/search': 'search', '/bookmarks': 'bookmarks', '/downloads': 'downloads', '/settings': 'settings', '/about': 'settings', '/khatma': 'home', '/memorize': 'home', '/car': 'home' };
+const TAB_FOR = { '/': 'home', '/surah': 'home', '/search': 'search', '/bookmarks': 'bookmarks', '/downloads': 'downloads', '/settings': 'settings', '/about': 'settings', '/khatma': 'home', '/memorize': 'home', '/car': 'home', '/page': 'home' };
 
 async function boot() {
   const status = document.querySelector('.boot p');
@@ -44,6 +45,7 @@ async function boot() {
   route('/khatma', renderKhatma);
   route('/memorize', renderMemorize);
   route('/car', renderCar);
+  route('/page/:page', renderMushaf);
 
   mountPlayerBar();
   initAutoDownload();
