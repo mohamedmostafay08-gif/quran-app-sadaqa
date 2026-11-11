@@ -1,0 +1,107 @@
+/* ===================================================================
+   الشاشات الكبيرة (لابتوب وكمبيوتر): شريط تنقل جانبي، ومحتوى أعرض في المنتصف،
+   وشبكات متعددة الأعمدة بدل القوائم الطويلة. يُحمَّل بعد كل الأنماط.
+   =================================================================== */
+@media (min-width: 1024px) {
+  :root { --rail: 104px; --maxw: 1180px; --gutter: 40px; --tabbar-h: 0px; }
+
+  /* ===== شريط التنقل الجانبي ===== */
+  body { padding-inline-start: var(--rail); }
+  .tabbar {
+    inset: 0 0 0 auto; inset-inline-start: 0; inset-inline-end: auto;
+    width: var(--rail); height: 100%; padding: 22px 10px;
+    flex-direction: column; justify-content: flex-start; align-items: stretch; gap: 6px;
+    border: 0; border-inline-end: 3px double var(--gold-line); border-top: 0;
+    transform: none !important;
+  }
+  .tabbar::before {
+    content: 'رتّل'; display: block; text-align: center; margin: 0 0 18px;
+    font-family: var(--font-quran); font-size: 34px; line-height: 1.6; color: var(--accent);
+  }
+  .tabbar a { flex: none; max-width: none; height: 72px; margin: 0; gap: 6px; border-radius: 14px; font-size: 12px; }
+  .tabbar a:hover { background: var(--surface-2); color: var(--text); }
+  .tabbar a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+  .tabbar a[aria-current="page"]::before { display: none; }
+
+  /* ===== المحتوى في المنتصف ===== */
+  .main { max-width: var(--maxw); padding-inline: var(--gutter); padding-bottom: 40px; }
+  body:has(.mini-player.show) .main { padding-bottom: calc(var(--mini-h) + 56px); }
+  .topbar { min-height: 72px; }
+  .topbar-title h1 { font-size: 22px; }
+
+  /* ===== المشغّل الصغير: شريط عائم في المنتصف ===== */
+  .mini-player {
+    bottom: 18px; left: auto; right: auto;
+    inset-inline-start: calc(var(--rail) + max(var(--gutter), (100vw - var(--rail) - var(--maxw)) / 2 + var(--gutter)));
+    width: min(calc(var(--maxw) - var(--gutter) * 2), calc(100vw - var(--rail) - var(--gutter) * 2));
+    border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 10px 30px rgba(40, 30, 10, .14); padding: 0 12px;
+  }
+  .mini-player > * { max-width: none; }
+  .mp-progress { inset: 0 16px auto 16px; }
+  .toast { bottom: calc(var(--mini-h) + 40px); }
+  .install-banner, body:has(.mini-player.show) .install-banner { bottom: calc(var(--mini-h) + 36px); left: calc(50% - var(--rail) / 2); }
+  body.immersive .tabbar, body.immersive .mini-player.show { transform: none; }
+  body.immersive .topbar { transform: none; }
+
+  /* الأوراق والمشغّل الكامل: نافذة في منتصف الشاشة */
+  .sheet { inset-inline-start: var(--rail); }
+  .full-player { left: var(--rail); bottom: 24px; border-radius: 22px; border-bottom: 1px solid var(--border); height: min(86vh, 760px); }
+
+  /* ===== الرئيسية ===== */
+  .home { display: grid; grid-template-columns: 1fr; gap: 0; }
+  .hero { padding-top: 32px; }
+  .home .quick-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .home .quick { align-items: flex-start; }
+  .home .quick-row > * { margin: 0; }
+  .surah-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .surah-list > li { margin: 0; }
+  .surah-list .surah-item { height: 100%; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+
+  /* ===== القراءة: سطر مريح للعين في المنتصف ===== */
+  .reader .ayahs, .reader .surah-head, .reader .surah-nav { max-width: 920px; margin-inline: auto; }
+  .ayahs { font-size: calc(1.75rem * var(--quran-scale)); }
+  .m-page { max-width: 760px; }
+  .m-nav { max-width: 760px; }
+  /* صفحتان متقابلتان: الحجم يتبع ارتفاع الشاشة حتى تظهر الصفحة كاملة */
+  .m-wrap.m-spread { gap: 0; padding-top: 18px; align-items: stretch; }
+  .m-spread .m-page { width: min(600px, calc((100dvh - 250px) / 1.62)); max-width: none; flex: none; padding-bottom: 10px; display: flex; flex-direction: column; }
+  .m-spread .m-page:first-child { border-radius: 0 22px 22px 0; border-inline-end-width: 0; box-shadow: inset 18px 0 22px -18px rgba(60, 45, 15, .28), 0 12px 30px rgba(20, 45, 38, .08); }
+  .m-spread .m-page:last-child:not(:first-child) { border-radius: 22px 0 0 22px; box-shadow: inset -18px 0 22px -18px rgba(60, 45, 15, .28), 0 12px 30px rgba(20, 45, 38, .08); border-inline-start: 1px solid var(--gold-soft); }
+  .m-folio { margin-top: auto; padding-top: 6px; text-align: center; font-family: var(--font-ui, inherit); font-size: 13px; color: var(--gold); }
+  .m-spread ~ .m-nav { max-width: 520px; }
+
+  /* ===== الإذاعة ===== */
+  .radio-search { max-width: 560px; }
+  .radio-list { grid-template-columns: repeat(3, 1fr); }
+  .radio-list.featured { grid-template-columns: repeat(3, 1fr); }
+
+  /* ===== الإعدادات والصفحات ذات الكروت: عمودان ===== */
+  .settings, .about, .downloads { column-count: 2; column-gap: 20px; }
+  .settings > *, .about > *, .downloads > * { break-inside: avoid; }
+  .settings > .topbar, .about > .topbar, .downloads > .topbar { column-span: all; margin-bottom: 16px; }
+  .settings > section, .about > section, .downloads > section { margin: 0 0 16px; }
+
+  /* ===== قوائم في شبكة ===== */
+  .bm-list, .dl-list, .mem-list, .past-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .adk-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .adk-items { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; align-items: start; }
+  .results { max-width: 920px; margin-inline: auto; }
+  .search-page .search-bar { max-width: 920px; margin-inline: auto; }
+
+  /* ===== الصلاة: المواقيت بجوار الإعدادات ===== */
+  .pr-tabs { max-width: 560px; margin-inline: auto; }
+  .pr-panel > div { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .pr-panel > div > .pr-hero { align-self: stretch; display: grid; place-content: center; }
+  .pr-panel > div > * { margin: 0; }
+  .pr-panel > div > :first-child { grid-column: 1 / -1; }
+
+  /* ===== الترحيب والختمة الجماعية والحفظ ===== */
+  .welcome { max-width: 760px; margin-inline: auto; }
+  .wl-reciters { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .khatma, .memorize, .groups { max-width: 920px; margin-inline: auto; }
+}
+
+@media (min-width: 1440px) {
+  :root { --maxw: 1320px; }
+  .surah-list, .radio-list { grid-template-columns: repeat(4, 1fr); }
+}

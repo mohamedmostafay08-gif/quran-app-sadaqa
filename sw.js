@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = 'd38038783e';
+const VERSION = '45843d5ed8';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -47,6 +47,7 @@ const ASSETS = [
   'src/styles/base.css',
   'src/styles/classic.css',
   'src/styles/components.css',
+  'src/styles/desktop.css',
   'src/styles/features.css',
   'src/styles/themes.css',
   'src/ui.js',
