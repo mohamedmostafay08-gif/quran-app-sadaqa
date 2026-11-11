@@ -162,3 +162,6 @@ body[data-route="welcome"] .main { padding-bottom: 120px; }
 .ayahs .trans { margin: -4px 0 18px; padding: 0 4px 14px; border-bottom: 1px dashed var(--border); font-family: var(--font-ui, system-ui), sans-serif; font-size: calc(15px * var(--quran-scale, 1)); line-height: 1.75; color: var(--text-2); text-align: start; }
 .ayahs .trans[dir="rtl"] { font-family: 'Noto Nastaliq Urdu', var(--font-ui, system-ui), serif; }
 .tafsir-body { min-height: 120px; margin-top: 12px; }
+.share-audio { display: grid; gap: 12px; padding-bottom: 6px; }
+.share-audio .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.share-audio .btn-row > * { flex: 1; }

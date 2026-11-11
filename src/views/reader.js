@@ -9,6 +9,7 @@ import { player, getReciters } from '../audio/player.js';
 import { getTajweed, getWords, getTafsir, getTranslation, getTranslations, isWordToken, TAJWEED_RULES, TAFSIRS } from '../features/extra.js';
 import { navigate } from '../router.js';
 import { shareCardSheet } from '../features/shareCard.js';
+import { shareAudioSheet } from '../features/shareAudio.js';
 import { setupImmersive, gestureHintOnce } from '../features/immersive.js';
 
 export async function renderReader(params, _q, isStale) {
@@ -217,6 +218,7 @@ export async function ayahSheet(n, a, el) {
           close();
         }),
         actionRow('share', 'بطاقة مشاركة (صورة)', () => { close(); shareCardSheet(n, a); }),
+        actionRow('play', 'مقطع صوتي من الآية (مشاركة/تنزيل)', () => { close(); shareAudioSheet(n, a); }),
         navigator.share ? actionRow('share', 'مشاركة كنص', async () => {
           close();
           try { await navigator.share({ text: shareText }); } catch { /* أُلغيت */ }
