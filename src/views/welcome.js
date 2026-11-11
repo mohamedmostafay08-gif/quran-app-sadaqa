@@ -1,5 +1,6 @@
 // شاشة الترحيب: ثلاث خطوات (القارئ، شكل القراءة، الختمة)
 import { h, icon, ar } from '../lib/dom.js';
+import { normalize } from '../lib/arabic.js';
 import * as settings from '../state.js';
 import { player, getReciters } from '../audio/player.js';
 import * as K from '../features/khatma.js';
@@ -29,33 +30,47 @@ export function renderWelcome() {
   }
 
   function stepReciter() {
-    let style = 'مرتل';
+    let style = getReciters().find((r) => r.id === settings.get('reciter'))?.style || 'مرتل';
     const list = h('ul.wl-reciters');
+    const input = h('input.note-input.wl-search', { type: 'search', placeholder: 'ابحث باسم القارئ…', 'aria-label': 'ابحث باسم القارئ' });
     const select = (r, li) => {
       settings.set('reciter', r.id);
-      for (const x of list.children) { x.classList.toggle('sel', x === li); x.firstChild.setAttribute('aria-pressed', String(x === li)); }
+      for (const x of list.querySelectorAll('li')) { x.classList.toggle('sel', x === li); x.firstChild.setAttribute('aria-pressed', String(x === li)); }
+    };
+    const row = (r, current) => {
+      const li = h('li', { class: r.id === current ? 'sel' : '' },
+        h('button.wl-pick', { type: 'button', 'aria-pressed': String(r.id === current), onclick: () => select(r, li) }, h('strong', r.nameAr), h('small', r.style === 'مرتل' ? 'مرتّل' : r.style)),
+        h('button.icon-btn', { type: 'button', 'aria-label': `استمع إلى ${r.nameAr}`, onclick: () => { select(r, li); player.playFrom(1, 2, { only: true, times: 1 }); } }, icon('play')),
+      );
+      return li;
     };
     const draw = () => {
       const current = settings.get('reciter');
-      const pool = getReciters().filter((r) => r.style === style);
-      const shown = (pool.filter((r) => r.featured).length ? pool.filter((r) => r.featured) : pool).slice(0, 12);
-      list.replaceChildren(...shown.map((r) => {
-        const li = h('li', { class: r.id === current ? 'sel' : '' },
-          h('button.wl-pick', { type: 'button', 'aria-pressed': String(r.id === current), onclick: () => select(r, li) }, h('strong', r.nameAr), h('small', r.style === 'مرتل' ? 'مرتّل' : r.style)),
-          h('button.icon-btn', { type: 'button', 'aria-label': `استمع إلى ${r.nameAr}`, onclick: () => { select(r, li); player.playFrom(1, 2, { only: true, times: 1 }); } }, icon('play')),
-        );
-        return li;
-      }));
+      const q = normalize(input.value);
+      // كل القراء: الأشهر أولًا ثم الباقي بالترتيب الأبجدي؛ البحث يشمل كل الأنواع
+      const pool = getReciters().filter((r) => (q ? normalize(r.nameAr).includes(q) : r.style === style));
+      const featured = pool.filter((r) => r.featured), rest = pool.filter((r) => !r.featured);
+      tabs.hidden = !!q;
+      list.replaceChildren(...[
+        featured.length && rest.length ? h('li.wl-label', 'الأشهر') : null,
+        ...featured.map((r) => row(r, current)),
+        featured.length && rest.length ? h('li.wl-label', `باقي القراء (${ar(rest.length)})`) : null,
+        ...rest.map((r) => row(r, current)),
+        !pool.length ? h('li.wl-label', 'لا يوجد قارئ بهذا الاسم') : null,
+      ].filter(Boolean));
     };
-    const tabs = h('div.seg', { role: 'tablist' }, [['مرتل', 'مرتّل'], ['مجوّد', 'مجوّد'], ['معلّم', 'معلّم']].map(([v, label]) => h('button', {
+    const count = (v) => getReciters().filter((r) => r.style === v).length;
+    const tabs = h('div.seg', { role: 'tablist' }, [['مرتل', 'مرتّل'], ['مجوّد', 'مجوّد'], ['معلّم', 'معلّم']].filter(([v]) => count(v)).map(([v, label]) => h('button', {
       type: 'button', role: 'tab', 'aria-selected': String(v === style),
       onclick: (e) => { style = v; for (const b of tabs.children) b.setAttribute('aria-selected', String(b === e.currentTarget)); draw(); },
-    }, label)));
+    }, `${label} (${ar(count(v))})`)));
+    input.addEventListener('input', draw);
     draw();
     return h('section.wl-step',
       h('h1', { tabindex: '-1' }, 'اختر قارئك المفضل'),
-      h('p.muted', 'المرتّل للقراءة اليومية، والمجوّد بأداء المحافل، والمعلّم للتعلّم والحفظ. تقدر تسمع عينة وتغيّر القارئ في أي وقت.'),
+      h('p.muted', 'المرتّل للقراءة اليومية، والمجوّد بأداء المحافل، والمعلّم للتعلّم والحفظ. اضغط ▶ لتسمع عينة، وتقدر تغيّر القارئ في أي وقت.'),
       tabs,
+      input,
       list,
     );
   }

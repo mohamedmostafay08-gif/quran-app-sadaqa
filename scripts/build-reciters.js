@@ -65,8 +65,12 @@ async function main() {
   const ok = [];
   for (const r of out) {
     const res = await fetch(r.server + '001.mp3', { method: 'HEAD', redirect: 'follow' }).catch(() => null);
-    if (res && res.ok) ok.push(r);
-    else console.warn('✗ بدون صوت:', r.nameAr, r.server);
+    if (!res || !res.ok) { console.warn('✗ بدون صوت:', r.nameAr, r.server); continue; }
+    // التوقيت لازم يغطي كل آيات البقرة (أطول سورة) وإلا لا يمكن تظليل الآيات
+    const t2 = await getJSON(`${API}/ayat_timing?surah=2&read=${r.id}`).catch(() => []);
+    const ayahs = new Set((t2 || []).filter((x) => x.ayah >= 1).map((x) => x.ayah));
+    if (ayahs.size < 286) { console.warn('✗ توقيت ناقص:', r.nameAr, ayahs.size); continue; }
+    ok.push(r);
   }
   ok.sort((a, b) => {
     const fa = a.featured < 0 ? 999 : a.featured, fb = b.featured < 0 ? 999 : b.featured;
