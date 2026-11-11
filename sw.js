@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '1b27a41a9a';
+const VERSION = '075875b171';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -355,13 +355,13 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
 
   // الصوت
-  if ((url.hostname.endsWith('mp3quran.net') || url.hostname === 'everyayah.com') && url.pathname.endsWith('.mp3')) {
+  if ((url.hostname.endsWith('mp3quran.net') || url.hostname === 'download.quranicaudio.com' || url.hostname === 'everyayah.com') && url.pathname.endsWith('.mp3')) {
     event.respondWith(audioResponse(req));
     return;
   }
 
   // توقيت الآيات: كاش أولًا (صغير، يُحفظ عند أول تشغيل ليعمل التظليل بدون إنترنت)
-  if (url.hostname.endsWith('mp3quran.net') && url.pathname.includes('/ayat_timing')) {
+  if ((url.hostname.endsWith('mp3quran.net') && url.pathname.includes('/ayat_timing')) || (url.hostname === 'api.quran.com' && url.pathname.includes('/chapter_recitations/'))) {
     event.respondWith((async () => {
       const hit = await caches.match(req.url);
       if (hit) return hit;

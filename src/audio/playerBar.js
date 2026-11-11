@@ -156,33 +156,50 @@ export function mountPlayerBar() {
   render();
 }
 
+const STYLES = [
+  ['مرتل', 'مرتّل', 'التلاوة المعتادة بسرعة متوسطة، مناسبة للقراءة اليومية والختمة'],
+  ['مجوّد', 'مجوّد', 'تلاوة متأنية بأداء صوتي ومدود أطول، كتلاوات المحافل'],
+  ['معلّم', 'معلّم', 'المصحف المعلّم: تلاوة بطيئة واضحة مناسبة للتعلّم والحفظ'],
+];
+
 export function reciterSheet() {
   const current = settings.get('reciter');
   const all = getReciters();
+  let style = getReciter(current)?.style || 'مرتل';
   const input = h('input.note-input', { type: 'search', placeholder: 'ابحث باسم القارئ…', 'aria-label': 'ابحث باسم القارئ' });
+  const hint = h('p.muted.rs-hint');
   const list = h('div');
   let closeFn;
   const item = (r) => h('li', h('button.choice', {
     type: 'button', 'aria-pressed': String(r.id === current),
     onclick: () => { player.setReciter(r.id); closeFn(); },
-  }, h('span', h('strong', r.nameAr), h('small', r.style)), r.id === current ? icon('check') : null));
+  }, h('span', h('strong', r.nameAr), h('small', r.style === 'مرتل' ? 'مرتّل' : r.style)), r.id === current ? icon('check') : null));
+  const tabs = h('div.seg', { role: 'tablist', 'aria-label': 'نوع التلاوة' }, STYLES.map(([v, label]) => {
+    const n = all.filter((r) => r.style === v).length;
+    return h('button', {
+      type: 'button', role: 'tab', 'aria-selected': String(v === style), hidden: !n,
+      onclick: (e) => { style = v; for (const b of tabs.children) b.setAttribute('aria-selected', String(b === e.currentTarget)); draw(); },
+    }, `${label} (${ar(n)})`);
+  }));
   const draw = () => {
     const q = normalize(input.value);
-    const match = (r) => !q || normalize(r.nameAr).includes(q);
-    const featured = all.filter((r) => r.featured && match(r));
-    const others = all.filter((r) => !r.featured && match(r));
+    hint.textContent = q ? '' : STYLES.find(([v]) => v === style)[2];
+    const pool = q ? all.filter((r) => normalize(r.nameAr).includes(q)) : all.filter((r) => r.style === style);
+    const featured = q ? [] : pool.filter((r) => r.featured);
+    const others = q ? pool : pool.filter((r) => !r.featured);
+    tabs.hidden = !!q;
     list.replaceChildren(...[
       featured.length ? h('h3.list-label', 'الأشهر') : null,
       featured.length ? h('ul.choice-list', featured.map(item)) : null,
-      others.length ? h('h3.list-label', `كل القراء (${ar(others.length)})`) : null,
+      others.length && featured.length ? h('h3.list-label', `باقي القراء (${ar(others.length)})`) : null,
       others.length ? h('ul.choice-list', others.map(item)) : null,
-      !featured.length && !others.length ? h('p.muted', 'لا يوجد قارئ بهذا الاسم.') : null,
+      !pool.length ? h('p.muted', 'لا يوجد قارئ بهذا الاسم.') : null,
     ].filter(Boolean));
   };
   input.addEventListener('input', draw);
   draw();
   sheet({
     title: 'اختر القارئ',
-    content: (close) => { closeFn = close; return h('div', h('p.muted', 'التلاوة متصلة للسورة كاملة، مع تظليل الآية المقروءة.'), input, list); },
+    content: (close) => { closeFn = close; return h('div', tabs, hint, input, list); },
   });
 }

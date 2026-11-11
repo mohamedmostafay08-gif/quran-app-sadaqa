@@ -138,3 +138,4 @@ body.immersive .topbar { transform: translateY(calc(-100% - env(safe-area-inset-
 body.car-mode .mini-player { display: none; }
 .hero-date { margin: 12px 0 0; color: var(--accent); font-weight: 700; font-size: 14px; }
 .pr-pill { background: var(--surface); border: 1px solid var(--border); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.rs-hint { margin: 8px 2px; font-size: 12px; }

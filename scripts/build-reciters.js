@@ -31,6 +31,12 @@ async function getJSON(url) {
   }
 }
 
+// تلاوات من Quran.com (مصدر ثانٍ): المجوّد والمعلّم
+const QDC_EXTRA = [
+  { id: 'qdc8', nameAr: 'محمد صديق المنشاوي', style: 'مجوّد', qdc: 8 },
+  { id: 'qdc12', nameAr: 'محمود خليل الحصري', style: 'معلّم', qdc: 12 },
+];
+
 const keyOf = (url) => (url.match(/audio\/(.+?)\/?$/) || [])[1];
 
 async function main() {
@@ -45,7 +51,8 @@ async function main() {
     const info = moshafByKey.get(key);
     if (rd.soar_count !== 114) continue;
     if (!/حفص عن عاصم/.test(rd.rewaya || '') && !(info && /حفص عن عاصم/.test(info.moshaf))) continue;
-    const style = info ? (info.moshaf.split(' - ')[1] || 'مرتل').replace('المصحف ', '') : 'مرتل';
+    const raw = info ? (info.moshaf.split(' - ')[1] || 'مرتل') : 'مرتل';
+    const style = /مجود/.test(raw) ? 'مجوّد' : /معلم/.test(raw) ? 'معلّم' : 'مرتل';
     out.push({
       id: String(rd.id),
       nameAr: (info?.name || rd.name).replace(/^شيخ /, ''),
@@ -66,6 +73,19 @@ async function main() {
     return fa - fb || a.nameAr.localeCompare(b.nameAr, 'ar');
   });
   const final = ok.map(({ featured, ...r }) => ({ ...r, featured: featured >= 0 }));
+  // مصاحف من Quran.com لها توقيت آيات (غير متاحة بتوقيت في mp3quran)
+  for (const x of QDC_EXTRA) {
+    const t = await getJSON(`https://api.quran.com/api/v4/chapter_recitations/${x.qdc}/1?segments=true`);
+    const url = t.audio_file?.audio_url || '';
+    const file = url.split('/').pop();
+    const head = url ? await fetch(url, { method: 'HEAD' }).catch(() => null) : null;
+    if (!head?.ok) { console.warn('✗ ملف الصوت غير موجود:', x.nameAr, url); continue; }
+    if (t.audio_file?.timestamps?.length && /^0*1\.mp3$/.test(file)) {
+      // نمط اسم الملف: 001.mp3 أو 1.mp3
+      final.push({ ...x, source: 'qdc', server: url.slice(0, -file.length), pad: file === '001.mp3', featured: true });
+    }
+    else console.warn('✗ بدون توقيت:', x.nameAr);
+  }
   fs.writeFileSync(OUT, JSON.stringify(final, null, 1));
   console.log(`✓ ${final.length} قارئ (${final.filter((r) => r.featured).length} من الأشهر)`);
 }

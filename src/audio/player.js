@@ -1,10 +1,11 @@
-// محرك الصوت: تلاوة السورة كاملة (متصلة بدون فواصل) من mp3quran.net
+// محرك الصوت: تلاوة السورة كاملة (متصلة بدون فواصل) من mp3quran.net أو Quran.com (المجوّد والمعلّم)
 // مع توقيت كل آية لتظليل الآية المقروءة، والتكرار، والنطاقات، ومقارنة القراء — كلها بالقفز داخل نفس الملف.
 import * as settings from '../state.js';
 import { getSurahMeta } from '../data.js';
 import { setupMediaSession, updateMediaSession } from './mediaSession.js';
 
 const TIMING_API = 'https://www.mp3quran.net/api/v3/ayat_timing';
+const QDC_API = 'https://api.quran.com/api/v4/chapter_recitations';
 const pad = (n) => String(n).padStart(3, '0');
 export const DEFAULT_RECITER = '123'; // مشاري العفاسي
 
@@ -13,6 +14,7 @@ export async function loadReciters() {
   const res = await fetch(new URL('../../public/data/reciters.json', import.meta.url));
   reciters = await res.json();
   for (const r of reciters) r.style = r.style === 'المجود' ? 'مجوّد' : r.style;
+  // تصنيف: مرتل / مجوّد / معلّم
   // ترحيل إعداد القارئ القديم (معرّفات EveryAyah) إلى القائمة الجديدة
   if (!reciters.some((r) => r.id === settings.get('reciter'))) settings.set('reciter', DEFAULT_RECITER);
   return reciters;
@@ -20,8 +22,14 @@ export async function loadReciters() {
 export const getReciters = () => reciters;
 export const getReciter = (id) => reciters.find((r) => r.id === id) || reciters[0];
 
-export const surahUrl = (reciterId, s) => `${getReciter(reciterId).server}${pad(s)}.mp3`;
-export const timingUrl = (reciterId, s) => `${TIMING_API}?surah=${s}&read=${reciterId}`;
+export function surahUrl(reciterId, s) {
+  const r = getReciter(reciterId);
+  return `${r.server}${r.source === 'qdc' && !r.pad ? s : pad(s)}.mp3`;
+}
+export function timingUrl(reciterId, s) {
+  const r = getReciter(reciterId);
+  return r.source === 'qdc' ? `${QDC_API}/${r.qdc}/${s}?segments=true` : `${TIMING_API}?surah=${s}&read=${reciterId}`;
+}
 
 // ---- توقيتات الآيات ----
 const timingCache = new Map();
@@ -33,7 +41,14 @@ export async function getTimings(reciterId, s) {
   if (!res.ok) throw new Error('timing ' + res.status);
   const data = await res.json();
   const t = [];
-  for (const x of data) if (x.ayah >= 1) t[x.ayah] = [x.start_time / 1000, x.end_time / 1000];
+  if (getReciter(reciterId).source === 'qdc') {
+    for (const x of data.audio_file?.timestamps || []) {
+      const a = +x.verse_key.split(':')[1];
+      t[a] = [x.timestamp_from / 1000, x.timestamp_to / 1000];
+    }
+  } else {
+    for (const x of data) if (x.ayah >= 1) t[x.ayah] = [x.start_time / 1000, x.end_time / 1000];
+  }
   const count = getSurahMeta(s).ayahCount;
   for (let a = 1; a <= count; a++) if (!t[a]) throw new Error('timing incomplete');
   t[0] = [0, t[1][0]];

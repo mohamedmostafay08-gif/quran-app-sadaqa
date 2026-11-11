@@ -16,7 +16,7 @@
  {
   "id": "51",
   "nameAr": "عبدالباسط عبدالصمد",
-  "style": "المجود",
+  "style": "مجوّد",
   "server": "https://cdn.mp3quran.net/audio/abdulbasit-abdulsamad/r1/",
   "featured": true
  },
@@ -51,7 +51,7 @@
  {
   "id": "133",
   "nameAr": "ماهر المعيقلي",
-  "style": "المجود",
+  "style": "مجوّد",
   "server": "https://cdn.mp3quran.net/audio/maher-muaiqly/r3/",
   "featured": true
  },
@@ -163,14 +163,14 @@
  {
   "id": "122",
   "nameAr": "محمود علي البنا",
-  "style": "المجود",
+  "style": "مجوّد",
   "server": "https://cdn.mp3quran.net/audio/mahmoud-banna/r2/",
   "featured": true
  },
  {
   "id": "288",
   "nameAr": "مصطفى إسماعيل",
-  "style": "المجود",
+  "style": "مجوّد",
   "server": "https://cdn.mp3quran.net/audio/mustafa-ismail/r2/",
   "featured": true
  },
@@ -660,7 +660,7 @@
  {
   "id": "119",
   "nameAr": "محمود خليل الحصري",
-  "style": "المجود",
+  "style": "مجوّد",
   "server": "https://cdn.mp3quran.net/audio/mahmoud-husary/r2/",
   "featured": false
  },
@@ -688,7 +688,7 @@
  {
   "id": "273",
   "nameAr": "هيثم الدخين",
-  "style": "تلاوة مميزة",
+  "style": "مرتل",
   "server": "https://cdn.mp3quran.net/audio/haitham-dukhain/r1/",
   "featured": false
  },
@@ -705,5 +705,15 @@
   "style": "مرتل",
   "server": "https://cdn.mp3quran.net/audio/yousef-ahmad/r1/",
   "featured": false
+ },
+ {
+  "id": "qdc12",
+  "nameAr": "محمود خليل الحصري",
+  "style": "معلّم",
+  "qdc": 12,
+  "source": "qdc",
+  "server": "https://download.quranicaudio.com/qdc/khalil_al_husary/muallim/",
+  "pad": false,
+  "featured": true
  }
 ]

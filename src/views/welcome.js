@@ -29,24 +29,33 @@ export function renderWelcome() {
   }
 
   function stepReciter() {
-    const current = settings.get('reciter');
-    const list = h('ul.wl-reciters', getReciters().filter((r) => r.featured).slice(0, 12).map((r) => {
-      const li = h('li', { class: r.id === current ? 'sel' : '' },
-        h('button.wl-pick', { type: 'button', 'aria-pressed': String(r.id === current), onclick: () => {
-          settings.set('reciter', r.id);
-          for (const x of list.children) { x.classList.toggle('sel', x === li); x.firstChild.setAttribute('aria-pressed', String(x === li)); }
-        } }, h('strong', r.nameAr), h('small', r.style)),
-        h('button.icon-btn', { type: 'button', 'aria-label': `استمع إلى ${r.nameAr}`, onclick: () => {
-          settings.set('reciter', r.id);
-          for (const x of list.children) { x.classList.toggle('sel', x === li); x.firstChild.setAttribute('aria-pressed', String(x === li)); }
-          player.playFrom(1, 2, { only: true, times: 1 });
-        } }, icon('play')),
-      );
-      return li;
-    }));
+    let style = 'مرتل';
+    const list = h('ul.wl-reciters');
+    const select = (r, li) => {
+      settings.set('reciter', r.id);
+      for (const x of list.children) { x.classList.toggle('sel', x === li); x.firstChild.setAttribute('aria-pressed', String(x === li)); }
+    };
+    const draw = () => {
+      const current = settings.get('reciter');
+      const pool = getReciters().filter((r) => r.style === style);
+      const shown = (pool.filter((r) => r.featured).length ? pool.filter((r) => r.featured) : pool).slice(0, 12);
+      list.replaceChildren(...shown.map((r) => {
+        const li = h('li', { class: r.id === current ? 'sel' : '' },
+          h('button.wl-pick', { type: 'button', 'aria-pressed': String(r.id === current), onclick: () => select(r, li) }, h('strong', r.nameAr), h('small', r.style === 'مرتل' ? 'مرتّل' : r.style)),
+          h('button.icon-btn', { type: 'button', 'aria-label': `استمع إلى ${r.nameAr}`, onclick: () => { select(r, li); player.playFrom(1, 2, { only: true, times: 1 }); } }, icon('play')),
+        );
+        return li;
+      }));
+    };
+    const tabs = h('div.seg', { role: 'tablist' }, [['مرتل', 'مرتّل'], ['مجوّد', 'مجوّد'], ['معلّم', 'معلّم']].map(([v, label]) => h('button', {
+      type: 'button', role: 'tab', 'aria-selected': String(v === style),
+      onclick: (e) => { style = v; for (const b of tabs.children) b.setAttribute('aria-selected', String(b === e.currentTarget)); draw(); },
+    }, label)));
+    draw();
     return h('section.wl-step',
       h('h1', { tabindex: '-1' }, 'اختر قارئك المفضل'),
-      h('p.muted', 'تقدر تسمع عينة من كل قارئ، وتغيّره بعدين في أي وقت. التلاوة متصلة للسورة كاملة.'),
+      h('p.muted', 'المرتّل للقراءة اليومية، والمجوّد بأداء المحافل، والمعلّم للتعلّم والحفظ. تقدر تسمع عينة وتغيّر القارئ في أي وقت.'),
+      tabs,
       list,
     );
   }
