@@ -166,3 +166,4 @@ body:has(.mini-player.show) .install-banner { bottom: calc(var(--tabbar-h) + var
 .scrim { z-index: 60; }
 .sheet { z-index: 61; }
 .toast { z-index: 70; }
+.backup-sum { margin: 6px 0; padding-inline-start: 20px; line-height: 1.9; }

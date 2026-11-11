@@ -26,6 +26,7 @@ export const DEFAULTS = {
   deviceToken: null,      // معرّف سري للجهاز (الختمة الجماعية)
   myGroups: [],           // الختمات الجماعية على هذا الجهاز
   groupName: '',          // الاسم الظاهر في الختمة الجماعية
+  lastBackupAt: null,     // آخر نسخة احتياطية
 };
 
 const state = { ...DEFAULTS };

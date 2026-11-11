@@ -5,6 +5,9 @@ import { getReciter } from '../audio/player.js';
 import { reciterSheet } from '../audio/playerBar.js';
 import { mount, topbar } from '../ui.js';
 import { install, isStandalone } from '../features/install.js';
+import * as B from '../features/backup.js';
+import { download } from '../features/notes.js';
+import { sheet, toast } from '../ui.js';
 
 function seg(key, opts, after) {
   return h('div.seg', { role: 'radiogroup' }, opts.map(([v, label]) => h('button', {
@@ -56,6 +59,7 @@ export function renderSettings() {
       toggle('wifiOnly', 'التنزيل التلقائي على الواي فاي فقط', 'يعتمد على دعم المتصفح لمعرفة نوع الاتصال'),
       h('a.row-btn', { href: '#/downloads' }, h('span', h('strong', 'إدارة التنزيلات والمساحة')), icon('forward')),
     ),
+    backupCard(),
     !isStandalone() ? h('section.card',
       h('button.row-btn', { type: 'button', onclick: () => install() }, h('span', h('strong', 'تثبيت التطبيق على الشاشة الرئيسية'), h('small', 'يفتح كتطبيق ويعمل بدون إنترنت')), icon('download')),
     ) : null,
@@ -64,4 +68,56 @@ export function renderSettings() {
     ),
   ));
   return { cleanup: unsub };
+}
+
+function backupCard() {
+  const last = settings.get('lastBackupAt');
+  const fileIn = h('input', { type: 'file', accept: 'application/json,.json', hidden: true });
+  fileIn.addEventListener('change', async () => {
+    const f = fileIn.files[0];
+    fileIn.value = '';
+    if (!f) return;
+    let data;
+    try { data = B.parseBackup(await f.text()); } catch (e) { return toast(e.message); }
+    const n = B.summary(data);
+    sheet({ title: 'استعادة النسخة الاحتياطية', content: (close) => h('div',
+      h('p', `النسخة بتاريخ ${new Date(data.exportedAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })} فيها:`),
+      h('ul.backup-sum',
+        h('li', `${ar(n.bookmarks)} علامة`), h('li', `${ar(n.notes)} ملاحظة`), h('li', `${ar(n.memorize)} آية في جدول الحفظ`),
+        h('li', `${ar(n.khatma)} ختمة`), h('li', `${ar(n.groups)} ختمة جماعية`)),
+      h('p.small-note', 'هتتدمج مع بياناتك الحالية، والعناصر المتكررة هتاخد قيمتها من النسخة.'),
+      h('div.btn-row',
+        h('button.btn', { type: 'button', onclick: async () => {
+          try { await B.importBackup(data); close(); toast('تمت الاستعادة، جارٍ إعادة التحميل…'); setTimeout(() => location.reload(), 900); }
+          catch (e) { toast('تعذرت الاستعادة: ' + e.message); }
+        } }, icon('check'), 'استعادة'),
+        h('button.btn.ghost', { type: 'button', onclick: () => close() }, 'إلغاء')),
+    ) });
+  });
+  const exportIt = async (share) => {
+    const data = await B.exportBackup();
+    const text = JSON.stringify(data);
+    const name = B.backupFilename();
+    if (share) {
+      const file = new File([text], name, { type: 'application/json' });
+      if (navigator.canShare?.({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: 'نسخة احتياطية من رتّل' }); toast('تم'); dispatchEvent(new HashChangeEvent('hashchange')); return; }
+        catch (e) { if (e.name === 'AbortError') return; }
+      }
+    }
+    download(name, text, 'application/json');
+    toast('تم حفظ ملف النسخة الاحتياطية');
+    dispatchEvent(new HashChangeEvent('hashchange'));
+  };
+  return h('section.card',
+    h('h2', 'النسخة الاحتياطية'),
+    h('p.muted', 'علاماتك وملاحظاتك وختماتك وتقدّم الحفظ محفوظة على هذا الجهاز فقط. احفظ نسخة في ملف علشان ماتضيعش لو غيّرت الموبايل أو مسحت بيانات المتصفح.'),
+    h('p.small-note', last ? `آخر نسخة: ${new Date(last).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })}` : 'لم تحفظ أي نسخة احتياطية بعد.'),
+    h('div.btn-row',
+      h('button.btn', { type: 'button', onclick: () => exportIt(false) }, icon('download'), 'حفظ نسخة'),
+      navigator.canShare ? h('button.btn.ghost', { type: 'button', onclick: () => exportIt(true) }, icon('share'), 'إرسال النسخة') : null,
+      h('button.btn.ghost', { type: 'button', onclick: () => fileIn.click() }, 'استعادة من ملف'),
+      fileIn,
+    ),
+  );
 }

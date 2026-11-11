@@ -79,17 +79,33 @@ async function boot() {
   });
 }
 
+// نسخة جديدة فعّلت نفسها: نعرض زر «حدّث الآن» (لا نعيد التحميل تلقائيًا حتى لا نقطع القراءة أو التلاوة)
+if ('serviceWorker' in navigator) {
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) showUpdateBanner(); });
+}
+
 function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
   navigator.serviceWorker.register('sw.js').then((reg) => {
-    reg.addEventListener('updatefound', () => {
-      const w = reg.installing;
-      w?.addEventListener('statechange', () => {
-        if (w.state === 'installed' && navigator.serviceWorker.controller) toast('يوجد تحديث جديد — أعد فتح التطبيق لتطبيقه', 5000);
-      });
-    });
+    // فحص التحديثات عند العودة للتطبيق وكل ساعة
+    const check = () => reg.update().catch(() => {});
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });
+    setInterval(check, 3600000);
   }).catch((e) => console.warn('SW registration failed', e));
+}
+
+function showUpdateBanner() {
+  if (document.querySelector('.update-banner')) return;
+  const bar = h('div.install-banner.update-banner', { role: 'status' },
+    h('img', { src: 'public/icons/icon-192.png', alt: '', width: 40, height: 40 }),
+    h('div.ib-text', h('strong', 'نسخة جديدة من «رتّل» جاهزة'), h('small', 'حدّث علشان تاخد آخر التحسينات')),
+    h('button.btn.ib-go', { type: 'button', onclick: () => location.reload() }, 'حدّث الآن'),
+    h('button.icon-btn.ib-close', { type: 'button', 'aria-label': 'لاحقًا', onclick: () => bar.remove() }, '✕'),
+  );
+  document.body.append(bar);
+  requestAnimationFrame(() => bar.classList.add('show'));
 }
 
 addEventListener('online', () => toast('عاد الاتصال بالإنترنت'));

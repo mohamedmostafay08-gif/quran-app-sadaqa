@@ -7,6 +7,7 @@ import { reciterSheet } from '../audio/playerBar.js';
 import * as dl from '../offline/downloader.js';
 import { downloadsFor, estimate, isPersisted, requestPersist, deleteReciter } from '../offline/storage.js';
 import { mount, topbar, toast, sheet } from '../ui.js';
+import { extrasStatus, downloadExtras } from '../offline/extras.js';
 
 // تقدير حجم الصوت: ثوانٍ تقريبية لكل حرف × معدل البت
 const SEC_PER_LETTER = 0.2;
@@ -108,8 +109,36 @@ export async function renderDownloads(_p, _q, isStale) {
 
   const remaining = () => getSurahs().map((s) => s.id).filter((s) => done.get(s)?.status !== 'done');
 
+  // ---- بيانات التطبيق الإضافية (للاستخدام بدون إنترنت) ----
+  const exState = h('span.muted');
+  const exBar = h('div.bar.thin', h('span'));
+  const exBtn = h('button.btn', { type: 'button' }, icon('download'), 'نزّل كل البيانات');
+  const paintEx = (st) => {
+    const full = st.done >= st.total;
+    exState.textContent = full ? `كل البيانات منزّلة ✓ (${formatBytes(st.bytes)})` : `${ar(st.done)} من ${ar(st.total)} ملف، الحجم الكامل ≈ ${formatBytes(st.bytes)}`;
+    exBar.firstChild.style.width = `${(st.done / st.total) * 100}%`;
+    exBtn.hidden = full;
+  };
+  extrasStatus().then(paintEx).catch(() => { exState.textContent = 'غير متاح'; });
+  exBtn.onclick = async () => {
+    exBtn.disabled = true;
+    try {
+      const st = await downloadExtras((done, total) => paintEx({ done, total, bytes: 0 }));
+      paintEx({ ...st, bytes: (await extrasStatus()).bytes });
+      toast('تم تنزيل كل البيانات، التطبيق جاهز بدون إنترنت');
+    } catch (e) { toast(navigator.onLine ? e.message : 'تحتاج اتصالًا بالإنترنت للتنزيل'); }
+    exBtn.disabled = false;
+  };
+  const extrasCard = h('section.card',
+    h('h2', 'بيانات التطبيق للاستخدام بدون إنترنت'),
+    h('p.muted', 'معاني الكلمات والتفسير وصفحات المصحف والتجويد تتنزّل تلقائيًا أول ما تفتحها. لو هتستخدم التطبيق من غير نت، نزّلها كلها مرة واحدة.'),
+    exState, exBar,
+    h('div.btn-row', exBtn),
+  );
+
   mount(h('div.downloads',
     topbar({ title: 'التنزيلات' }),
+    extrasCard,
     h('section.card',
       h('button.row-btn', { type: 'button', onclick: () => reciterSheet() },
         h('span', h('strong', r.nameAr), h('small', `${r.style}، المصحف كاملًا ≈ ${formatBytes(totalEst)}`)), icon('forward')),
