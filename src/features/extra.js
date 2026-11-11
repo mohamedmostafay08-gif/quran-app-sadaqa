@@ -15,15 +15,24 @@ export async function getWords(s) {
   return data.map((ayah) => ayah && ayah.map(([root, lemma, p, x, gloss]) => ({ root, lemma, pos: labels[p], extra: labels[x], gloss })));
 }
 
-/** التفسير الميسر لآية (يتتبع الآيات المجمّعة) */
-export async function getTafsir(s, a) {
-  const arr = await load(`tafsir/${s}.json`);
+export const TAFSIRS = {
+  muyassar: { name: 'التفسير الميسر', dir: 'tafsir', source: 'التفسير الميسر — مجمع الملك فهد لطباعة المصحف الشريف.' },
+  saadi: { name: 'تفسير السعدي', dir: 'tafsir-saadi', source: 'تيسير الكريم الرحمن في تفسير كلام المنان — الشيخ عبدالرحمن السعدي، عبر Quran.com.' },
+};
+
+/** تفسير آية (يتتبع الآيات المجمّعة) */
+export async function getTafsir(s, a, which = 'muyassar') {
+  const arr = await load(`${(TAFSIRS[which] || TAFSIRS.muyassar).dir}/${s}.json`);
   const v = arr[a - 1];
   if (typeof v === 'number') return { text: arr[v - 1], groupFrom: v };
   return { text: v || '', groupFrom: null };
 }
 
 export const getTajweed = () => load('tajweed.json');
+/** قائمة ترجمات المعاني المتاحة */
+export const getTranslations = () => load('trans/index.json');
+/** ترجمة سورة: مصفوفة نصوص الآيات */
+export const getTranslation = (id, s) => load(`trans/${id}/${s}.json`);
 export const getRoots = () => load('roots.json');
 
 export const decodeLoc = (n) => ({ surah: Math.floor(n / 1e6), ayah: Math.floor((n % 1e6) / 1e3), word: n % 1e3 });

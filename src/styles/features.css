@@ -159,3 +159,6 @@ body[data-route="welcome"] .main { padding-bottom: 120px; }
 .m-end.bookmarked { color: var(--accent); text-shadow: 0 0 1px var(--accent); }
 .m-end.has-note { text-decoration: underline wavy var(--accent) 1px; text-underline-offset: 6px; }
 .m-w.hl-yellow, .m-w.hl-green, .m-w.hl-blue, .m-w.hl-pink { border-radius: 4px; }
+.ayahs .trans { margin: -4px 0 18px; padding: 0 4px 14px; border-bottom: 1px dashed var(--border); font-family: var(--font-ui, system-ui), sans-serif; font-size: calc(15px * var(--quran-scale, 1)); line-height: 1.75; color: var(--text-2); text-align: start; }
+.ayahs .trans[dir="rtl"] { font-family: 'Noto Nastaliq Urdu', var(--font-ui, system-ui), serif; }
+.tafsir-body { min-height: 120px; margin-top: 12px; }

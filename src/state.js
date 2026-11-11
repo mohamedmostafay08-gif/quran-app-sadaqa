@@ -17,6 +17,8 @@ export const DEFAULTS = {
   showPageMarks: true,
   tajweed: false,         // ألوان التجويد
   wordTap: false,         // الضغط على الكلمة يعرض معناها
+  tafsir: 'muyassar',     // muyassar | saadi
+  translation: null,      // معرّف ترجمة المعاني تحت كل آية (en.sahih ...) أو null
   keepAwake: true,        // منع انطفاء الشاشة أثناء القراءة
   lastRead: null,         // { surah, ayah, at }
   lastListen: null,       // { surah, ayah, reciter, time, at } لاستكمال الاستماع

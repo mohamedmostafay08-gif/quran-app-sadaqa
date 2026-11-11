@@ -8,6 +8,7 @@ import { install, isStandalone } from '../features/install.js';
 import * as B from '../features/backup.js';
 import { download } from '../features/notes.js';
 import { sheet, toast } from '../ui.js';
+import { translationPicker } from './reader.js';
 
 function seg(key, opts, after) {
   return h('div.seg', { role: 'radiogroup' }, opts.map(([v, label]) => h('button', {
@@ -40,6 +41,8 @@ export function renderSettings() {
       h('label.field', h('span', 'حجم خط المصحف'), h('div.range-row', h('span.small', 'أ'), scale, h('span.large', 'أ'))),
       h('p.preview', { lang: 'ar' }, 'ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ'),
       h('div.field', h('span', 'طريقة العرض'), seg('layout', [['flow', 'متصل كالمصحف'], ['list', 'آية في سطر']])),
+      translationPicker(),
+      h('div.field', h('span', 'التفسير المفضّل'), seg('tafsir', [['muyassar', 'الميسر'], ['saadi', 'السعدي']])),
       toggle('showPageMarks', 'علامات الصفحات والأجزاء', 'تظهر بداية كل صفحة وجزء وربع حزب داخل السورة'),
       toggle('keepAwake', 'إبقاء الشاشة مضاءة أثناء القراءة'),
     ),

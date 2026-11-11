@@ -6,7 +6,7 @@ import * as bookmarks from '../features/bookmarks.js';
 import * as notes from '../features/notes.js';
 import { mount, topbar, sheet, actionRow, toast } from '../ui.js';
 import { player, getReciters } from '../audio/player.js';
-import { getTajweed, getWords, getTafsir, isWordToken, TAJWEED_RULES } from '../features/extra.js';
+import { getTajweed, getWords, getTafsir, getTranslation, getTranslations, isWordToken, TAJWEED_RULES, TAFSIRS } from '../features/extra.js';
 import { navigate } from '../router.js';
 import { shareCardSheet } from '../features/shareCard.js';
 import { setupImmersive, gestureHintOnce } from '../features/immersive.js';
@@ -17,14 +17,19 @@ export async function renderReader(params, _q, isStale) {
   if (settings.get('readMode') === 'pages') { navigate(`/page/${pageOf(n, target || 1)}`, { replace: true }); return; }
   const meta = getSurahMeta(n);
   const useTajweed = settings.get('tajweed');
-  const [ayahs, marked, noted, tajweed] = await Promise.all([
+  const transId = settings.get('translation');
+  const [ayahs, marked, noted, tajweed, trans, transList] = await Promise.all([
     getSurahText(n), bookmarks.bookmarkedIn(n), notes.inSurah(n),
     useTajweed ? getTajweed().catch(() => null) : null,
+    transId ? getTranslation(transId, n).catch(() => null) : null,
+    transId ? getTranslations().catch(() => []) : [],
   ]);
+  const transInfo = trans && transList.find((t) => t.id === transId);
   if (isStale()) return;
   const wordTap = settings.get('wordTap');
 
-  const layout = settings.get('layout');
+  // مع الترجمة: كل آية في سطر وتحتها معناها
+  const layout = trans ? 'list' : settings.get('layout');
   const showMarks = settings.get('showPageMarks');
   let currentTop = target || 1;
   const sub = h('p.reader-sub', `الجزء ${ar(juzOf(n, 1))}، صفحة ${ar(pageOf(n, 1))}`);
@@ -62,6 +67,7 @@ export async function renderReader(params, _q, isStale) {
     // آخر كلمة + رقم الآية في وحدة لا تنكسر (حتى لا يسقط الرقم وحده في سطر)
     parts, h('span.ayah-end', last, '\u00A0', h('span.ayah-num', { 'aria-hidden': 'true' }, '\u06DD' + ar(a)), h('span.sr-only', ` (الآية ${a})`)));
     frag.append(span);
+    if (trans) frag.append(h('p.trans', { lang: transInfo?.lang, dir: transInfo?.dir || 'ltr' }, trans[i]));
     if (layout === 'flow') frag.append(' ');
   });
   container.append(frag);
@@ -196,7 +202,7 @@ export async function ayahSheet(n, a, el) {
         actionRow('play', 'تشغيل من هذه الآية', () => { close(); player.playFrom(n, a); }),
         actionRow('repeat', 'تكرار هذه الآية', () => { close(); player.playFrom(n, a, { only: true }); }),
         actionRow('compare', 'مقارنة القراء', () => { close(); compareSheet(n, a); }),
-        actionRow('book', 'التفسير الميسر', () => { close(); tafsirSheet(n, a); }),
+        actionRow('book', 'التفسير (الميسر والسعدي)', () => { close(); tafsirSheet(n, a); }),
         actionRow('info', 'معاني الكلمات وجذورها', () => { close(); wordsListSheet(n, a); }),
         actionRow(isMarked ? 'bookmarkFill' : 'bookmark', isMarked ? 'إزالة العلامة' : 'إضافة علامة', async () => {
           const on = await bookmarks.toggle(n, a);
@@ -240,10 +246,21 @@ function displaySheet() {
         h('div.field', h('span', 'طريقة العرض'), seg('layout', [['flow', 'متصل'], ['list', 'آية في سطر']])),
         h('div.field', h('span', 'ألوان التجويد'), seg('tajweed', [[false, 'بدون'], [true, 'ملوّن']])),
         h('div.field', h('span', 'الضغط على كلمة'), seg('wordTap', [[false, 'يفتح الآية'], [true, 'يعرض معناها وجذرها']])),
+        translationPicker(),
         settings.get('tajweed') ? tajweedLegend() : null,
       );
     },
   });
+}
+
+/** اختيار ترجمة المعاني تحت الآيات */
+export function translationPicker() {
+  const sel = h('select', { 'aria-label': 'ترجمة المعاني' }, h('option', { value: '' }, 'بدون ترجمة'));
+  getTranslations().then((list) => {
+    for (const t of list) sel.append(h('option', { value: t.id, selected: settings.get('translation') === t.id }, t.name));
+  }).catch(() => sel.append(h('option', { disabled: true }, 'القائمة تحتاج اتصالًا لأول مرة')));
+  sel.addEventListener('change', () => { settings.set('translation', sel.value || null); if (location.hash.startsWith('#/surah/')) dispatchEvent(new HashChangeEvent('hashchange')); });
+  return h('label.field', h('span', 'ترجمة المعاني تحت الآيات'), sel);
 }
 
 const DEFAULT_COMPARE = ['123', '118', '112', '53']; // العفاسي، الحصري، المنشاوي، عبدالباسط
@@ -253,7 +270,7 @@ function compareSheet(n, a) {
   sheet({
     title: `مقارنة القراء – الآية ${ar(a)}`,
     content: (close) => {
-      const list = h('ul.choice-list', getReciters().map((r) => {
+      const list = h('ul.choice-list', getReciters().filter((r) => !r.untimed).map((r) => {
         const b = h('button.choice', { type: 'button', 'aria-pressed': String(chosen.has(r.id)), onclick: () => {
           if (chosen.has(r.id)) chosen.delete(r.id); else chosen.add(r.id);
           b.setAttribute('aria-pressed', String(chosen.has(r.id)));
@@ -372,16 +389,24 @@ async function wordSheet(n, a, w, el) {
 
 async function tafsirSheet(n, a) {
   const meta = getSurahMeta(n);
-  let t;
-  try { t = await getTafsir(n, a); } catch { return toast('التفسير غير متاح بدون إنترنت قبل تحميله'); }
-  sheet({
-    title: `التفسير الميسر، سورة ${meta.nameAr} ${ar(a)}`,
-    content: () => h('div',
+  let which = settings.get('tafsir') in TAFSIRS ? settings.get('tafsir') : 'muyassar';
+  const body = h('div.tafsir-body', { 'aria-live': 'polite' });
+  const draw = async () => {
+    body.replaceChildren(h('div.spinner', { 'aria-label': 'جارٍ التحميل' }));
+    let t;
+    try { t = await getTafsir(n, a, which); } catch { body.replaceChildren(h('p.muted', 'التفسير غير متاح بدون إنترنت قبل تحميله.')); return; }
+    body.replaceChildren(...[
       t.groupFrom ? h('p.muted', `تفسير الآيات من ${ar(t.groupFrom)} مجتمعة:`) : null,
       h('p.tafsir-text', t.text || 'لا يوجد تفسير لهذه الآية.'),
-      h('p.small-note', 'المصدر: التفسير الميسر — مجمع الملك فهد لطباعة المصحف الشريف.'),
-    ),
-  });
+      h('p.small-note', 'المصدر: ' + TAFSIRS[which].source),
+    ].filter(Boolean));
+  };
+  const tabs = h('div.seg', { role: 'tablist', 'aria-label': 'التفسير' }, Object.entries(TAFSIRS).map(([k, v]) => h('button', {
+    type: 'button', role: 'tab', 'aria-selected': String(k === which),
+    onclick: (e) => { which = k; settings.set('tafsir', k); for (const b of tabs.children) b.setAttribute('aria-selected', String(b === e.currentTarget)); draw(); },
+  }, v.name)));
+  draw();
+  sheet({ title: `التفسير، سورة ${meta.nameAr} ${ar(a)}`, content: () => h('div', tabs, body) });
 }
 
 async function wordsListSheet(n, a) {
