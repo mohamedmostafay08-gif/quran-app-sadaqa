@@ -79,4 +79,6 @@ addEventListener('online', () => toast('عاد الاتصال بالإنترنت
 addEventListener('offline', () => toast('أنت الآن بدون إنترنت — النص متاح بالكامل'));
 
 boot();
-registerSW();
+// تسجيل الـ SW بعد اكتمال التحميل حتى لا ينافس الكاش المسبق ظهور الواجهة
+if (document.readyState === "complete") setTimeout(registerSW, 1500);
+else addEventListener("load", () => setTimeout(registerSW, 1500));

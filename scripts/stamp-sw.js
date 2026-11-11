@@ -25,6 +25,13 @@ const hash = crypto.createHash('sha256');
 for (const f of files) hash.update(f).update(fs.readFileSync(path.join(ROOT, f)));
 const version = hash.digest('hex').slice(0, 10);
 
+// modulepreload لكل وحدات JS لتفادي تحميلها في سلسلة متتابعة
+const idxPath = path.join(ROOT, 'index.html');
+let idx = fs.readFileSync(idxPath, 'utf8');
+const mods = files.filter((f) => f.startsWith('src/') && f.endsWith('.js'));
+idx = idx.replace(/<!-- modulepreload:start -->[\s\S]*?<!-- modulepreload:end -->/, `<!-- modulepreload:start -->\n${mods.map((m) => `  <link rel="modulepreload" href="${m}">`).join('\n')}\n  <!-- modulepreload:end -->`);
+fs.writeFileSync(idxPath, idx);
+
 const swPath = path.join(ROOT, 'sw.js');
 let sw = fs.readFileSync(swPath, 'utf8');
 sw = sw.replace(/const VERSION = '[^']*';/, `const VERSION = '${version}';`);

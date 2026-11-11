@@ -39,13 +39,17 @@ export async function initData(onProgress) {
     notice = stored.value;
     return;
   }
-  onProgress?.('جارٍ تنزيل نص المصحف…');
+  // أول تشغيل: نقل النص إلى IndexedDB في الخلفية دون تعطيل ظهور الواجهة
+  importPromise = importText().catch((e) => { importPromise = null; console.warn('text import failed', e); });
+}
+
+let importPromise = null;
+async function importText() {
   const q = await getJSON('quran-uthmani.json');
-  onProgress?.('جارٍ حفظ المصحف على جهازك…');
+  q.ayahs.forEach((a, i) => surahCache.set(i + 1, a));
+  notice = q.notice;
   await db.putMany('ayahs', q.ayahs.map((ayahs, i) => ({ id: i + 1, ayahs })));
   await db.put('settings', { key: 'dataNotice', value: q.notice });
-  notice = q.notice;
-  q.ayahs.forEach((a, i) => surahCache.set(i + 1, a));
 }
 
 export const getSurahs = () => surahs;
@@ -56,6 +60,7 @@ export const TOTAL_AYAHS = 6236;
 /** نص آيات سورة (مصفوفة نصوص) */
 export async function getSurahText(n) {
   if (surahCache.has(n)) return surahCache.get(n);
+  if (importPromise) { await importPromise; if (surahCache.has(n)) return surahCache.get(n); }
   let rec = await db.get('ayahs', n);
   if (!rec) {
     // احتياطي: لو التخزين اتمسح، نعيد التحميل
@@ -64,7 +69,7 @@ export async function getSurahText(n) {
     rec = { ayahs: q.ayahs[n - 1] };
   }
   surahCache.set(n, rec.ayahs);
-  if (surahCache.size > 12) surahCache.delete(surahCache.keys().next().value);
+  if (!importPromise && surahCache.size > 12) surahCache.delete(surahCache.keys().next().value);
   return rec.ayahs;
 }
 

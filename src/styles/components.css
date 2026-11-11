@@ -331,7 +331,7 @@ body:has(.player-bar.show) .main { padding-bottom: calc(var(--tabbar-h) + 100px 
 
 /* ===== اختصارات الرئيسية ===== */
 .quick-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 4px 0 6px; }
-.quick-row:empty { display: none; }
+.quick-row:empty { min-height: 140px; }
 .quick { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); color: var(--text); text-decoration: none; }
 .quick:hover { border-color: var(--accent); }
 .quick > svg { color: var(--accent); width: 26px; height: 26px; }

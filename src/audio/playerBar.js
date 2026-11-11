@@ -11,7 +11,7 @@ const REPEATS = [1, 2, 3, 5, 10];
 
 export function mountPlayerBar() {
   const slot = document.getElementById('player-slot');
-  const title = h('a.pb-title');
+  const title = h('a.pb-title', { href: '#/' });
   const sub = h('button.pb-sub', { type: 'button', onclick: () => reciterSheet() });
   const playBtn = h('button.pb-play', { type: 'button', onclick: () => player.toggle() });
   const rateBtn = h('button.pb-chip', { type: 'button', 'aria-label': 'سرعة التشغيل', onclick: () => {
