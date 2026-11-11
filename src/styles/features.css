@@ -165,3 +165,9 @@ body[data-route="welcome"] .main { padding-bottom: 120px; }
 .share-audio { display: grid; gap: 12px; padding-bottom: 6px; }
 .share-audio .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .share-audio .btn-row > * { flex: 1; }
+.notify-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.notify-chips .pb-chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.notify-chips .pb-chip:disabled { opacity: .5; }
+.notify-time { display: flex; gap: 8px; align-items: center; }
+.notify-time input { flex: 1; max-width: 200px; }
+.notify-chips .pb-chip { min-height: 40px; min-width: 64px; font-size: 14px; }

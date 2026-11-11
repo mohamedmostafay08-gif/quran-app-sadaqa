@@ -29,6 +29,8 @@ export const DEFAULTS = {
   myGroups: [],           // الختمات الجماعية على هذا الجهاز
   groupName: '',          // الاسم الظاهر في الختمة الجماعية
   lastBackupAt: null,     // آخر نسخة احتياطية
+  notifyPrayers: [],      // تنبيهات الأذان (fajr, dhuhr ...)
+  wirdTime: null,         // تذكير الورد اليومي HH:MM
   stats: true,            // إحصائيات مجهولة مجمّعة (عدد يومي فقط)
 };
 

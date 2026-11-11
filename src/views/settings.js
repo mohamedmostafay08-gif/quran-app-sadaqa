@@ -9,6 +9,7 @@ import * as B from '../features/backup.js';
 import { download } from '../features/notes.js';
 import { sheet, toast } from '../ui.js';
 import { translationPicker } from './reader.js';
+import { notifyCard } from './notifyCard.js';
 
 function seg(key, opts, after) {
   return h('div.seg', { role: 'radiogroup' }, opts.map(([v, label]) => h('button', {
@@ -62,6 +63,7 @@ export function renderSettings() {
       toggle('wifiOnly', 'التنزيل التلقائي على الواي فاي فقط', 'يعتمد على دعم المتصفح لمعرفة نوع الاتصال'),
       h('a.row-btn', { href: '#/downloads' }, h('span', h('strong', 'إدارة التنزيلات والمساحة')), icon('forward')),
     ),
+    notifyCard(),
     h('section.card',
       h('h2', 'الخصوصية'),
       toggle('stats', 'مشاركة إحصائيات مجهولة', 'عدد يومي فقط (مثل: كم مرة فُتح التطبيق اليوم) بلا أي معرّف أو بيانات عنك، لنعرف ما يفيد الناس فنطوّره'),

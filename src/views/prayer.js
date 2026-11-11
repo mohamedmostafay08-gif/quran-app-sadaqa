@@ -5,6 +5,7 @@ import * as settings from '../state.js';
 import * as P from '../features/prayer.js';
 import { mount, topbar, sheet, toast, empty } from '../ui.js';
 import { navigate } from '../router.js';
+import { notifyCard } from './notifyCard.js';
 
 let tab = 'times';
 
@@ -69,6 +70,7 @@ function timesPanel(redraw) {
     dateCard,
     h('section.card.pr-hero', nextEl),
     h('section.card', list),
+    notifyCard({ wird: false }),
     h('details.card.pr-settings',
       h('summary', 'إعدادات الحساب'),
       h('div.form',
@@ -105,7 +107,7 @@ function locationSheet(onDone) {
       closeFn(); onDone?.(); toast('تم تحديد موقعك');
     }, () => { geo.disabled = false; geo.lastChild.textContent = 'استخدم موقعي الحالي'; toast('تعذر تحديد الموقع، اختر مدينتك من القائمة'); }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 3600000 });
   } }, icon('pin'), h('span', 'استخدم موقعي الحالي'));
-  sheet({ title: 'الموقع', content: (close) => { closeFn = close; return h('div.form', geo, h('p.small-note', 'الموقع يُحفظ على جهازك فقط ولا يُرسل لأي جهة.'), input, list); } });
+  sheet({ title: 'الموقع', content: (close) => { closeFn = close; return h('div.form', geo, h('p.small-note', 'الموقع يُحفظ على جهازك فقط، ولا يُرسل (مقرّبًا) إلا لو فعّلت تنبيهات الأذان.'), input, list); } });
 }
 
 // ---------------- القبلة ----------------

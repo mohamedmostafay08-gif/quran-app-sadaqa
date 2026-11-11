@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '04bba3b08b';
+const VERSION = '99112209ef';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -30,6 +30,7 @@ const ASSETS = [
   'src/features/khatma.js',
   'src/features/notes.js',
   'src/features/prayer.js',
+  'src/features/push.js',
   'src/features/shareAudio.js',
   'src/features/shareCard.js',
   'src/features/srs.js',
@@ -58,6 +59,7 @@ const ASSETS = [
   'src/views/khatma.js',
   'src/views/memorize.js',
   'src/views/mushaf.js',
+  'src/views/notifyCard.js',
   'src/views/prayer.js',
   'src/views/reader.js',
   'src/views/search.js',
@@ -74,6 +76,7 @@ const ASSETS = [
   'public/fonts/noto-kufi-arabic.woff2',
   'public/fonts/noto-kufi-latin.woff2',
   'public/fonts/uthmanic-hafs.woff2',
+  'public/icons/badge-96.png',
   'public/icons/icon-192.png',
   'public/icons/icon-512.png',
   'public/icons/maskable-512.png',
@@ -94,6 +97,27 @@ self.addEventListener('activate', (event) => {
     const keys = await caches.keys();
     await Promise.all(keys.filter((k) => (k.startsWith('app-') && k !== APP_CACHE) || (k.startsWith('extras-') && k !== EXTRAS_CACHE)).map((k) => caches.delete(k)));
     await self.clients.claim();
+  })());
+});
+
+// ===== الإشعارات =====
+self.addEventListener('push', (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch { d = { title: 'رتّل', body: event.data?.text() || '' }; }
+  event.waitUntil(self.registration.showNotification(d.title || 'رتّل', {
+    body: d.body || '', tag: d.tag || 'rattil', renotify: true, lang: 'ar', dir: 'rtl',
+    icon: 'public/icons/icon-192.png', badge: 'public/icons/badge-96.png', data: { url: d.url || '' },
+  }));
+});
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = new URL(self.registration.scope).href + (event.notification.data?.url || '');
+  event.waitUntil((async () => {
+    const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const w of wins) {
+      if (w.url.startsWith(self.registration.scope)) { await w.focus(); return w.navigate(target).catch(() => {}); }
+    }
+    return self.clients.openWindow(target);
   })());
 });
 
