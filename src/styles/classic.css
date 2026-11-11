@@ -161,3 +161,8 @@ body:has(.mini-player.show) .install-banner { bottom: calc(var(--tabbar-h) + var
 .ib-n { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-weight: 700; }
 .ib-ico, .ib-steps svg { width: 22px; height: 22px; vertical-align: middle; color: var(--accent); display: inline-block; }
 .home-foot { text-align: center; margin: 22px 0 6px; font-size: 13px; } .home-foot a { color: var(--accent); }
+
+/* الأوراق والتنبيهات فوق المشغّل الكامل (الذي يفتح منها: السرعة، القارئ، مؤقت النوم) */
+.scrim { z-index: 60; }
+.sheet { z-index: 61; }
+.toast { z-index: 70; }

@@ -7,7 +7,8 @@ export const DEFAULTS = {
   layout: 'flow',         // flow (متصل كالمصحف) | list (آية في سطر)
   readMode: 'scroll',     // scroll (عرض متصل) | pages (صفحات مصحف المدينة)
   reciter: '123',          // معرّف القارئ في mp3quran (123 = مشاري العفاسي)
-  rate: 1,                // سرعة التشغيل
+  rate: 1,                // سرعة التشغيل الافتراضية
+  rateByReciter: {},      // سرعة مخصصة لكل قارئ (بعض التسجيلات متأنية)
   repeat: 1,              // تكرار كل آية
   autoNext: true,         // متابعة السورة التالية
   autoScroll: true,       // تتبع الآية المقروءة

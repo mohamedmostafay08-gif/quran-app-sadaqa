@@ -126,7 +126,7 @@ async function load(s, a) {
     loadedKey = key;
     audio.src = surahUrl(reciterId, s);
   }
-  audio.playbackRate = settings.get('rate');
+  audio.playbackRate = rateFor(reciterId);
   audio.volume = sleepFade;
   await seek(resumeAt != null ? resumeAt : startOf(a));
   resumeAt = null;
@@ -227,7 +227,18 @@ audio.addEventListener('ended', () => {
   st.status = 'idle'; emit();
 });
 
-settings.subscribe((k, v) => { if (k === 'rate') audio.playbackRate = v; });
+/** السرعة الفعلية: المخصصة للقارئ إن وُجدت، وإلا الافتراضية */
+export function rateFor(reciterId) {
+  const r = (settings.get('rateByReciter') || {})[reciterId];
+  return r || settings.get('rate') || 1;
+}
+/** تغيير سرعة القارئ الحالي (تُحفظ له وحده) */
+export function setRate(v) {
+  const id = currentReciter() || settings.get('reciter');
+  settings.set('rateByReciter', { ...(settings.get('rateByReciter') || {}), [id]: v });
+  audio.playbackRate = v;
+}
+settings.subscribe((k) => { if (k === 'rate' || k === 'rateByReciter') audio.playbackRate = rateFor(currentReciter() || settings.get('reciter')); });
 
 // حفظ موضع الاستماع لاستكماله من نفس الثانية
 let lastSave = 0;

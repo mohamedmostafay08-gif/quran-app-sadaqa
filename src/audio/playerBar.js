@@ -1,13 +1,13 @@
 // المشغّل: كبسولة زجاجية صغيرة + مشغّل كامل الشاشة
 import { h, icon, ar } from '../lib/dom.js';
-import { player, getReciters, getReciter } from './player.js';
+import { player, getReciters, getReciter, rateFor, setRate } from './player.js';
 import { getSurahMeta, getSurahText } from '../data.js';
 import * as settings from '../state.js';
 import { sheet, toast } from '../ui.js';
 import { normalize } from '../lib/arabic.js';
 import { sleepSheet, sleepState } from './sleepTimer.js';
 
-const RATES = [0.75, 1, 1.25, 1.5];
+const RATES = [0.75, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2];
 const REPEATS = [1, 2, 3, 5, 10];
 
 const fmt = (sec) => {
@@ -39,9 +39,7 @@ export function mountPlayerBar() {
   const tNow = h('span'), tAll = h('span');
   const fpPlay = h('button.fp-play', { type: 'button', onclick: () => player.toggle() });
   const rateBtn = h('button.pb-chip', { type: 'button', 'aria-label': 'سرعة التشغيل', onclick: () => {
-    const i = RATES.indexOf(settings.get('rate'));
-    settings.set('rate', RATES[(i + 1) % RATES.length]);
-    render();
+    rateSheet();
   } });
   const repBtn = h('button.pb-chip', { type: 'button', 'aria-label': 'تكرار كل آية', onclick: () => {
     const i = REPEATS.indexOf(settings.get('repeat'));
@@ -144,14 +142,15 @@ export function mountPlayerBar() {
     fpSub.textContent = st.error ? st.error : `${where} من ${ar(m.ayahCount)}`;
     recBtn.replaceChildren(icon('user'), h('span', recName));
     goBtn.href = `#/surah/${st.surah}/${st.ayah || 1}`;
-    rateBtn.textContent = `${ar(settings.get('rate'))}×`;
+    rateBtn.replaceChildren(icon('speed'), h('span', `${ar(rateFor(rid))}×`));
+    rateBtn.classList.toggle('on', rateFor(rid) !== 1);
     repBtn.replaceChildren(...[icon('repeat'), h('span', settings.get('repeat') > 1 ? `${ar(settings.get('repeat'))}×` : 'تكرار')]);
     repBtn.classList.toggle('on', settings.get('repeat') > 1);
     sleepBtn.classList.toggle('on', !!sl);
     showAyah(st);
   }
   player.subscribe(render);
-  settings.subscribe((k) => { if (k === 'reciter' || k === 'rate') render(); });
+  settings.subscribe((k) => { if (k === 'reciter' || k === 'rate' || k === 'rateByReciter') render(); });
   setInterval(() => { if (sleepState()) render(); }, 15000);
   render();
 }
@@ -201,5 +200,22 @@ export function reciterSheet() {
   sheet({
     title: 'اختر القارئ',
     content: (close) => { closeFn = close; return h('div', tabs, hint, input, list); },
+  });
+}
+
+/** اختيار سرعة التلاوة للقارئ الحالي */
+export function rateSheet() {
+  const st = player.state();
+  const rid = (st.compare ? st.compare.list[st.compare.idx] : st.reciter) || settings.get('reciter');
+  const cur = rateFor(rid);
+  sheet({
+    title: 'سرعة التلاوة',
+    content: (close) => h('div',
+      h('p.muted', `بعض التسجيلات متأنية بطبيعتها. السرعة التي تختارها تُحفظ لـ«${getReciter(rid)?.nameAr || ''}» وحده.`),
+      h('div.chip-grid', RATES.map((r) => h('button.chip', {
+        type: 'button', 'aria-pressed': String(r === cur),
+        onclick: () => { setRate(r); close(); toast(`السرعة ${ar(r)}× لـ${getReciter(rid)?.nameAr || 'القارئ'}`); },
+      }, `${ar(r)}×`))),
+    ),
   });
 }
