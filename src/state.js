@@ -20,6 +20,8 @@ export const DEFAULTS = {
   lastRead: null,         // { surah, ayah, at }
   lastListen: null,       // { surah, ayah, reciter, time, at } لاستكمال الاستماع
   onboarded: false,       // أكمل شاشة الترحيب
+  prayerLocation: null,   // { name, lat, lng, tz, method, madhab }
+  hijriAdjust: 0,         // تعديل التاريخ الهجري بالأيام
 };
 
 const state = { ...DEFAULTS };

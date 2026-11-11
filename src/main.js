@@ -17,10 +17,12 @@ import { renderMemorize } from './views/memorize.js';
 import { renderCar } from './views/car.js';
 import { renderMushaf } from './views/mushaf.js';
 import { renderWelcome } from './views/welcome.js';
+import { renderPrayer, renderAdhkarChapter } from './views/prayer.js';
+import { timeOfDay, getLocation } from './features/prayer.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
-const TAB_FOR = { '/': 'home', '/surah': 'home', '/search': 'search', '/bookmarks': 'bookmarks', '/downloads': 'downloads', '/settings': 'settings', '/about': 'settings', '/khatma': 'home', '/memorize': 'home', '/car': 'home', '/page': 'home' };
+const TAB_FOR = { '/': 'home', '/surah': 'home', '/search': 'search', '/bookmarks': 'bookmarks', '/downloads': 'settings', '/prayer': 'prayer', '/adhkar': 'prayer', '/settings': 'settings', '/about': 'settings', '/khatma': 'home', '/memorize': 'home', '/car': 'home', '/page': 'home' };
 
 async function boot() {
   const status = document.querySelector('.boot p');
@@ -48,6 +50,12 @@ async function boot() {
   route('/car', renderCar);
   route('/page/:page', renderMushaf);
   route('/welcome', renderWelcome);
+  route('/prayer', renderPrayer);
+  route('/adhkar/:id', renderAdhkarChapter);
+
+  // لون الخلفية حسب وقت الصلاة الحقيقي (لو الموقع محدد)
+  const tod = () => { try { const t = timeOfDay(getLocation()); if (t) document.documentElement.dataset.tod = t; } catch { /* */ } };
+  tod(); setInterval(tod, 5 * 60000);
 
   // أول فتح: شاشة الترحيب
   if (!getSetting('onboarded') && (!location.hash || location.hash === '#/' || location.hash === '#')) history.replaceState(null, '', '#/welcome');

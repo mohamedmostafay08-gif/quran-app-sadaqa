@@ -7,6 +7,7 @@ import { mount } from '../ui.js';
 import { navigate } from '../router.js';
 import { homeWirdCard } from './khatma.js';
 import * as srs from '../features/srs.js';
+import * as P from '../features/prayer.js';
 
 let tab = 'surahs';
 
@@ -52,7 +53,8 @@ export function renderHome() {
     h('header.hero',
       h('div.hero-mark', { 'aria-hidden': 'true' }, '۞'),
       h('h1', 'القرآن الكريم'),
-      h('p', 'برواية حفص عن عاصم'),
+      h('p', P.hijri()?.text || 'برواية حفص عن عاصم'),
+      prayerPill(),
     ),
     h('form.search-bar', { role: 'search', onsubmit: (e) => e.preventDefault() }, icon('search'), input),
     last ? continueCard(last) : null,
@@ -120,4 +122,13 @@ function juzList() {
       h('span.surah-en', JUZ_NAMES[i]),
     ));
   }));
+}
+
+function prayerPill() {
+  const loc = P.getLocation();
+  if (!loc) return h('a.pr-pill', { href: '#/prayer' }, icon('mosque'), 'حدّد موقعك لمواقيت الصلاة');
+  try {
+    const n = P.nextPrayer(loc);
+    return h('a.pr-pill', { href: '#/prayer' }, icon('mosque'), `${n.name} ${P.fmtTime(n.time, loc.tz)}، بعد ${P.countdown(n.time - new Date())}`);
+  } catch { return null; }
 }

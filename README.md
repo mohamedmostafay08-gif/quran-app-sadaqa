@@ -18,6 +18,7 @@ node scripts/build-data.js     # نص المصحف + الأجزاء/الصفحا
 node scripts/build-extra.js    # الصرف والجذور، التفسير الميسر، التجويد، معاني الكلمات
 node scripts/build-reciters.js # قائمة القراء من mp3quran (التي لها توقيت آيات لكل السور)
 node scripts/build-mushaf.js   # وضع الصفحات: نص مجمع الملك فهد مرتبًا بالصفحة والسطر (604 × 15)
+node scripts/build-adhkar.js   # الأذكار من حصن المسلم (hisnmuslim.com)
 node scripts/stamp-sw.js       # تحديث قائمة الكاش ورقم الإصدار في sw.js — شغّله قبل كل نشر
 ```
 
@@ -52,6 +53,8 @@ src/views/        الشاشات
 - التفسير الميسر، ومواضع التجويد، ومعاني الكلمات بالإنجليزية: [Quran.com API](https://quran.com).
 - الصوت: [mp3quran.net](https://mp3quran.net) — تلاوة السورة كاملة متصلة مع توقيت كل آية (ayat_timing) لتظليلها. يُحمَّل وقت التشغيل ولا يُضمَّن في المشروع.
 - وضع الصفحات: نص مجمع الملك فهد (text_qpc_hafs) وترتيب الأسطر من Quran.com، بخط KFGQPC Uthmanic Script HAFS.
+- الأذكار: كتاب «حصن المسلم» عبر hisnmuslim.com.
+- مواقيت الصلاة والقبلة: مكتبة [Adhan](https://github.com/batoulapps/adhan-js) (MIT) على الجهاز. التاريخ الهجري بتقويم أم القرى في المتصفح.
 - الخطوط: Amiri Quran و Noto Kufi Arabic، رخصة SIL OFL.
 
 > بما أن بيانات الصرف مرخصة GPL، فالأسلم نشر كود المشروع برخصة متوافقة (GPL-3.0).

@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = 'c3d2f690d4';
+const VERSION = 'f16e4e3ac0';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -22,6 +22,7 @@ const ASSETS = [
   'src/features/immersive.js',
   'src/features/khatma.js',
   'src/features/notes.js',
+  'src/features/prayer.js',
   'src/features/shareCard.js',
   'src/features/srs.js',
   'src/lib/arabic.js',
@@ -45,10 +46,12 @@ const ASSETS = [
   'src/views/khatma.js',
   'src/views/memorize.js',
   'src/views/mushaf.js',
+  'src/views/prayer.js',
   'src/views/reader.js',
   'src/views/search.js',
   'src/views/settings.js',
   'src/views/welcome.js',
+  'public/data/adhkar.json',
   'public/data/extra-notice.json',
   'public/data/mushaf/1.json',
   'public/data/mushaf/10.json',
@@ -325,6 +328,7 @@ const ASSETS = [
   'public/icons/icon-512.png',
   'public/icons/icon.svg',
   'public/icons/maskable-512.png',
+  'public/lib/adhan.esm.js',
 ];
 
 self.addEventListener('install', (event) => {

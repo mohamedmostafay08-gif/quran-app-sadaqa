@@ -288,3 +288,56 @@ body[data-route="welcome"] .main { padding-bottom: 120px; }
 }
 .wl-foot .btn { flex: 1; max-width: 360px; }
 .wl-foot .btn:last-child { margin-inline-start: auto; }
+
+/* ===== الصلاة ===== */
+.pr-pill { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 8px 16px; border-radius: 999px; background: var(--glass-bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); color: var(--accent); font-weight: 700; font-size: 13px; text-decoration: none; }
+.pr-pill svg { width: 18px; height: 18px; }
+.pr-tabs { margin-top: 14px; }
+.pr-date { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pr-date > div { display: grid; min-width: 0; }
+.pr-hijri { font-size: 18px; color: var(--accent); }
+.pr-city { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--glass-edge); background: var(--card-bg); border-radius: 999px; min-height: 40px; padding: 0 14px; font-size: 13px; font-weight: 700; max-width: 50%; }
+.pr-city span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pr-city svg { width: 16px; height: 16px; color: var(--accent); flex: none; }
+.pr-hero { text-align: center; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 92%, transparent), color-mix(in srgb, var(--accent-2) 88%, transparent)); color: var(--on-accent); border: 0; }
+.pr-next { display: grid; gap: 2px; padding: 6px 0; }
+.pr-next strong { font-size: 30px; }
+.pr-next-time { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pr-left { opacity: .85; font-size: 14px; }
+.pr-list { list-style: none; margin: 0; padding: 0; }
+.pr-list li { display: flex; justify-content: space-between; align-items: center; min-height: 52px; padding: 0 12px; border-radius: 12px; }
+.pr-list li + li { border-top: 1px solid var(--glass-edge); }
+.pr-list li.next { background: var(--accent-soft); color: var(--accent); font-weight: 700; border-color: transparent; }
+.pr-list li.cur span::after { content: ' (الآن)'; color: var(--text-2); font-size: 12px; font-weight: 400; }
+.pr-settings summary { cursor: pointer; font-weight: 700; min-height: 32px; display: flex; align-items: center; }
+.pr-settings .form { margin-top: 12px; }
+
+.qb-card { display: grid; justify-items: center; text-align: center; gap: 8px; }
+.qb-rose { width: min(78vw, 300px); height: auto; }
+.qb-rose .ring { fill: var(--card-bg); stroke: var(--glass-edge); stroke-width: 2; }
+.qb-rose .t { stroke: var(--text-3); stroke-width: 1.2; }
+.qb-rose .t-long { stroke: var(--text); stroke-width: 2.2; }
+.qb-rose text { font: 700 18px var(--font-ui); text-anchor: middle; fill: var(--text-2); }
+.qb-rose text.n { fill: var(--danger); font-size: 20px; }
+.qb-rose .needle { stroke: var(--accent); stroke-width: 4; stroke-linecap: round; }
+.qb-rose .kaaba { fill: #1b1b1b; stroke: var(--gold); stroke-width: 1.5; }
+.qb-rose .kaaba-band { fill: var(--gold); }
+.qb-rose .hub { fill: var(--accent); }
+.qb-rose .top { fill: var(--gold); }
+.qb-rose .dial { transform-origin: 120px 120px; transition: transform .25s linear; }
+.qb-rose.ok .ring { stroke: var(--accent); stroke-width: 4; }
+.qb-angle { font-weight: 700; margin: 4px 0 0; }
+.qb-aligned { color: var(--accent); font-weight: 700; font-size: 18px; margin: 0; }
+.qb-status { color: var(--text-2); font-size: 13px; min-height: 1.6em; margin: 0; }
+
+.adk-list { list-style: none; padding: 0; margin: 10px 0 0; }
+.adk-ch { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 52px; padding: 0 6px; border-top: 1px solid var(--glass-edge); color: var(--text); text-decoration: none; }
+.adhkar > .bar { margin: 12px 0; }
+.adk-items { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.adk-item { border-radius: var(--radius); background: var(--card-bg); border: 1px solid var(--glass-edge); padding: 16px; display: grid; gap: 12px; transition: opacity .3s; }
+.adk-text { margin: 0; font-family: var(--font-quran); font-size: calc(1.25rem * var(--quran-scale)); line-height: 2.1; white-space: pre-wrap; }
+.adk-count { justify-self: stretch; min-height: 52px; border-radius: 14px; border: 0; background: var(--accent); color: var(--on-accent); font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
+.adk-count:active { transform: scale(.98); }
+.adk-item.done { opacity: .6; }
+.adk-item.done .adk-count { background: var(--accent-soft); color: var(--accent); }
+.pr-hijri { white-space: nowrap; }
