@@ -1,8 +1,8 @@
 // نقطة البداية: تجهيز البيانات، الإعدادات، الراوتر، والـ Service Worker
 import { initData } from './data.js';
-import { loadSettings } from './state.js';
+import { loadSettings, get as getSetting } from './state.js';
 import { route, start } from './router.js';
-import { loadReciters } from './audio/player.js';
+import { loadReciters, player } from './audio/player.js';
 import { mountPlayerBar } from './audio/playerBar.js';
 import { initAutoDownload } from './offline/autoDownload.js';
 import { renderHome } from './views/home.js';
@@ -16,6 +16,7 @@ import { renderKhatma, initKhatmaAutoRecord } from './views/khatma.js';
 import { renderMemorize } from './views/memorize.js';
 import { renderCar } from './views/car.js';
 import { renderMushaf } from './views/mushaf.js';
+import { renderWelcome } from './views/welcome.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
@@ -46,8 +47,13 @@ async function boot() {
   route('/memorize', renderMemorize);
   route('/car', renderCar);
   route('/page/:page', renderMushaf);
+  route('/welcome', renderWelcome);
+
+  // أول فتح: شاشة الترحيب
+  if (!getSetting('onboarded') && (!location.hash || location.hash === '#/' || location.hash === '#')) history.replaceState(null, '', '#/welcome');
 
   mountPlayerBar();
+  player.restore(getSetting('lastListen'));
   initAutoDownload();
   initKhatmaAutoRecord();
 

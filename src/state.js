@@ -18,6 +18,8 @@ export const DEFAULTS = {
   wordTap: false,         // الضغط على الكلمة يعرض معناها
   keepAwake: true,        // منع انطفاء الشاشة أثناء القراءة
   lastRead: null,         // { surah, ayah, at }
+  lastListen: null,       // { surah, ayah, reciter, time, at } لاستكمال الاستماع
+  onboarded: false,       // أكمل شاشة الترحيب
 };
 
 const state = { ...DEFAULTS };

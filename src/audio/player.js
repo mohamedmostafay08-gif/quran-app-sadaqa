@@ -65,7 +65,8 @@ let sleepFade = 1;
 let timings = null;     // توقيتات الملف المحمّل
 let loadedKey = null;   // reciter:surah للملف المحمّل
 let loadSeq = 0;
-let switching = false;  // أثناء تبديل الملف/القفز: تجاهل مراقبة الحدود حتى يبدأ التشغيل فعليًا
+let switching = false;
+let resumeAt = null;     // ثانية الاستكمال بعد إعادة فتح التطبيق  // أثناء تبديل الملف/القفز: تجاهل مراقبة الحدود حتى يبدأ التشغيل فعليًا
 
 const needsBasmala = (s) => s !== 1 && s !== 9;
 const currentReciter = () => (st.compare ? st.compare.list[st.compare.idx] : st.reciter);
@@ -112,7 +113,8 @@ async function load(s, a) {
   }
   audio.playbackRate = settings.get('rate');
   audio.volume = sleepFade;
-  await seek(startOf(a));
+  await seek(resumeAt != null ? resumeAt : startOf(a));
+  resumeAt = null;
   if (my !== loadSeq) return;
   try {
     await audio.play();
@@ -212,12 +214,26 @@ audio.addEventListener('ended', () => {
 
 settings.subscribe((k, v) => { if (k === 'rate') audio.playbackRate = v; });
 
+// حفظ موضع الاستماع لاستكماله من نفس الثانية
+let lastSave = 0;
+function saveListen(force) {
+  if (!st.surah || st.compare || switching || !audio.getAttribute('src')) return;
+  const now = Date.now();
+  if (!force && now - lastSave < 5000) return;
+  lastSave = now;
+  settings.set('lastListen', { surah: st.surah, ayah: st.ayah, reciter: currentReciter(), time: Math.max(0, audio.currentTime - 1), at: now });
+}
+audio.addEventListener('timeupdate', () => saveListen(false));
+audio.addEventListener('pause', () => saveListen(true));
+addEventListener('pagehide', () => saveListen(true));
+
 export const player = {
   state: () => st,
   subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
 
   /** يبدأ من آية؛ {only:true} يكرر آية واحدة، {range:{from,to,loop,times}} نطاق محدد */
   playFrom(s, a, opts = {}) {
+    resumeAt = null;
     st.reciter = settings.get('reciter');
     st.only = !!opts.only;
     st.compare = null;
@@ -230,6 +246,7 @@ export const player = {
   },
   /** مقارنة القراء: نفس الآية بأكثر من قارئ ورا بعض */
   compare(s, a, list) {
+    resumeAt = null;
     st.reciter = settings.get('reciter');
     st.only = false;
     st.range = null;
@@ -238,9 +255,21 @@ export const player = {
     load(s, a);
   },
   pause() { audio.pause(); },
-  resume() { if (st.surah) audio.play().catch(() => {}); },
+  resume() {
+    if (!st.surah) return;
+    if (!audio.getAttribute('src')) { st.reciter = st.reciter || settings.get('reciter'); st.repeatLeft = settings.get('repeat'); load(st.surah, st.ayah || 0); return; }
+    audio.play().catch(() => {});
+  },
+  /** استعادة آخر موضع استماع (بدون تحميل الصوت حتى يضغط المستخدم تشغيل) */
+  restore(last) {
+    if (!last || !last.surah || st.surah) return;
+    Object.assign(st, { surah: last.surah, ayah: last.ayah ?? 1, reciter: last.reciter || settings.get('reciter'), status: 'paused', error: null });
+    resumeAt = last.time || null;
+    emit();
+  },
   toggle() {
     if (st.status === 'playing') audio.pause();
+    else if (st.status === 'paused' && !audio.getAttribute('src')) player.resume();
     else if (st.status === 'idle' && st.surah) player.playFrom(st.surah, st.ayah || 1);
     else player.resume();
   },
@@ -248,8 +277,9 @@ export const player = {
     loadSeq++;
     switching = false;
     audio.pause(); audio.removeAttribute('src'); audio.load();
-    loadedKey = null; timings = null;
+    loadedKey = null; timings = null; resumeAt = null;
     Object.assign(st, { status: 'idle', surah: null, ayah: null, compare: null, error: null, range: null, only: false });
+    settings.set('lastListen', null);
     emit();
   },
   next() {
