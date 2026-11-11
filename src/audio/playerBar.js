@@ -171,13 +171,13 @@ export function reciterSheet() {
     const match = (r) => !q || normalize(r.nameAr).includes(q);
     const featured = all.filter((r) => r.featured && match(r));
     const others = all.filter((r) => !r.featured && match(r));
-    list.replaceChildren(
+    list.replaceChildren(...[
       featured.length ? h('h3.list-label', 'الأشهر') : null,
       featured.length ? h('ul.choice-list', featured.map(item)) : null,
       others.length ? h('h3.list-label', `كل القراء (${ar(others.length)})`) : null,
       others.length ? h('ul.choice-list', others.map(item)) : null,
       !featured.length && !others.length ? h('p.muted', 'لا يوجد قارئ بهذا الاسم.') : null,
-    );
+    ].filter(Boolean));
   };
   input.addEventListener('input', draw);
   draw();

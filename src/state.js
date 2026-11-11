@@ -22,6 +22,9 @@ export const DEFAULTS = {
   onboarded: false,       // أكمل شاشة الترحيب
   prayerLocation: null,   // { name, lat, lng, tz, method, madhab }
   hijriAdjust: 0,         // تعديل التاريخ الهجري بالأيام
+  deviceToken: null,      // معرّف سري للجهاز (الختمة الجماعية)
+  myGroups: [],           // الختمات الجماعية على هذا الجهاز
+  groupName: '',          // الاسم الظاهر في الختمة الجماعية
 };
 
 const state = { ...DEFAULTS };

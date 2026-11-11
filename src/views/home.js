@@ -46,6 +46,7 @@ export function renderHome() {
     quick.append(
       wird,
       h('a.quick', { href: '#/memorize' }, icon('repeat'), h('span', h('strong', 'الحفظ والمراجعة'), h('small', due.length ? `${ar(due.length)} آية للمراجعة اليوم` : 'إخفاء تدريجي وتكرار'))),
+      h('a.quick', { href: '#/group' }, icon('user'), h('span', h('strong', 'ختمة جماعية أو مُهداة'), h('small', 'اقرأوا معًا برابط واحد'))),
       h('a.quick', { href: '#/car' }, icon('play'), h('span', h('strong', 'وضع السيارة'), h('small', 'أزرار كبيرة وتحكم صوتي'))),
     );
   });

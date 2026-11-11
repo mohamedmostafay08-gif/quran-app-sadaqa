@@ -32,6 +32,7 @@ export async function renderKhatma(_p, _q, isStale) {
       h('span.muted', `، ${ar(Math.max(1, Math.round((k.finishedAt - k.startDate) / 86400000)))} يومًا، انتهت ${new Date(k.finishedAt).toLocaleDateString('ar-EG')}`),
     ))));
   }
+  body.append(h('a.quick', { href: '#/group' }, icon('user'), h('span', h('strong', 'ختمة جماعية أو مُهداة'), h('small', 'شارك رابطًا، وكل واحد يختار جزءًا'))));
   mount(h('div.khatma', topbar({ title: 'الختمة والورد', back: '#/' }), body));
 
 }

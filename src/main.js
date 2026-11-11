@@ -18,11 +18,12 @@ import { renderCar } from './views/car.js';
 import { renderMushaf } from './views/mushaf.js';
 import { renderWelcome } from './views/welcome.js';
 import { renderPrayer, renderAdhkarChapter } from './views/prayer.js';
+import { renderGroups, renderGroup } from './views/group.js';
 import { timeOfDay, getLocation } from './features/prayer.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
-const TAB_FOR = { '/': 'home', '/surah': 'home', '/search': 'search', '/bookmarks': 'bookmarks', '/downloads': 'settings', '/prayer': 'prayer', '/adhkar': 'prayer', '/settings': 'settings', '/about': 'settings', '/khatma': 'home', '/memorize': 'home', '/car': 'home', '/page': 'home' };
+const TAB_FOR = { '/': 'home', '/surah': 'home', '/search': 'search', '/bookmarks': 'bookmarks', '/downloads': 'settings', '/prayer': 'prayer', '/adhkar': 'prayer', '/settings': 'settings', '/about': 'settings', '/khatma': 'home', '/memorize': 'home', '/car': 'home', '/page': 'home', '/group': 'home' };
 
 async function boot() {
   const status = document.querySelector('.boot p');
@@ -52,6 +53,8 @@ async function boot() {
   route('/welcome', renderWelcome);
   route('/prayer', renderPrayer);
   route('/adhkar/:id', renderAdhkarChapter);
+  route('/group', renderGroups);
+  route('/group/:id', renderGroup);
 
   // لون الخلفية حسب وقت الصلاة الحقيقي (لو الموقع محدد)
   const tod = () => { try { const t = timeOfDay(getLocation()); if (t) document.documentElement.dataset.tod = t; } catch { /* */ } };
