@@ -4,6 +4,7 @@ import * as settings from '../state.js';
 import { getReciter } from '../audio/player.js';
 import { reciterSheet } from '../audio/playerBar.js';
 import { mount, topbar } from '../ui.js';
+import { install, isStandalone } from '../features/install.js';
 
 function seg(key, opts, after) {
   return h('div.seg', { role: 'radiogroup' }, opts.map(([v, label]) => h('button', {
@@ -53,6 +54,9 @@ export function renderSettings() {
       toggle('wifiOnly', 'التنزيل التلقائي على الواي فاي فقط', 'يعتمد على دعم المتصفح لمعرفة نوع الاتصال'),
       h('a.row-btn', { href: '#/downloads' }, h('span', h('strong', 'إدارة التنزيلات والمساحة')), icon('forward')),
     ),
+    !isStandalone() ? h('section.card',
+      h('button.row-btn', { type: 'button', onclick: () => install() }, h('span', h('strong', 'تثبيت التطبيق على الشاشة الرئيسية'), h('small', 'يفتح كتطبيق ويعمل بدون إنترنت')), icon('download')),
+    ) : null,
     h('section.card',
       h('a.row-btn', { href: '#/about' }, h('span', h('strong', 'عن التطبيق'), h('small', 'المصادر والإصدارات والحقوق')), icon('forward')),
     ),

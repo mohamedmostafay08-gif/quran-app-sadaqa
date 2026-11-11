@@ -19,6 +19,7 @@ import { renderMushaf } from './views/mushaf.js';
 import { renderWelcome } from './views/welcome.js';
 import { renderPrayer, renderAdhkarChapter } from './views/prayer.js';
 import { renderGroups, renderGroup } from './views/group.js';
+import { initInstall } from './features/install.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
@@ -63,6 +64,7 @@ async function boot() {
   player.restore(getSetting('lastListen'));
   initAutoDownload();
   initKhatmaAutoRecord();
+  initInstall();
 
   start((m) => {
     // أي انتقال يغلق الأوراق السفلية المفتوحة (مثل زر الرجوع في الموبايل)

@@ -38,12 +38,57 @@
   "shortcuts": [
     {
       "name": "أكمل القراءة",
-      "url": "./#/bookmarks"
+      "url": "./#/bookmarks",
+      "icons": [
+        {
+          "src": "public/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
-      "name": "البحث",
-      "url": "./#/search"
+      "name": "مواقيت الصلاة",
+      "url": "./#/prayer",
+      "icons": [
+        {
+          "src": "public/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "الأذكار",
+      "url": "./#/prayer?tab=adhkar",
+      "icons": [
+        {
+          "src": "public/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ],
-  "id": "./"
+  "id": "./",
+  "screenshots": [
+    {
+      "src": "public/screenshots/home.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "الرئيسية: السور والختمة والحفظ"
+    },
+    {
+      "src": "public/screenshots/mushaf.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "صفحات مصحف المدينة"
+    },
+    {
+      "src": "public/screenshots/prayer.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "مواقيت الصلاة"
+    }
+  ]
 }
