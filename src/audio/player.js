@@ -1,7 +1,7 @@
 // محرك الصوت: تلاوة السورة كاملة (متصلة بدون فواصل) من mp3quran.net أو Quran.com (المجوّد والمعلّم)
 // مع توقيت كل آية لتظليل الآية المقروءة، والتكرار، والنطاقات، ومقارنة القراء — كلها بالقفز داخل نفس الملف.
 import * as settings from '../state.js';
-import { getSurahMeta } from '../data.js';
+import { getSurahMeta, getSurahText } from '../data.js';
 import { setupMediaSession, updateMediaSession } from './mediaSession.js';
 
 const TIMING_API = 'https://www.mp3quran.net/api/v3/ayat_timing';
@@ -54,10 +54,42 @@ export async function getTimings(reciterId, s) {
     for (const x of data) if (x.ayah >= 1) t[x.ayah] = [x.start_time / 1000, x.end_time / 1000];
   }
   const count = getSurahMeta(s).ayahCount;
-  for (let a = 1; a <= count; a++) if (!t[a]) throw new Error('timing incomplete');
+  t.length = count + 1;
+  // بعض التوقيتات تدمج آيتين في مدخل واحد (مثل آخر آيتين من الفاتحة عند الحصري):
+  // نوزّع مدة المقطع على آياته بنسبة طول نصها بدل رفض السورة كلها
+  if ([...t.slice(1)].some((x) => !x)) {
+    const have = t.slice(1).filter(Boolean).length;
+    if (have < count * 0.5) throw new Error('timing incomplete');
+    await fillGaps(t, count, await getSurahText(s));
+  }
   t[0] = [0, t[1][0]];
   timingCache.set(key, t);
   if (timingCache.size > 30) timingCache.delete(timingCache.keys().next().value);
+  return t;
+}
+
+/** يملأ الآيات الناقصة: كل مجموعة ناقصة تُدمج مع الآية المعروفة قبلها وتُقسَّم المدة بنسبة عدد الحروف */
+export async function fillGaps(t, count, texts) {
+  const len = (a) => Math.max(1, (texts[a - 1] || '').replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\s]/g, '').length);
+  let a = 1;
+  while (a <= count) {
+    if (t[a]) { a++; continue; }
+    let b = a;
+    while (b <= count && !t[b]) b++;            // الناقص: a .. b-1
+    const first = a > 1 ? a - 1 : a;              // نضم الآية المعروفة السابقة
+    const start = a > 1 ? t[a - 1][0] : 0;
+    const end = b <= count ? t[b][0] : (a > 1 ? t[a - 1][1] : start);
+    const group = [];
+    for (let k = first; k < b; k++) group.push(k);
+    const total = group.reduce((n, k) => n + len(k), 0);
+    let pos = start;
+    for (const k of group) {
+      const d = (end - start) * (len(k) / total);
+      t[k] = [pos, pos + d];
+      pos += d;
+    }
+    a = b;
+  }
   return t;
 }
 
@@ -128,9 +160,12 @@ async function load(s, a) {
       timings = t;
     } catch (e) {
       if (my !== loadSeq) return;
-      return fail(navigator.onLine ? 'تعذر تحميل توقيت الآيات' : null);
+      // توقيت هذه السورة غير متوفر عند المصدر: نشغّلها متصلة بلا تظليل بدل الخطأ
+      if (e.message !== 'timing incomplete') return fail(navigator.onLine ? 'تعذر تحميل توقيت الآيات' : null);
+      loadedKey = key;
+      audio.src = surahUrl(reciterId, s);
     }
-    if (!isUntimed(reciterId)) {
+    if (!isUntimed(reciterId) && timings) {
       loadedKey = key;
       audio.src = surahUrl(reciterId, s);
     }

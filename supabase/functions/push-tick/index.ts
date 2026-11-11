@@ -1,7 +1,7 @@
 // push-tick: تُستدعى كل ٥ دقائق من pg_cron. تحسب مواقيت الصلاة لكل مشترك بمدينته وطريقته،
 // وترسل إشعار الأذان عند دخول الوقت، وتذكير الورد في الموعد الذي اختاره.
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
-import webpush from 'npm:web-push@3.6.7';
+import { sendPush } from './webpush.js';
 import { Coordinates, CalculationMethod, PrayerTimes, Madhab, HighLatitudeRule } from 'npm:adhan@4.4.3';
 
 const NAMES: Record<string, string> = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
@@ -28,8 +28,26 @@ Deno.serve(async (req) => {
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
   const { data: cfg, error: cfgErr } = await db.rpc('push_config');
   if (cfgErr || !cfg?.vapid_private) return new Response('config', { status: 500 });
+  const vapid = { subject: APP, publicKey: cfg.vapid_public, privateKey: cfg.vapid_private };
+  const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'content-type, apikey, authorization', 'Content-Type': 'application/json' };
+  if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
+
+  // إشعار تجريبي يطلبه المستخدم لجهازه (نقطة الإرسال سرية ولا يعرفها غيره؛ مرة كل ٣٠ ثانية)
+  const body = await req.json().catch(() => ({}));
+  if (body?.test_endpoint) {
+    const { data: s } = await db.from('push_subs').select('*').eq('endpoint', body.test_endpoint).maybeSingle();
+    if (!s) return new Response(JSON.stringify({ ok: false, error: 'not subscribed' }), { status: 404, headers: cors });
+    const lastTest = Date.parse(s.last_sent?.test || 0);
+    if (Date.now() - lastTest < 30_000) return new Response(JSON.stringify({ ok: false, error: 'too soon' }), { status: 429, headers: cors });
+    const r = await sendPush({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+      JSON.stringify({ title: 'رتّل — إشعار تجريبي', body: 'التنبيهات شغّالة على جهازك ✓', url: '#/prayer', tag: 'test' }), { vapid, ttl: 120 });
+    await db.from('push_subs').update({ last_sent: { ...(s.last_sent || {}), test: new Date().toISOString() } }).eq('endpoint', s.endpoint);
+    const ok = r.status >= 200 && r.status < 300;
+    if (r.status === 404 || r.status === 410) await db.from('push_subs').delete().eq('endpoint', s.endpoint);
+    return new Response(JSON.stringify({ ok, status: r.status, error: ok ? undefined : r.text.slice(0, 200) }), { status: ok ? 200 : 502, headers: cors });
+  }
+
   if (req.headers.get('x-tick-key') !== cfg.push_tick_key) return new Response('forbidden', { status: 403 });
-  webpush.setVapidDetails(APP, cfg.vapid_public, cfg.vapid_private);
 
   const now = new Date();
   const { data: subs, error } = await db.from('push_subs').select('*').limit(5000);
@@ -61,12 +79,11 @@ Deno.serve(async (req) => {
     let gone = false, failed = false;
     for (const d of due) {
       try {
-        await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(d.payload), { TTL: 1800, urgency: 'high', topic: d.tag });
-        last[d.key] = lp.date; sent++;
-      } catch (e: any) {
-        if (e?.statusCode === 404 || e?.statusCode === 410) { gone = true; break; }
-        failed = true;
-      }
+        const r = await sendPush({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(d.payload), { vapid, topic: d.tag });
+        if (r.status === 404 || r.status === 410) { gone = true; break; }
+        if (r.status >= 200 && r.status < 300) { last[d.key] = lp.date; sent++; }
+        else { failed = true; console.error('push', r.status, r.text.slice(0, 200)); }
+      } catch (e) { failed = true; console.error('push error', String(e)); }
     }
     if (gone || (failed && s.fails >= 20)) { await db.from('push_subs').delete().eq('endpoint', s.endpoint); removed++; return; }
     await db.from('push_subs').update({ last_sent: last, fails: failed ? s.fails + 1 : 0 }).eq('endpoint', s.endpoint);

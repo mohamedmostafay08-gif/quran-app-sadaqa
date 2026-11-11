@@ -2,7 +2,7 @@
 import { h, ar } from '../lib/dom.js';
 import * as settings from '../state.js';
 import { toast } from '../ui.js';
-import { pushStatus, syncPush, PUSH_PRAYERS } from '../features/push.js';
+import { pushStatus, syncPush, PUSH_PRAYERS, askPermission, testPush } from '../features/push.js';
 
 const NAMES = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
 const STATUS_MSG = {
@@ -14,12 +14,20 @@ const STATUS_MSG = {
 export function notifyCard({ prayers = true, wird = true } = {}) {
   const status = pushStatus();
   const note = h('p.small-note', { 'aria-live': 'polite' });
-  const save = async (rollback) => {
+  const testBtn = h('button.btn.ghost.block', { type: 'button', hidden: !((settings.get('notifyPrayers') || []).length || settings.get('wirdTime')), onclick: async () => {
+    testBtn.disabled = true; note.textContent = 'جارٍ الإرسال…';
+    try { await testPush(); note.textContent = 'اتبعت. لو ما وصلكش خلال دقيقة: تأكد إن إشعارات «رتّل» مسموحة من إعدادات الجهاز، وإن وضع «عدم الإزعاج/التركيز» مقفول.'; }
+    catch (e) { note.textContent = e.message === 'too soon' ? 'استنى نص دقيقة وجرّب تاني.' : 'تعذر الإرسال؛ جرّب تقفل التنبيهات وتفتحها تاني.'; }
+    setTimeout(() => { testBtn.disabled = false; }, 30000);
+  } }, 'إرسال إشعار تجريبي');
+  const save = async (rollback, perm) => {
     note.textContent = 'جارٍ الحفظ…';
     try {
+      if ((await perm) === 'denied') { rollback(); note.textContent = STATUS_MSG.denied; return; }
       const ok = await syncPush({ ask: true });
       if (!ok) { rollback(); note.textContent = Notification?.permission === 'denied' ? STATUS_MSG.denied : 'لم يتم السماح بالإشعارات.'; return; }
       note.textContent = '';
+      testBtn.hidden = !((settings.get('notifyPrayers') || []).length || settings.get('wirdTime'));
       toast('تم حفظ التنبيهات');
     } catch {
       rollback(); note.textContent = navigator.onLine ? 'تعذر الحفظ، حاول مرة أخرى.' : 'حفظ التنبيهات يحتاج اتصالًا بالإنترنت.';
@@ -34,11 +42,12 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
       const chips = h('div.notify-chips', PUSH_PRAYERS.map((k) => {
         const on = () => (settings.get('notifyPrayers') || []).includes(k);
         const b = h('button.pb-chip', { type: 'button', 'aria-pressed': String(on()), disabled: !hasLoc, onclick: async () => {
+          const perm = askPermission();
           const before = settings.get('notifyPrayers') || [];
           const next = on() ? before.filter((x) => x !== k) : [...before, k];
           await settings.set('notifyPrayers', PUSH_PRAYERS.filter((x) => next.includes(x)));
           b.setAttribute('aria-pressed', String(on()));
-          save(async () => { await settings.set('notifyPrayers', before); b.setAttribute('aria-pressed', String(on())); });
+          save(async () => { await settings.set('notifyPrayers', before); b.setAttribute('aria-pressed', String(on())); }, perm);
         } }, NAMES[k]);
         return b;
       }));
@@ -48,15 +57,19 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
     if (wird) {
       const time = h('input.note-input', { type: 'time', value: settings.get('wirdTime') || '', 'aria-label': 'موعد تذكير الورد' });
       const clear = h('button.btn.ghost', { type: 'button', hidden: !settings.get('wirdTime'), onclick: () => { time.value = ''; time.dispatchEvent(new Event('change')); } }, 'إيقاف');
+      // iOS: نطلب الإذن عند لمس خانة الوقت (ضغطة مستخدم)، لأن حدث change لا يُعتبر ضغطة
+      let perm = null;
+      time.addEventListener('pointerdown', () => { perm = askPermission(); });
       time.addEventListener('change', async () => {
+        perm ||= askPermission();
         const before = settings.get('wirdTime');
         await settings.set('wirdTime', time.value || null);
         clear.hidden = !time.value;
-        save(async () => { await settings.set('wirdTime', before); time.value = before || ''; clear.hidden = !before; });
+        save(async () => { await settings.set('wirdTime', before); time.value = before || ''; clear.hidden = !before; }, perm);
       });
       body.push(h('div.field', h('span', 'تذكير بالورد اليومي'), h('div.notify-time', time, clear)));
     }
     body.push(h('p.small-note', 'لتصلك التنبيهات والتطبيق مغلق، نحفظ على الخادم: موقعك مقرّبًا (حوالي ١ كم)، وطريقة الحساب، والمواعيد التي اخترتها فقط — بلا اسم أو أي بيانات أخرى. إلغاء كل التنبيهات يحذفها من الخادم.'));
   }
-  return h('section.card.notify-card', h('h2', 'التنبيهات'), ...body, note);
+  return h('section.card.notify-card', h('h2', 'التنبيهات'), ...body, status === 'ok' ? testBtn : null, note);
 }

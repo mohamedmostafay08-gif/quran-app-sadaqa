@@ -50,6 +50,30 @@ function prefs() {
 }
 const wanted = () => (settings.get('notifyPrayers') || []).length > 0 || !!settings.get('wirdTime');
 
+/** يطلب إذن الإشعارات فورًا (لازم يُستدعى مباشرة داخل ضغطة المستخدم — شرط في iOS) */
+export function askPermission() {
+  if (!('Notification' in self) || Notification.permission !== 'default') return Promise.resolve(self.Notification?.permission);
+  return Notification.requestPermission();
+}
+
+/** إشعار تجريبي لهذا الجهاز من الخادم (يمر بنفس طريق تنبيهات الأذان) */
+export async function testPush() {
+  const sub = await subscription(false);
+  if (!sub) throw new Error('not subscribed');
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/push-tick`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ test_endpoint: sub.endpoint }),
+  });
+  const d = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(d.error || String(res.status));
+  return d;
+}
+
+/** عند فتح التطبيق: تحديث الاشتراك على الخادم (المتصفح قد يغيّر نقطة الإرسال) */
+export function refreshPush() {
+  if (!wanted() || pushStatus() !== 'ok' || Notification.permission !== 'granted') return;
+  syncPush().catch(() => {});
+}
+
 /** يحفظ التفضيلات الحالية على الخادم (يطلب الإذن عند أول تفعيل). يرجع true لو نجح */
 export async function syncPush({ ask = false } = {}) {
   if (pushStatus() !== 'ok') return false;

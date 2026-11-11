@@ -35,7 +35,7 @@ export function renderWelcome() {
     const input = h('input.note-input.wl-search', { type: 'search', placeholder: 'ابحث باسم القارئ…', 'aria-label': 'ابحث باسم القارئ' });
     const select = (r, li) => {
       settings.set('reciter', r.id);
-      for (const x of list.querySelectorAll('li')) { x.classList.toggle('sel', x === li); x.firstChild.setAttribute('aria-pressed', String(x === li)); }
+      for (const x of list.querySelectorAll('li:not(.wl-label)')) { x.classList.toggle('sel', x === li); x.querySelector('.wl-pick')?.setAttribute('aria-pressed', String(x === li)); }
     };
     const row = (r, current) => {
       const li = h('li', { class: r.id === current ? 'sel' : '' },

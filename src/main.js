@@ -21,6 +21,7 @@ import { renderPrayer, renderAdhkarChapter } from './views/prayer.js';
 import { renderGroups, renderGroup } from './views/group.js';
 import { initInstall, isStandalone } from './features/install.js';
 import { track } from './features/stats.js';
+import { refreshPush } from './features/push.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
@@ -67,6 +68,7 @@ async function boot() {
   initKhatmaAutoRecord();
   initInstall();
   track(isStandalone() ? 'open_installed' : 'open');
+  refreshPush();
   player.subscribe((st) => { if (st.status === 'playing') track('listen'); });
   const ROUTE_EVENT = { surah: 'read', page: 'pages', prayer: 'prayer', group: 'group', memorize: 'memorize' };
 
