@@ -1,23 +1,49 @@
 {
-  "name": "القرآن الكريم",
-  "short_name": "القرآن",
-  "description": "المصحف الشريف كاملًا مع تلاوات أشهر القراء — يعمل بدون إنترنت.",
+  "name": "رتّل — القرآن الكريم",
+  "short_name": "رتّل",
+  "description": "رتّل: المصحف الشريف كاملًا بخط مصحف المدينة، وتلاوات أكثر من ١٠٠ قارئ مرتّل ومجوّد، والختمة والحفظ ومواقيت الصلاة والأذكار — يعمل بدون إنترنت.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./#/",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#f7f4ec",
-  "theme_color": "#0f5c4d",
-  "categories": ["books", "education", "lifestyle"],
+  "background_color": "#f4ecda",
+  "theme_color": "#0e5a4b",
+  "categories": [
+    "books",
+    "education",
+    "lifestyle"
+  ],
   "icons": [
-    { "src": "public/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "public/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "public/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "public/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "public/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "public/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "أكمل القراءة", "url": "./#/bookmarks" },
-    { "name": "البحث", "url": "./#/search" }
-  ]
+    {
+      "name": "أكمل القراءة",
+      "url": "./#/bookmarks"
+    },
+    {
+      "name": "البحث",
+      "url": "./#/search"
+    }
+  ],
+  "id": "./"
 }

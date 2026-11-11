@@ -83,7 +83,7 @@ export async function renderCard({ text, ref, theme }) {
   ctx.fillText(ref, W / 2, H - 170);
   ctx.globalAlpha = 0.7;
   ctx.font = '400 24px "Noto Kufi Arabic", sans-serif';
-  ctx.fillText('۞ القرآن الكريم', W / 2, H - 110);
+  ctx.fillText('۞ رتّل — القرآن الكريم', W / 2, H - 110);
   ctx.globalAlpha = 1;
   return c;
 }

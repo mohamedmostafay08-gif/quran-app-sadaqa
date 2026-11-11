@@ -29,7 +29,7 @@ export function updateMediaSession(st) {
     ms.metadata = new MediaMetadata({
       title,
       artist: reciter ? reciter.nameAr : '',
-      album: 'القرآن الكريم',
+      album: 'رتّل — القرآن الكريم',
       artwork: [{ src: ICON, sizes: '512x512', type: 'image/png' }],
     });
   }

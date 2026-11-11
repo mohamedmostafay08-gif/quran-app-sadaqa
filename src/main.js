@@ -19,7 +19,6 @@ import { renderMushaf } from './views/mushaf.js';
 import { renderWelcome } from './views/welcome.js';
 import { renderPrayer, renderAdhkarChapter } from './views/prayer.js';
 import { renderGroups, renderGroup } from './views/group.js';
-import { timeOfDay, getLocation } from './features/prayer.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
@@ -56,9 +55,6 @@ async function boot() {
   route('/group', renderGroups);
   route('/group/:id', renderGroup);
 
-  // لون الخلفية حسب وقت الصلاة الحقيقي (لو الموقع محدد)
-  const tod = () => { try { const t = timeOfDay(getLocation()); if (t) document.documentElement.dataset.tod = t; } catch { /* */ } };
-  tod(); setInterval(tod, 5 * 60000);
 
   // أول فتح: شاشة الترحيب
   if (!getSetting('onboarded') && (!location.hash || location.hash === '#/' || location.hash === '#')) history.replaceState(null, '', '#/welcome');
