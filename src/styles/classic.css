@@ -21,7 +21,7 @@ body { background: var(--bg); }
   background: var(--surface);
   -webkit-backdrop-filter: none; backdrop-filter: none;
   box-shadow: none;
-  top: env(safe-area-inset-top, 0px);
+  top: 0; /* المنطقة الآمنة محسوبة في الحشو مرة واحدة */
   transition: transform .3s var(--ease);
 }
 
@@ -133,7 +133,7 @@ body:has(.mini-player.show) .main { padding-bottom: calc(var(--tabbar-h) + var(-
 /* ===== القراءة الغامرة ===== */
 body.immersive .tabbar { transform: translateY(100%); }
 body.immersive .mini-player.show { transform: translateY(calc(var(--tabbar-h) + var(--safe-b))); }
-body.immersive .topbar { transform: translateY(calc(-100% - env(safe-area-inset-top, 0px))); }
+body.immersive .topbar { transform: translateY(-100%); }
 
 body.car-mode .mini-player { display: none; }
 .hero-date { margin: var(--sp-3) 0 0; color: var(--accent); font-weight: 700; font-size: var(--fs-md); }
@@ -169,3 +169,6 @@ body:has(.mini-player.show) .install-banner { bottom: calc(var(--tabbar-h) + var
 .backup-sum { margin: var(--sp-2) 0; padding-inline-start: var(--sp-5); line-height: 1.9; }
 .fp-untimed { display: grid; gap: var(--sp-3); }
 .fp-untimed small { font-family: var(--font-ui, inherit); font-size: var(--fs-md); line-height: 1.9; color: var(--text-2); }
+
+/* شريط بلون الخلفية تحت ساعة الجهاز (المنطقة الآمنة) حتى لا يمر المحتوى خلفها عند إخفاء الشريط العلوي */
+body::before { content: ''; position: fixed; z-index: 9; inset: 0 0 auto 0; height: env(safe-area-inset-top, 0px); background: var(--surface); pointer-events: none; }

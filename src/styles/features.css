@@ -329,3 +329,17 @@ body[data-route="welcome"] .main { padding-bottom: 120px; }
 .pr-date > div { flex: 1; }
 .pr-date strong, .pr-date > div > :first-child { overflow-wrap: anywhere; }
 .pr-city { flex: none; max-width: 45%; }
+
+/* ===== إصلاحات التداخل والمساحات (فحص آلي على الآيفون SE) ===== */
+/* شاشة البداية: مساحة تحت القائمة بقدر الشريط الثابت حتى لا يختفي آخر عنصر خلفه */
+.welcome { padding-bottom: calc(96px + var(--safe-b)); }
+.wl-skip { min-height: 44px; min-width: 44px; padding: 0 var(--sp-2); text-decoration: none; }
+/* الصلاة: التاريخ والمدينة يلتفّان بدل التداخل */
+.pr-date { flex-wrap: wrap; row-gap: var(--sp-2); }
+.pr-date > div { flex: 1 1 180px; }
+.pr-city { max-width: 100%; }
+/* أزرار الخيارات المتعددة على الشاشات الضيقة: لا قصّ للنص */
+.seg button { min-width: 0; padding: 0 var(--sp-2); }
+@media (max-width: 400px) { .seg button { font-size: var(--fs-sm); } }
+/* الروابط-الأزرار: مساحة لمس كافية */
+button.link { min-height: 40px; padding: 0 var(--sp-1); }
