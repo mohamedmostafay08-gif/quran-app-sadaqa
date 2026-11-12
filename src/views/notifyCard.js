@@ -3,13 +3,13 @@ import { h, ar } from '../lib/dom.js';
 import * as settings from '../state.js';
 import { toast } from '../ui.js';
 import { pushStatus, syncPush, PUSH_PRAYERS, askPermission, testPush } from '../features/push.js';
-import { playAdhan, preloadAdhan } from '../features/adhan.js';
+import { playAdhan, preloadAdhan, VOICES } from '../features/adhan.js';
 
 const NAMES = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
 const STATUS_MSG = {
-  unsupported: 'هذا المتصفح لا يدعم الإشعارات. جرّب Chrome أو Edge أو Firefox، أو ثبّت التطبيق.',
-  'ios-install': 'على الآيفون: تعمل الإشعارات بعد تثبيت التطبيق على الشاشة الرئيسية (مشاركة ← «إضافة إلى الشاشة الرئيسية») ثم فتحه من أيقونته.',
-  denied: 'الإشعارات محظورة لهذا الموقع. فعّلها من إعدادات المتصفح (رمز القفل بجوار العنوان) ثم عد إلى هنا.',
+  unsupported: 'المتصفح لا يدعم الإشعارات.',
+  'ios-install': 'لتفعيل الإشعارات: ثبّت التطبيق على الشاشة الرئيسية ثم افتحه منها.',
+  denied: 'الإشعارات محظورة؛ فعّلها من إعدادات المتصفح.',
 };
 
 export function notifyCard({ prayers = true, wird = true } = {}) {
@@ -17,8 +17,8 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
   const note = h('p.small-note', { 'aria-live': 'polite' });
   const testBtn = h('button.btn.ghost.block', { type: 'button', hidden: !((settings.get('notifyPrayers') || []).length || settings.get('wirdTime')), onclick: async () => {
     testBtn.disabled = true; note.textContent = 'جارٍ الإرسال…';
-    try { await testPush(); note.textContent = 'أُرسل الإشعار. إذا لم يصلك خلال دقيقة، فتأكد أن إشعارات «رتّل» مسموحة في إعدادات الجهاز، وأن وضع «عدم الإزعاج» أو «التركيز» غير مفعّل.'; }
-    catch (e) { note.textContent = e.message === 'too soon' ? 'انتظر نصف دقيقة ثم أعد المحاولة.' : 'تعذر الإرسال؛ جرّب إيقاف التنبيهات ثم تفعيلها من جديد.'; }
+    try { await testPush(); note.textContent = 'تم الإرسال'; }
+    catch (e) { note.textContent = e.message === 'too soon' ? 'حاول بعد نصف دقيقة' : 'تعذر الإرسال'; }
     setTimeout(() => { testBtn.disabled = false; }, 30000);
   } }, 'إرسال إشعار تجريبي');
   const save = async (rollback, perm) => {
@@ -59,9 +59,16 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
     body.push(
       h('div.field', h('span', 'الأذان عند دخول وقت الصلاة'), chips,
         hasLoc ? null : h('small.muted', 'حدّد موقعك أولًا من شاشة المواقيت.')),
-      h('label.toggle', h('span', h('strong', 'تشغيل صوت الأذان'), h('small', 'يُرفع الأذان كاملًا إذا كان التطبيق مفتوحًا، وعند الضغط على تنبيه الأذان')), inApp),
-      h('button.btn.ghost.block', { type: 'button', onclick: () => playAdhan('test') }, 'استمع إلى الأذان'),
-      h('p.small-note', 'ملاحظة: لا تسمح الهواتف لتطبيقات الويب بتشغيل صوت خاص مع الإشعار، فيصلك التنبيه بصوت الإشعارات المعتاد واهتزاز، ثم يُرفع الأذان كاملًا عند فتحه.'));
+      h('label.toggle', h('span', h('strong', 'تشغيل صوت الأذان')), inApp),
+      h('div.field', h('span', 'صوت الأذان'), h('div.notify-chips', VOICES.map((v) => {
+        const b = h('button.pb-chip.voice-chip', { type: 'button', 'aria-pressed': String(settings.get('adhanVoice') === v.id), onclick: async () => {
+          await settings.set('adhanVoice', v.id);
+          for (const x of b.parentElement.children) x.setAttribute('aria-pressed', String(x === b));
+          playAdhan('test', v.id);
+        } }, v.name);
+        return b;
+      }))),
+      h('button.btn.ghost.block', { type: 'button', onclick: () => playAdhan('test') }, 'استمع إلى الأذان'));
   }
   if (pushOk) {
     if (wird) {
@@ -79,7 +86,6 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
       });
       body.push(h('div.field', h('span', 'تذكير بالورد اليومي'), h('div.notify-time', time, clear)));
     }
-    body.push(h('p.small-note', 'لتصلك التنبيهات والتطبيق مغلق، نحفظ على الخادم موقعك مقرّبًا (نحو ١ كم)، وطريقة الحساب، والمواعيد التي اخترتها فقط، بلا اسم أو أي بيانات أخرى. وإلغاء كل التنبيهات يحذفها من الخادم.'));
   }
   return h('section.card.notify-card', h('h2', 'التنبيهات'), ...body, status === 'ok' ? testBtn : null, note);
 }

@@ -6,13 +6,22 @@ import * as P from './prayer.js';
 import { player } from '../audio/player.js';
 
 const NAMES = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
-const SRC = new URL('../../public/audio/adhan.mp3', import.meta.url).href;
-let audio = null, box = null, blobP = null;
+// أصوات الأذان المتاحة
+export const VOICES = [
+  { id: 'egypt', name: 'المصري', by: 'بصوت الشيخ محمد رفعت', file: 'adhan-egypt.mp3' },
+  { id: 'makkah', name: 'الحرم المكي', by: 'من المسجد الحرام', file: 'adhan-makkah.mp3' },
+  { id: 'calm', name: 'هادئ', by: '', file: 'adhan.mp3' },
+];
+const voice = (id = settings.get('adhanVoice')) => VOICES.find((v) => v.id === id) || VOICES[0];
+const srcOf = (v) => new URL(`../../public/audio/${v.file}`, import.meta.url).href;
+let audio = null, box = null;
+const blobs = {};
 
 // نحمّل الملف كاملًا مرة واحدة (يُحفظ في الكاش فيعمل بدون إنترنت) ونشغّله من الذاكرة؛
 // هذا أضمن على الآيفون من طلبات الصوت الجزئية
-export function preloadAdhan() {
-  return (blobP ||= fetch(SRC).then((r) => (r.ok ? r.blob() : Promise.reject(r.status))).then((b) => URL.createObjectURL(b)).catch(() => { blobP = null; return SRC; }));
+export function preloadAdhan(v = voice()) {
+  const src = srcOf(v);
+  return (blobs[v.id] ||= fetch(src).then((r) => (r.ok ? r.blob() : Promise.reject(r.status))).then((b) => URL.createObjectURL(b)).catch(() => { delete blobs[v.id]; return src; }));
 }
 
 const playedKey = () => 'qa:adhan-played';
@@ -26,12 +35,14 @@ export function stopAdhan() {
 }
 
 /** يعرض بطاقة الأذان ويحاول تشغيله؛ إن منع المتصفح التشغيل التلقائي يظهر زر «تشغيل الأذان» */
-export function playAdhan(key) {
+export function playAdhan(key, voiceId) {
   if (key && key !== 'test') markPlayed(key);
   if (player.state().status === 'playing') player.pause();
-  audio ||= new Audio(SRC);
+  const v = voice(voiceId), src = srcOf(v);
+  audio ||= new Audio();
+  if (audio.dataset.voice !== v.id) { audio.src = src; audio.dataset.voice = v.id; }
   audio.volume = 1;
-  preloadAdhan().then((u) => { if (audio.src !== u && audio.paused && u !== SRC) { audio.src = u; } });
+  preloadAdhan(v).then((u) => { if (u !== src && audio.dataset.voice === v.id && audio.paused && audio.src !== u) audio.src = u; });
   const title = NAMES[key] ? `حان الآن موعد صلاة ${NAMES[key]}` : 'الأذان';
   const playBtn = h('button.btn.adh-play', { type: 'button' });
   const setBtn = () => playBtn.replaceChildren(icon(audio.paused ? 'play' : 'pause'), h('span', audio.paused ? 'تشغيل الأذان' : 'إيقاف مؤقت'));
@@ -44,6 +55,7 @@ export function playAdhan(key) {
       h('span.adh-mark', { 'aria-hidden': 'true' }, '۞'),
       h('strong', title),
       h('p', '«حيّ على الصلاة، حيّ على الفلاح»'),
+      v.by ? h('small.adh-by', v.by) : null,
       h('div.adh-actions', playBtn, h('button.btn.ghost', { type: 'button', onclick: stopAdhan }, 'إغلاق'))));
   box.addEventListener('keydown', (e) => { if (e.key === 'Escape') stopAdhan(); });
   document.body.append(box);

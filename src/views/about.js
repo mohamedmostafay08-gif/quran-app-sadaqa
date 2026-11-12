@@ -40,7 +40,7 @@ export function renderAbout() {
         h('dt', 'المكتبة'),
         h('dd', 'الأحاديث بنصوصها وتخريجها وشروحها من ', link('https://hadeethenc.com', 'موسوعة الأحاديث النبوية (HadeethEnc)'), '، ولا يُعرض منها إلا ما حُكم عليه بالصحة. وسير الصحابة من ', link('https://ar.wikipedia.org', 'ويكيبيديا العربية'), ' (CC BY-SA 4.0). ودليل الوضوء والصلاة ملخّص ميسّر، تحت كل خطوة منه دليلها من الحديث.'),
         h('dt', 'صوت الأذان'),
-        h('dd', 'أذان كامل من ', link('https://commons.wikimedia.org/wiki/File:Beautiful_adhan.ogg', 'ويكيميديا كومنز'), ' (ملكية عامة CC0).'),
+        h('dd', 'الأذان المصري بصوت الشيخ محمد رفعت من ', link('https://archive.org/details/20230813_20230813_1843', 'أرشيف الإنترنت'), '، وأذان الحرم المكي من ', link('https://archive.org/details/MakkahAzan-ramadan', 'أرشيف الإنترنت'), '، والأذان الهادئ من ', link('https://commons.wikimedia.org/wiki/File:Beautiful_adhan.ogg', 'ويكيميديا كومنز'), '؛ وكلها ملكية عامة.'),
         h('dt', 'الإذاعة'),
         h('dd', 'إذاعة القرآن الكريم من القاهرة ومن السعودية (بث مباشر عبر radiojar)، وإذاعات القراء والبرامج من ', link('https://mp3quran.net', 'mp3quran.net'), '.'),
         h('dt', 'أسماء السور بالإنجليزية'),

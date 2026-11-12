@@ -24,7 +24,8 @@ function walk(rel) {
 const EXTRA = [/^public\/data\/(words|tafsir|tafsir-saadi|mushaf|trans|library)\//, /^public\/data\/(roots|tajweed|tajweed-qpc)\.json$/];
 const all = INCLUDE.flatMap(walk).filter((f) => !SKIP.some((re) => re.test(f)));
 const extras = all.filter((f) => EXTRA.some((re) => re.test(f)) && !/^public\/data\/trans\//.test(f));
-const files = all.filter((f) => !EXTRA.some((re) => re.test(f)) && f !== 'public/data/extras.json');
+// أصوات الأذان: تُحمَّل عند أول تشغيل وتُحفظ في كاش الصوت الدائم (لا تُثقل التثبيت الأول)
+const files = all.filter((f) => !EXTRA.some((re) => re.test(f)) && f !== 'public/data/extras.json' && !f.startsWith('public/audio/'));
 const exHash = crypto.createHash('sha256');
 for (const f of extras) exHash.update(f).update(fs.readFileSync(path.join(ROOT, f)));
 const exVersion = exHash.digest('hex').slice(0, 10);

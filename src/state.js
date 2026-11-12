@@ -32,6 +32,7 @@ export const DEFAULTS = {
   notifyPrayers: [],      // تنبيهات الأذان (fajr, dhuhr ...)
   wirdTime: null,         // تذكير الورد اليومي HH:MM
   adhanInApp: true,       // تشغيل صوت الأذان عند دخول الوقت والتطبيق مفتوح
+  adhanVoice: 'egypt',    // صوت الأذان: egypt | makkah | calm
   stats: true,            // إحصائيات مجهولة مجمّعة (عدد يومي فقط)
 };
 

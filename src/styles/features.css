@@ -377,3 +377,4 @@ button.link { min-height: 40px; padding: 0 var(--sp-1); }
 @keyframes adh-in { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .adhan-box { animation: none; } }
 .new-badge { display: inline-block; margin-inline-end: 6px; padding: 0 7px; border-radius: 999px; background: var(--gold); color: #fff; font-size: var(--fs-xs); font-weight: 700; line-height: 1.7; vertical-align: 1px; }
+.adh-by { font-size: var(--fs-sm); color: var(--text-3, var(--muted)); }

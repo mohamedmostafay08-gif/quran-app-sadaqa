@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '011756575f';
+const VERSION = '3cb6a177f6';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -70,7 +70,6 @@ const ASSETS = [
   'src/views/search.js',
   'src/views/settings.js',
   'src/views/welcome.js',
-  'public/audio/adhan.mp3',
   'public/data/adhkar.json',
   'public/data/extra-notice.json',
   'public/data/quran-meta.json',
@@ -167,6 +166,18 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
   // طلبات الصوت الجزئية (Range) تذهب للشبكة مباشرة؛ ملف الأذان يُخزَّن كاملًا عبر الطلب العادي
   if (req.headers.has('range')) return;
+  // أصوات الأذان: كاش الصوت الدائم (لا يُمسح مع التحديثات)
+  if (url.pathname.includes('/public/audio/')) {
+    event.respondWith((async () => {
+      const cache = await caches.open(AUDIO_CACHE);
+      const hit = await cache.match(req, { ignoreSearch: true });
+      if (hit) return hit;
+      const res = await fetch(req);
+      if (res.status === 200) cache.put(req, res.clone());
+      return res;
+    })());
+    return;
+  }
 
   // التنقل: index.html من الكاش (التطبيق يعمل بدون نت)
   if (req.mode === 'navigate') {
