@@ -21,7 +21,7 @@ function walk(rel) {
 }
 
 // بيانات إضافية: لا تُحمَّل مسبقًا، بل عند أول استخدام (أو بزر «تنزيل كل البيانات»)
-const EXTRA = [/^public\/data\/(words|tafsir|tafsir-saadi|mushaf|trans)\//, /^public\/data\/(roots|tajweed|tajweed-qpc)\.json$/];
+const EXTRA = [/^public\/data\/(words|tafsir|tafsir-saadi|mushaf|trans|library)\//, /^public\/data\/(roots|tajweed|tajweed-qpc)\.json$/];
 const all = INCLUDE.flatMap(walk).filter((f) => !SKIP.some((re) => re.test(f)));
 const extras = all.filter((f) => EXTRA.some((re) => re.test(f)) && !/^public\/data\/trans\//.test(f));
 const files = all.filter((f) => !EXTRA.some((re) => re.test(f)) && f !== 'public/data/extras.json');

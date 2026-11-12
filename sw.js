@@ -3,14 +3,14 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '45843d5ed8';
+const VERSION = 'c0b8c9cdd6';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
 // البيانات الإضافية (الكلمات، التفسير، الصفحات، الترجمات…) تُخزَّن عند أول استخدام في كاش مستقل
-const EXTRAS_VERSION = '80dad7f240';
+const EXTRAS_VERSION = '56bbb67c1e';
 const EXTRAS_CACHE = 'extras-' + EXTRAS_VERSION;
-const isExtra = (path) => /\/public\/data\/(words|tafsir|tafsir-saadi|mushaf|trans)\//.test(path) || /\/public\/data\/(roots|tajweed|tajweed-qpc)\.json$/.test(path);
+const isExtra = (path) => /\/public\/data\/(words|tafsir|tafsir-saadi|mushaf|trans|library)\//.test(path) || /\/public\/data\/(roots|tajweed|tajweed-qpc)\.json$/.test(path);
 const ASSETS = [
   './',
   'index.html',
@@ -58,6 +58,7 @@ const ASSETS = [
   'src/views/group.js',
   'src/views/home.js',
   'src/views/khatma.js',
+  'src/views/library.js',
   'src/views/memorize.js',
   'src/views/mushaf.js',
   'src/views/notifyCard.js',

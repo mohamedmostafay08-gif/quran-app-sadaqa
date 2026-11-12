@@ -20,13 +20,14 @@ import { renderWelcome } from './views/welcome.js';
 import { renderPrayer, renderAdhkarChapter } from './views/prayer.js';
 import { renderGroups, renderGroup } from './views/group.js';
 import { renderRadio } from './views/radio.js';
+import { renderLibrary, renderTopic, renderHadith, renderGuide, renderSahabi } from './views/library.js';
 import { initInstall, isStandalone } from './features/install.js';
 import { track } from './features/stats.js';
 import { refreshPush } from './features/push.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
-const TAB_FOR = { '/': 'home', '/surah': 'home', '/search': 'search', '/bookmarks': 'bookmarks', '/downloads': 'settings', '/prayer': 'prayer', '/adhkar': 'prayer', '/settings': 'settings', '/about': 'settings', '/khatma': 'home', '/memorize': 'home', '/car': 'home', '/page': 'home', '/group': 'home', '/radio': 'home' };
+const TAB_FOR = { '/': 'home', '/surah': 'home', '/search': 'search', '/bookmarks': 'bookmarks', '/downloads': 'settings', '/prayer': 'prayer', '/adhkar': 'prayer', '/settings': 'settings', '/about': 'settings', '/khatma': 'home', '/memorize': 'home', '/car': 'home', '/page': 'home', '/group': 'home', '/radio': 'home', '/library': 'library', '/hadith': 'library', '/guide': 'library', '/sahabi': 'library' };
 
 async function boot() {
   const status = document.querySelector('.boot p');
@@ -59,6 +60,11 @@ async function boot() {
   route('/group', renderGroups);
   route('/group/:id', renderGroup);
   route('/radio', renderRadio);
+  route('/library', renderLibrary);
+  route('/library/:topic', renderTopic);
+  route('/hadith/:topic/:id', renderHadith);
+  route('/guide/:id', renderGuide);
+  route('/sahabi/:i?', renderSahabi);
 
 
   // أول فتح: شاشة الترحيب
@@ -72,7 +78,7 @@ async function boot() {
   track(isStandalone() ? 'open_installed' : 'open');
   refreshPush();
   player.subscribe((st) => { if (st.status === 'playing') track('listen'); });
-  const ROUTE_EVENT = { surah: 'read', page: 'pages', prayer: 'prayer', group: 'group', memorize: 'memorize' };
+  const ROUTE_EVENT = { surah: 'read', page: 'pages', prayer: 'prayer', group: 'group', memorize: 'memorize', sahabi: 'library', guide: 'library' };
 
   start((m) => {
     // أي انتقال يغلق الأوراق السفلية المفتوحة (مثل زر الرجوع في الموبايل)

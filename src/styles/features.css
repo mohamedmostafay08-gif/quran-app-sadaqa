@@ -202,3 +202,66 @@ body[data-route="welcome"] .main { padding-bottom: 120px; }
 .live-badge i { width: 9px; height: 9px; border-radius: 50%; background: var(--text-3); }
 .live-badge.on { color: var(--danger); } .live-badge.on i { background: var(--danger); animation: live 1.4s infinite; }
 .mp-art svg { width: 22px; height: 22px; }
+
+/* ===== المكتبة ===== */
+.lib-h { font-size: 15px; color: var(--text-2); margin: 22px 4px 10px; }
+.lib-grid { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.lib-card { display: flex; align-items: center; gap: 12px; min-height: 70px; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); color: inherit; text-decoration: none; }
+.lib-card:hover { border-color: var(--gold-line); }
+.lib-card.small { min-height: 56px; }
+.lib-icon { flex: none; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.lib-text { display: grid; gap: 2px; min-width: 0; }
+.lib-text strong { font-size: 15px; }
+.lib-text small { font-size: 12px; color: var(--text-2); }
+.lib-src { margin-top: 22px; }
+.sahabi-hero { display: grid; gap: 6px; margin-top: 12px; padding: 18px 20px; border-radius: 18px; text-decoration: none; color: var(--on-accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); border: 1px solid var(--gold-line); box-shadow: inset 0 0 0 4px var(--accent), inset 0 0 0 5px rgba(201, 168, 92, .5); }
+.sahabi-hero .eyebrow { color: var(--gold-soft); font-size: 12px; font-weight: 700; }
+.sahabi-hero strong { font-family: var(--font-quran); font-weight: 400; font-size: 32px; line-height: 1.5; }
+.sahabi-hero p { margin: 0; font-size: 14px; line-height: 1.9; opacity: .92; }
+.sh-more { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: var(--gold-soft); }
+.sh-more svg { width: 16px; height: 16px; }
+
+.hd-tools { display: grid; gap: 10px; margin: 12px 0 6px; }
+.hd-count { margin: 6px 4px; }
+.hd-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.hd-item { display: grid; gap: 10px; padding: 14px 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); color: inherit; text-decoration: none; }
+.hd-item:hover { border-color: var(--gold-line); }
+.hd-title { margin: 0; font-family: var(--font-quran); font-size: 19px; line-height: 1.9; }
+.hd-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.hd-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
+.hd-badge.agreed { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.hd-badge.hd-grade { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+.hd-card { margin-top: 14px; padding: 20px 18px; border-radius: 18px; background: var(--surface); border: 1px solid var(--gold-line); box-shadow: inset 0 0 0 4px var(--surface), inset 0 0 0 5px var(--gold-soft); display: grid; gap: 14px; }
+.hd-text { margin: 0; font-family: var(--font-quran); font-size: calc(22px * var(--quran-scale, 1)); line-height: 2.1; white-space: pre-line; }
+.hd-actions { display: flex; gap: 8px; }
+.hd-actions .pb-chip { min-height: 38px; padding: 0 14px; font-size: 13px; }
+.hd-sec { margin-top: 12px; }
+.hd-sec h2 { font-size: 16px; color: var(--accent); margin: 0 0 8px; }
+.hd-sec p { margin: 0 0 10px; line-height: 2; font-size: 15px; }
+.hd-sec summary { cursor: pointer; font-weight: 700; color: var(--accent); }
+.hd-hints { margin: 0; padding-inline-start: 20px; display: grid; gap: 8px; line-height: 1.9; font-size: 15px; }
+.hd-words { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: 15px; }
+.hd-words dt { font-family: var(--font-quran); font-size: 18px; color: var(--accent); }
+.hd-words dd { margin: 0; line-height: 1.9; }
+.hd-ref { white-space: pre-line; font-size: 13px; color: var(--text-2); margin-top: 8px; }
+.hd-sheet .hd-card { margin-top: 0; }
+
+.gd-intro p { margin: 0 0 8px; line-height: 2; font-size: 15px; }
+.gd-steps { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 10px; }
+.gd-steps > li { display: flex; gap: 14px; padding: 14px 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); }
+.gd-num { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-weight: 700; }
+.gd-steps.points .gd-num { background: var(--gold-soft); color: var(--gold); }
+.gd-body { min-width: 0; display: grid; gap: 6px; }
+.gd-body h3 { margin: 4px 0 0; font-size: 16px; }
+.gd-body p { margin: 0; line-height: 2; font-size: 15px; color: var(--text); }
+.gd-ev { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.gd-ev .pb-chip { min-height: 32px; font-size: 12px; }
+.gd-ev .pb-chip svg { width: 15px; height: 15px; }
+.gd-note { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--gold-soft); color: var(--text); }
+
+.sh-head { text-align: center; padding: 18px 0 6px; }
+.sh-head h1 { font-family: var(--font-quran); font-weight: 400; font-size: 40px; color: var(--accent); margin: 4px 0 0; line-height: 1.6; }
+.sh-head .eyebrow { color: var(--gold); font-weight: 700; font-size: 13px; }
+.sh-bio p { line-height: 2.05; font-size: 16px; margin: 0 0 12px; }
+.sh-list .lib-card { min-height: 60px; }

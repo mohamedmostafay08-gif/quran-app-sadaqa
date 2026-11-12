@@ -16,10 +16,10 @@ security definer
 set search_path = public
 as $$
 declare
-  allowed constant text[] := array['open','open_installed','listen','read','pages','tafsir','translation','prayer','group','memorize','share_audio','push_on','radio'];
+  allowed constant text[] := array['open','open_installed','listen','read','pages','tafsir','translation','prayer','group','memorize','share_audio','push_on','radio','library'];
   e text;
 begin
-  if p_events is null or array_length(p_events, 1) is null or array_length(p_events, 1) > 13 then return; end if;
+  if p_events is null or array_length(p_events, 1) is null or array_length(p_events, 1) > 14 then return; end if;
   foreach e in array p_events loop
     if e = any(allowed) then
       insert into public.daily_stats(day, event, count) values (current_date, e, 1)

@@ -1,5 +1,6 @@
 // الرئيسية: متابعة القراءة + قائمة السور/الأجزاء
 import { h, icon, ar } from '../lib/dom.js';
+import { sahabiTile } from './library.js';
 import { normalize, latinDigits } from '../lib/arabic.js';
 import { getSurahs, getSurahMeta, juzStart, juzOf, pageOf } from '../data.js';
 import * as settings from '../state.js';
@@ -45,6 +46,7 @@ export function renderHome() {
   Promise.all([homeWirdCard(), srs.due()]).then(([wird, due]) => {
     quick.append(
       wird,
+      sahabiTile(),
       h('a.quick', { href: '#/radio' }, icon('radio'), h('span', h('strong', 'إذاعة القرآن الكريم'), h('small', 'القاهرة والسعودية وإذاعات القراء'))),
       h('a.quick', { href: '#/memorize' }, icon('repeat'), h('span', h('strong', 'الحفظ والمراجعة'), h('small', due.length ? `${ar(due.length)} آية للمراجعة اليوم` : 'إخفاء تدريجي وتكرار'))),
       h('a.quick', { href: '#/group' }, icon('user'), h('span', h('strong', 'ختمة جماعية أو مُهداة'), h('small', 'اقرأوا معًا برابط واحد'))),
