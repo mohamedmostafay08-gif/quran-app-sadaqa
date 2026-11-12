@@ -92,6 +92,46 @@ async function fetchBatch(titles) {
   throw new Error('ويكيبيديا لم تستجب');
 }
 
+// ---- تصحيحات المراجعة (scripts/sahabi-edits.json) ----
+const EDITS = JSON.parse(fs.readFileSync(path.join(__dirname, 'sahabi-edits.json'), 'utf8'));
+const usedEdits = new Set();
+function applyEdits(title, name, bio) {
+  bio = clean(bio);
+  const ops = EDITS[title] || EDITS[name];
+  if (ops) usedEdits.add(EDITS[title] ? title : name);
+  for (const op of ops || []) {
+    if (op.bio) { bio = op.bio; continue; }
+    if (op.r) {
+      if (!bio.includes(op.r[0])) { if (op.optional) continue; throw new Error(`تصحيح لم يُطبَّق (${name}): «${op.r[0].slice(0, 60)}»`); }
+      bio = bio.split(op.r[0]).join(op.r[1]);
+    }
+    if (op.rRe) {
+      const re = new RegExp(op.rRe[0]);
+      if (!re.test(bio)) throw new Error(`تصحيح لم يُطبَّق (${name}): /${op.rRe[0].slice(0, 60)}/`);
+      bio = bio.replace(re, op.rRe[1]);
+    }
+    if (op.dropPara) {
+      const ps = bio.split(/\n\n/);
+      const k = ps.findIndex((x) => x.includes(op.dropPara));
+      if (k < 0) throw new Error(`فقرة لم تُحذف (${name}): «${op.dropPara.slice(0, 60)}»`);
+      ps.splice(k, 1); bio = ps.join('\n\n');
+    }
+    if (op.append) bio = bio.trimEnd() + ' ' + op.append;
+  }
+  return clean(bio);
+}
+// تنظيف عام: رمز ﷺ المحذوف من ويكيبيديا، والمحارف الخفية، والمسافات المكررة، وعلامات الترقيم المكررة
+function clean(bio) {
+  return bio
+    .replace(/(رسول الله|النبي|الرسول|رسول الإسلام)\s{2,}/g, '$1 ﷺ ')
+    .replace(/[\u200b-\u200f]/g, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/،{2,}/g, '،')
+    .replace(/ +([،.:؛])/g, '$1')
+    .replace(/\n\n+/g, '\n\n')
+    .trim();
+}
+
 (async () => {
   let wiki = fs.existsSync(CACHE) ? JSON.parse(fs.readFileSync(CACHE, 'utf8')) : {};
   const need = SAHABA.map((s) => s[0]).filter((t) => !wiki[t]);
@@ -138,7 +178,7 @@ async function fetchBatch(titles) {
     const pick = [];
     let n = 0;
     for (const p of paras) { if (n > 1400 || (n && n + p.length > 2200)) break; pick.push(p); n += p.length; }
-    const bio = pick.join('\n\n');
+    const bio = applyEdits(title, name, pick.join('\n\n'));
     const B = '(^|[\\s«"(،.:؛!؟\\-])', E = '(?=$|[\\s»"),.:،؛!؟\\-])';
     const res = keys.map((k) => new RegExp(B + strip(k).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + E));
     const hadith = lib.filter((h) => {
@@ -148,6 +188,8 @@ async function fetchBatch(titles) {
     }).slice(0, 4).map((h) => h.id);
     out.push({ name, bio, url: w.url, hadith });
   }
+  const unused = Object.keys(EDITS).filter((k) => !k.startsWith('_') && !usedEdits.has(k));
+  if (unused.length) throw new Error('تصحيحات لأسماء غير موجودة: ' + unused.join('، '));
   fs.writeFileSync(OUT, JSON.stringify(out));
   console.log(`✓ صحابي اليوم: ${out.length} صحابي`);
 })().catch((e) => { console.error(e); process.exit(1); });

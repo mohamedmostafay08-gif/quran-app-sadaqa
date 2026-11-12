@@ -192,7 +192,7 @@ export async function renderSahabi(params) {
     topbar({ title: k === today ? 'صحابي اليوم' : 'سيرة صحابي', back: '#/library', actions: [h('a.icon-btn', { href: '#/sahabi/list', 'aria-label': 'كل الصحابة' }, icon('users'))] }),
     h('header.sh-head', h('span.eyebrow', k === today ? 'صحابي اليوم' : 'من سِيَر الصحابة'), h('h1', s.name), h('p.muted', 'رضي الله عنه وأرضاه')),
     h('section.card.sh-bio', ...s.bio.split(/\n\n+/).map((p) => h('p', p)),
-      h('p.small-note', 'المصدر: ', h('a', { href: s.url, target: '_blank', rel: 'noopener' }, 'ويكيبيديا العربية'), ' (رخصة المشاع الإبداعي CC BY-SA)')),
+      h('p.small-note', 'المصدر: ', h('a', { href: s.url, target: '_blank', rel: 'noopener' }, 'ويكيبيديا العربية'), ' (CC BY-SA)، بعد مقابلتها بكتب التراجم (سير أعلام النبلاء، والإصابة، وتهذيب الكمال، وأسد الغابة) وتصحيح ما خالفها وحذف ما لا يثبت.')),
     related.length ? h('section.sh-related', h('h2.lib-h', 'أحاديث صحيحة ورد فيها ذكره'),
       h('ol.hd-list', related.map(([topic, x]) => h('li', h('a.hd-item', { href: `#/hadith/${topic}/${x.id}` }, h('p.hd-title', x.title), badges(x)))))) : null,
     h('nav.surah-nav', { 'aria-label': 'صحابة آخرون' },
