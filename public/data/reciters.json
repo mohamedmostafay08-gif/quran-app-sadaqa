@@ -35,6 +35,23 @@
   "featured": true
  },
  {
+  "id": "m10924",
+  "nameAr": "محمد صديق المنشاوي (تسجيل الإذاعة ١٩٦٧)",
+  "style": "مرتل",
+  "note": "أُذيع أول مرة ٢٠٢٦",
+  "server": "https://cdn.mp3quran.net/audio/muhammad-minshawi/r4/",
+  "missing": [
+   16,
+   23,
+   24,
+   35
+  ],
+  "fallback": "112",
+  "isNew": true,
+  "untimed": true,
+  "featured": true
+ },
+ {
   "id": "54",
   "nameAr": "عبدالرحمن السديس",
   "style": "مرتل",

@@ -25,6 +25,7 @@ import { renderLibrary, renderTopic, renderHadith, renderGuide, renderSahabi } f
 import { initInstall, isStandalone } from './features/install.js';
 import { track } from './features/stats.js';
 import { refreshPush } from './features/push.js';
+import { initAdhanScheduler, playAdhan } from './features/adhan.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
@@ -80,6 +81,9 @@ async function boot() {
   initInstall();
   track(isStandalone() ? 'open_installed' : 'open');
   refreshPush();
+  initAdhanScheduler();
+  // ضغطة على تنبيه الأذان والتطبيق مفتوح: يصل طلب التشغيل من عامل الخدمة
+  navigator.serviceWorker?.addEventListener('message', (e) => { if (e.data?.type === 'adhan') playAdhan(e.data.key); });
   player.subscribe((st) => { if (st.status === 'playing') track('listen'); });
   const ROUTE_EVENT = { surah: 'read', page: 'pages', prayer: 'prayer', group: 'group', memorize: 'memorize', sahabi: 'library', guide: 'library' };
 

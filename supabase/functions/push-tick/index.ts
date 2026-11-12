@@ -1,11 +1,11 @@
-// push-tick: تُستدعى كل ٥ دقائق من pg_cron. تحسب مواقيت الصلاة لكل مشترك بمدينته وطريقته،
+// push-tick: تُستدعى كل دقيقة من pg_cron. تحسب مواقيت الصلاة لكل مشترك بمدينته وطريقته،
 // وترسل إشعار الأذان عند دخول الوقت، وتذكير الورد في الموعد الذي اختاره.
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 import { sendPush } from './webpush.js';
 import { Coordinates, CalculationMethod, PrayerTimes, Madhab, HighLatitudeRule } from 'npm:adhan@4.4.3';
 
 const NAMES: Record<string, string> = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
-const WINDOW_BEFORE = 60_000, WINDOW_AFTER = 6 * 60_000; // نافذة الإرسال حول الموعد
+const WINDOW_BEFORE = 20_000, WINDOW_AFTER = 3 * 60_000; // نافذة الإرسال حول الموعد (يُشغَّل كل دقيقة)
 const APP = 'https://mohamedmostafay08-gif.github.io/quran-app-sadaqa/';
 
 type Sub = { endpoint: string; p256dh: string; auth: string; lat: number; lng: number; tz: string; method: string; madhab: string; prayers: string[]; wird_time: string | null; last_sent: Record<string, string>; fails: number };
@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
     const lastTest = Date.parse(s.last_sent?.test || 0);
     if (Date.now() - lastTest < 30_000) return new Response(JSON.stringify({ ok: false, error: 'too soon' }), { status: 429, headers: cors });
     const r = await sendPush({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-      JSON.stringify({ title: 'رتّل — إشعار تجريبي', body: 'التنبيهات شغّالة على جهازك ✓', url: '#/prayer', tag: 'test' }), { vapid, ttl: 120 });
+      JSON.stringify({ title: 'رتّل — إشعار تجريبي', body: 'التنبيهات تعمل على جهازك ✓ اضغط لسماع الأذان', url: '#/prayer?adhan=test', tag: 'test', adhan: true }), { vapid, ttl: 120 });
     await db.from('push_subs').update({ last_sent: { ...(s.last_sent || {}), test: new Date().toISOString() } }).eq('endpoint', s.endpoint);
     const ok = r.status >= 200 && r.status < 300;
     if (r.status === 404 || r.status === 410) await db.from('push_subs').delete().eq('endpoint', s.endpoint);
@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
 
   let sent = 0, removed = 0;
   const jobs = (subs as Sub[]).map(async (s) => {
-    const due: { key: string; tag: string; payload: Record<string, unknown> }[] = [];
+    const due: { key: string; tag: string; ttl?: number; payload: Record<string, unknown> }[] = [];
     let lp;
     try { lp = localParts(now, s.tz || 'UTC'); } catch { lp = localParts(now, 'UTC'); }
     if (s.prayers?.length && s.lat != null && s.lng != null) {
@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
         if (!t) continue;
         const diff = now.getTime() - t.getTime();
         if (diff >= -WINDOW_BEFORE && diff < WINDOW_AFTER && s.last_sent?.[k] !== lp.date) {
-          due.push({ key: k, tag: 'prayer-' + k, payload: { title: `حان الآن موعد صلاة ${NAMES[k]}`, body: '«حيّ على الصلاة، حيّ على الفلاح»', url: '#/prayer', tag: 'prayer' } });
+          due.push({ key: k, tag: 'prayer-' + k, ttl: 600, payload: { title: `حان الآن موعد صلاة ${NAMES[k]}`, body: '«حيّ على الصلاة، حيّ على الفلاح» — اضغط لسماع الأذان', url: `#/prayer?adhan=${k}`, tag: 'prayer', adhan: true } });
         }
       }
     }
@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
     let gone = false, failed = false;
     for (const d of due) {
       try {
-        const r = await sendPush({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(d.payload), { vapid, topic: d.tag });
+        const r = await sendPush({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(d.payload), { vapid, topic: d.tag, ttl: d.ttl || 1800 });
         if (r.status === 404 || r.status === 410) { gone = true; break; }
         if (r.status >= 200 && r.status < 300) { last[d.key] = lp.date; sent++; }
         else { failed = true; console.error('push', r.status, r.text.slice(0, 200)); }

@@ -61,9 +61,9 @@ grant execute on function public.push_save(jsonb, jsonb) to anon, authenticated;
 grant execute on function public.push_delete(text) to anon, authenticated;
 grant execute on function public.push_config() to service_role;
 
--- كل ٥ دقائق: استدعاء الدالة الطرفية التي تحسب المواقيت وترسل الإشعارات
+-- كل دقيقة: استدعاء الدالة الطرفية التي تحسب المواقيت وترسل الإشعارات
 -- (المفاتيح تُضاف إلى Vault مرة واحدة خارج هذا الملف: vapid_public, vapid_private, push_tick_key)
-select cron.schedule('push-tick', '*/5 * * * *', $$
+select cron.schedule('push-tick', '* * * * *', $$
   select net.http_post(
     url := 'https://lskfbmkesxxgqytjsftk.supabase.co/functions/v1/push-tick',
     headers := jsonb_build_object('Content-Type', 'application/json', 'x-tick-key',

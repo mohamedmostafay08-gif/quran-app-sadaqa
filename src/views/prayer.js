@@ -6,11 +6,14 @@ import * as P from '../features/prayer.js';
 import { mount, topbar, sheet, toast, empty } from '../ui.js';
 import { navigate } from '../router.js';
 import { notifyCard } from './notifyCard.js';
+import { playAdhan } from '../features/adhan.js';
 
 let tab = 'times';
 
 export function renderPrayer(_p, query) {
   if (query.tab) tab = query.tab;
+  // فُتح من تنبيه الأذان: نعرض بطاقة الأذان ونحاول تشغيله
+  if (query.adhan) { tab = 'times'; history.replaceState(null, '', '#/prayer'); setTimeout(() => playAdhan(query.adhan), 0); }
   const panel = h('div.pr-panel');
   const tabs = h('div.seg.pr-tabs', { role: 'tablist' }, [['times', 'المواقيت'], ['qibla', 'القبلة'], ['adhkar', 'الأذكار']].map(([t, label]) => h('button', {
     type: 'button', role: 'tab', 'aria-selected': String(tab === t),

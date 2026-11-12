@@ -26,8 +26,11 @@ export const isUntimed = (id) => !!getReciter(id)?.untimed;
 /** أقرب قارئ له توقيت (للتكرار والحفظ والمقارنة) */
 export const timedFallback = (id) => (isUntimed(id) ? (reciters.find((r) => !r.untimed && r.featured) || reciters[0]).id : id);
 
+/** سورة غير مسجّلة في هذا المصحف: تُشغَّل من مصحف بديل للقارئ نفسه */
+export const substituteFor = (reciterId, s) => { const r = getReciter(reciterId); return r?.missing?.includes(s) ? getReciter(r.fallback) : null; };
+
 export function surahUrl(reciterId, s) {
-  const r = getReciter(reciterId);
+  const r = substituteFor(reciterId, s) || getReciter(reciterId);
   return `${r.server}${r.source === 'qdc' && !r.pad ? s : pad(s)}.mp3`;
 }
 export function timingUrl(reciterId, s) {

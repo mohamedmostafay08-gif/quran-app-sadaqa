@@ -3,6 +3,7 @@ import { h, ar } from '../lib/dom.js';
 import * as settings from '../state.js';
 import { toast } from '../ui.js';
 import { pushStatus, syncPush, PUSH_PRAYERS, askPermission, testPush } from '../features/push.js';
+import { playAdhan, preloadAdhan } from '../features/adhan.js';
 
 const NAMES = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
 const STATUS_MSG = {
@@ -35,25 +36,34 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
   };
 
   const body = [];
-  if (status !== 'ok') body.push(h('p.muted', STATUS_MSG[status]));
-  else {
-    if (prayers) {
-      const hasLoc = !!settings.get('prayerLocation');
-      const chips = h('div.notify-chips', PUSH_PRAYERS.map((k) => {
-        const on = () => (settings.get('notifyPrayers') || []).includes(k);
-        const b = h('button.pb-chip', { type: 'button', 'aria-pressed': String(on()), disabled: !hasLoc, onclick: async () => {
-          const perm = askPermission();
-          const before = settings.get('notifyPrayers') || [];
-          const next = on() ? before.filter((x) => x !== k) : [...before, k];
-          await settings.set('notifyPrayers', PUSH_PRAYERS.filter((x) => next.includes(x)));
-          b.setAttribute('aria-pressed', String(on()));
-          save(async () => { await settings.set('notifyPrayers', before); b.setAttribute('aria-pressed', String(on())); }, perm);
-        } }, NAMES[k]);
-        return b;
-      }));
-      body.push(h('div.field', h('span', 'تنبيه عند دخول وقت الصلاة'), chips,
-        hasLoc ? null : h('small.muted', 'حدّد موقعك أولًا من شاشة المواقيت.')));
-    }
+  const pushOk = status === 'ok';
+  if (!pushOk) body.push(h('p.muted', STATUS_MSG[status]));
+  if (prayers) {
+    const hasLoc = !!settings.get('prayerLocation');
+    const chips = h('div.notify-chips', PUSH_PRAYERS.map((k) => {
+      const on = () => (settings.get('notifyPrayers') || []).includes(k);
+      const b = h('button.pb-chip', { type: 'button', 'aria-pressed': String(on()), disabled: !hasLoc, onclick: async () => {
+        const perm = pushOk ? askPermission() : null;
+        const before = settings.get('notifyPrayers') || [];
+        const next = on() ? before.filter((x) => x !== k) : [...before, k];
+        await settings.set('notifyPrayers', PUSH_PRAYERS.filter((x) => next.includes(x)));
+        b.setAttribute('aria-pressed', String(on()));
+        if (next.length) preloadAdhan();
+        if (pushOk) save(async () => { await settings.set('notifyPrayers', before); b.setAttribute('aria-pressed', String(on())); }, perm);
+        else toast(on() ? `سيُرفع أذان ${NAMES[k]} والتطبيق مفتوح` : 'تم الحفظ');
+      } }, NAMES[k]);
+      return b;
+    }));
+    const inApp = h('input', { type: 'checkbox', role: 'switch', checked: settings.get('adhanInApp') !== false });
+    inApp.addEventListener('change', () => settings.set('adhanInApp', inApp.checked));
+    body.push(
+      h('div.field', h('span', 'الأذان عند دخول وقت الصلاة'), chips,
+        hasLoc ? null : h('small.muted', 'حدّد موقعك أولًا من شاشة المواقيت.')),
+      h('label.toggle', h('span', h('strong', 'تشغيل صوت الأذان'), h('small', 'يُرفع الأذان كاملًا إذا كان التطبيق مفتوحًا، وعند الضغط على تنبيه الأذان')), inApp),
+      h('button.btn.ghost.block', { type: 'button', onclick: () => playAdhan('test') }, 'استمع إلى الأذان'),
+      h('p.small-note', 'ملاحظة: لا تسمح الهواتف لتطبيقات الويب بتشغيل صوت خاص مع الإشعار، فيصلك التنبيه بصوت الإشعارات المعتاد واهتزاز، ثم يُرفع الأذان كاملًا عند فتحه.'));
+  }
+  if (pushOk) {
     if (wird) {
       const time = h('input.note-input', { type: 'time', value: settings.get('wirdTime') || '', 'aria-label': 'موعد تذكير الورد' });
       const clear = h('button.btn.ghost', { type: 'button', hidden: !settings.get('wirdTime'), onclick: () => { time.value = ''; time.dispatchEvent(new Event('change')); } }, 'إيقاف');

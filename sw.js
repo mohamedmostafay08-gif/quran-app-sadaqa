@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '9c0964f52e';
+const VERSION = '011756575f';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -21,6 +21,7 @@ const ASSETS = [
   'src/audio/sleepTimer.js',
   'src/data.js',
   'src/db.js',
+  'src/features/adhan.js',
   'src/features/backup.js',
   'src/features/bookmarks.js',
   'src/features/extra.js',
@@ -69,6 +70,7 @@ const ASSETS = [
   'src/views/search.js',
   'src/views/settings.js',
   'src/views/welcome.js',
+  'public/audio/adhan.mp3',
   'public/data/adhkar.json',
   'public/data/extra-notice.json',
   'public/data/quran-meta.json',
@@ -109,18 +111,31 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('push', (event) => {
   let d = {};
   try { d = event.data ? event.data.json() : {}; } catch { d = { title: 'رتّل', body: event.data?.text() || '' }; }
-  event.waitUntil(self.registration.showNotification(d.title || 'رتّل', {
+  const opts = {
     body: d.body || '', tag: d.tag || 'rattil', renotify: true, lang: 'ar', dir: 'rtl',
     icon: 'public/icons/icon-192.png', badge: 'public/icons/badge-96.png', data: { url: d.url || '' },
-  }));
+  };
+  if (d.adhan) {
+    // تنبيه الأذان: يبقى ظاهرًا حتى يُغلق، باهتزاز طويل، وزر لتشغيل الأذان كاملًا
+    // (أنظمة الهواتف لا تسمح للمواقع بصوت تنبيه مخصص، فالأذان يُشغَّل عند فتح التنبيه)
+    Object.assign(opts, { requireInteraction: true, silent: false, vibrate: [600, 200, 600, 200, 900, 400, 600, 200, 600],
+      actions: [{ action: 'adhan', title: 'تشغيل الأذان' }, { action: 'dismiss', title: 'إغلاق' }] });
+  }
+  event.waitUntil(self.registration.showNotification(d.title || 'رتّل', opts));
 });
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  if (event.action === 'dismiss') return;
   const target = new URL(self.registration.scope).href + (event.notification.data?.url || '');
   event.waitUntil((async () => {
     const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     for (const w of wins) {
-      if (w.url.startsWith(self.registration.scope)) { await w.focus(); return w.navigate(target).catch(() => {}); }
+      if (!w.url.startsWith(self.registration.scope)) continue;
+      await w.focus();
+      // التطبيق مفتوح: نطلب منه تشغيل الأذان مباشرة دون إعادة تحميل الصفحة
+      const adhan = /[?&]adhan=(\w+)/.exec(event.notification.data?.url || '');
+      if (adhan) { w.postMessage({ type: 'adhan', key: adhan[1] }); return; }
+      return w.navigate(target).catch(() => {});
     }
     return self.clients.openWindow(target);
   })());
@@ -150,6 +165,8 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (url.origin !== self.location.origin) return;
+  // طلبات الصوت الجزئية (Range) تذهب للشبكة مباشرة؛ ملف الأذان يُخزَّن كاملًا عبر الطلب العادي
+  if (req.headers.has('range')) return;
 
   // التنقل: index.html من الكاش (التطبيق يعمل بدون نت)
   if (req.mode === 'navigate') {

@@ -24,6 +24,13 @@ const FEATURED = [
   'mustafa-ismail/r2', 'hani-rifai/r1', 'khalid-mohanna/r1',
 ];
 
+// تسجيل الإذاعة المصرية للمنشاوي (١٣٨٧هـ/١٩٦٧م) أُذيع أول مرة سنة ٢٠٢٦ — mp3quran مصحف 10924.
+// ينقصه ٤ سور (النحل، المؤمنون، النور، فاطر) فتُتلى من مصحفه المرتّل المعروف (112).
+const EXTRA_UNTIMED = [
+  { id: 'm10924', nameAr: 'محمد صديق المنشاوي (تسجيل الإذاعة ١٩٦٧)', style: 'مرتل', note: 'أُذيع أول مرة ٢٠٢٦',
+    server: 'https://cdn.mp3quran.net/audio/muhammad-minshawi/r4/', missing: [16, 23, 24, 35], fallback: '112', isNew: true },
+];
+
 async function getJSON(url) {
   for (let i = 0; i < 4; i++) {
     try { const r = await fetch(url); if (r.ok) return await r.json(); throw new Error(r.status); }
@@ -100,6 +107,13 @@ async function main() {
     if (!head?.ok) { console.warn('✗ بدون صوت:', r.name, srv); continue; }
     final.push({ id: 'm' + m.id, nameAr: r.name.replace(/^شيخ /, ''), style: 'مجوّد', server: srv, untimed: true, featured: false });
     servers.add(srv.replace(/^https?:\/\/[^/]+/, ''));
+  }
+  // مصاحف مختارة بلا توقيت آيات تُضاف بجوار مصحف القارئ الأصلي
+  for (const x of EXTRA_UNTIMED) {
+    const head = await fetch(x.server + '001.mp3', { method: 'HEAD' }).catch(() => null);
+    if (!head?.ok) { console.warn('✗ بدون صوت:', x.nameAr, x.server); continue; }
+    const at = final.findIndex((r) => r.id === x.fallback);
+    final.splice(at < 0 ? final.length : at + 1, 0, { ...x, untimed: true, featured: at >= 0 });
   }
   fs.writeFileSync(OUT, JSON.stringify(final, null, 1));
   console.log(`✓ ${final.length} قارئ (${final.filter((r) => r.featured).length} من الأشهر)`);

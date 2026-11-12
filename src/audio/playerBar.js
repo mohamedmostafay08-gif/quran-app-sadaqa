@@ -1,6 +1,6 @@
 // المشغّل: كبسولة زجاجية صغيرة + مشغّل كامل الشاشة
 import { h, icon, ar } from '../lib/dom.js';
-import { player, getReciters, getReciter, rateFor, setRate } from './player.js';
+import { player, getReciters, getReciter, rateFor, setRate, substituteFor } from './player.js';
 import { getSurahMeta, getSurahText } from '../data.js';
 import * as settings from '../state.js';
 import { sheet, toast } from '../ui.js';
@@ -133,7 +133,12 @@ export function mountPlayerBar() {
     const key = `${st.surah}:${st.ayah}`;
     if (key === shownAyah) return;
     shownAyah = key;
-    if (st.ayah == null) { fpAyah.replaceChildren(h('div.fp-untimed', h('p', `سورة ${getSurahMeta(st.surah).nameAr}`), h('small', 'تلاوة مجوّدة متصلة للسورة كاملة — هذا المصحف بلا توقيت للآيات، فلا تُظلَّل الآية المقروءة.'))); return; }
+    if (st.ayah == null) {
+      const sub = substituteFor(st.reciter, st.surah);
+      fpAyah.replaceChildren(h('div.fp-untimed', h('p', `سورة ${getSurahMeta(st.surah).nameAr}`),
+        h('small', sub ? `هذه السورة غير موجودة في تسجيل الإذاعة، فتُتلى من المصحف المرتّل المعروف (${sub.nameAr}). ولا تُظلَّل الآية المقروءة.` : 'تلاوة متصلة للسورة كاملة — هذا المصحف بلا توقيت للآيات، فلا تُظلَّل الآية المقروءة.')));
+      return;
+    }
     if (st.ayah === 0) { fpAyah.replaceChildren(h('p', getSurahMeta(st.surah).basmala || 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ')); return; }
     const text = (await getSurahText(st.surah))[st.ayah - 1];
     if (shownAyah !== key) return;
@@ -203,7 +208,7 @@ export function reciterSheet() {
   const item = (r) => h('li', h('button.choice', {
     type: 'button', 'aria-pressed': String(r.id === current),
     onclick: () => { player.setReciter(r.id); closeFn(); },
-  }, h('span', h('strong', r.nameAr), h('small', (r.style === 'مرتل' ? 'مرتّل' : r.style) + (r.untimed ? ' · بدون تظليل الآيات' : ''))), r.id === current ? icon('check') : null));
+  }, h('span', h('strong', r.nameAr), h('small', r.isNew ? h('b.new-badge', 'جديد') : null, (r.style === 'مرتل' ? 'مرتّل' : r.style) + (r.note ? ' · ' + r.note : '') + (r.untimed ? ' · بدون تظليل الآيات' : ''))), r.id === current ? icon('check') : null));
   const tabs = h('div.seg', { role: 'tablist', 'aria-label': 'نوع التلاوة' }, STYLES.map(([v, label]) => {
     const n = all.filter((r) => r.style === v).length;
     return h('button', {
