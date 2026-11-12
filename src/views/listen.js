@@ -111,6 +111,9 @@ export function renderMore() {
     h('div.more-group',
       row('#/settings', 'settings', 'الإعدادات', 'العرض والتلاوة والتنبيهات والنسخة الاحتياطية'),
       !isStandalone() ? h('button.more-row', { type: 'button', onclick: () => install() }, h('span.lib-icon', { 'aria-hidden': 'true' }, icon('download')), h('span.lib-text', h('strong', 'تثبيت التطبيق'), h('small', 'يفتح كتطبيق ويعمل بدون إنترنت')), icon('forward')) : null,
-      row('#/about', 'info', 'عن التطبيق', 'المصادر والخصوصية')),
+      row('#/about', 'info', 'عن التطبيق', 'المصادر والخصوصية والتواصل')),
+    h('a.credit-foot', { href: '#/about' },
+      h('span.cf-by', { dir: 'ltr' }, 'Powered by ', h('strong', 'Mohamed Mostafa')),
+      h('span.cf-phone', 'للتواصل والدعم: ', h('bdi', { dir: 'ltr' }, '01120339097'))),
   ));
 }

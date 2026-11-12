@@ -343,3 +343,16 @@ body[data-route="welcome"] .main { padding-bottom: 120px; }
 @media (max-width: 400px) { .seg button { font-size: var(--fs-sm); } }
 /* الروابط-الأزرار: مساحة لمس كافية */
 button.link { min-height: 40px; padding: 0 var(--sp-1); }
+
+/* ===== التطوير والدعم ===== */
+.credit-by { font-size: var(--fs-md); color: var(--text-2); text-align: center; margin: var(--sp-2) 0; }
+.credit-by strong { color: var(--accent); }
+.credit-phone { text-align: center; font-size: var(--fs-xl); font-weight: 700; letter-spacing: .04em; color: var(--text); margin: var(--sp-1) 0 var(--sp-3); font-variant-numeric: tabular-nums; }
+.credit-actions { display: flex; gap: var(--sp-2); }
+.credit-actions .btn { flex: 1; justify-content: center; }
+.credit-foot { display: block; text-align: center; margin: var(--sp-5) 0 var(--sp-2); font-size: var(--fs-sm); color: var(--text-3); text-decoration: none; }
+.credit-foot strong { color: var(--accent); }
+.credit-foot span { direction: rtl; unicode-bidi: isolate; }
+.credit-foot { display: grid; gap: 2px; justify-items: center; }
+.credit-foot span { direction: inherit; }
+.cf-by { direction: ltr; }
