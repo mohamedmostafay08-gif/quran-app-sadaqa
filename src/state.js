@@ -29,7 +29,8 @@ export const DEFAULTS = {
   myGroups: [],           // الختمات الجماعية على هذا الجهاز
   groupName: '',          // الاسم الظاهر في الختمة الجماعية
   lastBackupAt: null,     // آخر نسخة احتياطية
-  notifyPrayers: [],      // تنبيهات الأذان (fajr, dhuhr ...)
+  notifyPrayers: ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'], // الأذان مفعّل افتراضيًا للصلوات الخمس
+  prayersDefaultV2: false, // ترقية: تفعيل الأذان لمن لم يختر صلوات من قبل
   wirdTime: null,         // تذكير الورد اليومي HH:MM
   adhanInApp: true,       // تشغيل صوت الأذان عند دخول الوقت والتطبيق مفتوح
   adhanVoice: 'egypt',    // صوت الأذان: egypt | makkah | calm
@@ -44,6 +45,11 @@ export async function loadSettings() {
     const rows = await db.all('settings');
     for (const r of rows) if (r.key in DEFAULTS) state[r.key] = r.value;
   } catch (e) { console.warn('settings load failed', e); }
+  // مستخدمون قدامى لم يختاروا أي صلاة: نفعّل الأذان للصلوات الخمس مرة واحدة
+  if (!state.prayersDefaultV2) {
+    if (!(state.notifyPrayers || []).length) set('notifyPrayers', [...DEFAULTS.notifyPrayers]);
+    set('prayersDefaultV2', true);
+  }
   applyVisual();
   return state;
 }

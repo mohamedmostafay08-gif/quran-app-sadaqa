@@ -130,8 +130,8 @@ export async function renderDownloads(_p, _q, isStale) {
     exBtn.disabled = false;
   };
   const extrasCard = h('section.card',
-    h('h2', 'بيانات التطبيق للاستخدام بدون إنترنت'),
-    h('p.muted', 'معاني الكلمات والتفسير وصفحات المصحف والتجويد تُنزَّل تلقائيًا عند أول فتح لها. وإذا كنت ستستخدم التطبيق بدون إنترنت، فنزّلها كلها مرة واحدة.'),
+    h('h2', 'الاستخدام بدون إنترنت'),
+    h('p.muted', 'نزّل التفسير وصفحات المصحف مرة واحدة لتستخدمها بدون إنترنت.'),
     exState, exBar,
     h('div.btn-row', exBtn),
   );

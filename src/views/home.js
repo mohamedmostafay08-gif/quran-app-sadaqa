@@ -1,7 +1,5 @@
-// الرئيسية: متابعة القراءة + قائمة السور/الأجزاء
+// المصحف: أكمل القراءة + «وردي» (الختمة والحفظ والختمة الجماعية والعلامات) + فهرس السور والأجزاء
 import { h, icon, ar } from '../lib/dom.js';
-import { sahabiTile } from './library.js';
-import { listenCard } from './listen.js';
 import { normalize, latinDigits } from '../lib/arabic.js';
 import { getSurahs, getSurahMeta, juzStart, juzOf, pageOf } from '../data.js';
 import * as settings from '../state.js';
@@ -9,11 +7,10 @@ import { mount } from '../ui.js';
 import { navigate } from '../router.js';
 import { homeWirdCard } from './khatma.js';
 import * as srs from '../features/srs.js';
-import * as P from '../features/prayer.js';
 
 let tab = 'surahs';
 
-export function renderHome() {
+export function renderQuran() {
   const surahs = getSurahs();
   const last = settings.get('lastRead');
 
@@ -47,20 +44,20 @@ export function renderHome() {
   Promise.all([homeWirdCard(), srs.due()]).then(([wird, due]) => {
     quick.append(
       wird,
-      sahabiTile(),
       h('a.quick', { href: '#/memorize' }, icon('repeat'), h('span', h('strong', 'الحفظ والمراجعة'), h('small', due.length ? `${ar(due.length)} آية للمراجعة اليوم` : 'إخفاء تدريجي وتكرار'))),
-      h('a.quick', { href: '#/group' }, icon('users'), h('span', h('strong', 'ختمة جماعية أو مُهداة'), h('small', 'اقرأوا معًا برابط واحد'))),
+      h('a.quick', { href: '#/group' }, icon('users'), h('span', h('strong', 'ختمة جماعية'), h('small', 'اقرأوا معًا برابط واحد'))),
+      h('a.quick', { href: '#/bookmarks' }, icon('bookmark'), h('span', h('strong', 'العلامات'), h('small', 'الآيات المحفوظة والملاحظات'))),
     );
   });
-  const lc = listenCard();
-  const el = h('div.home',
+  const el = h('div.home.quran-home',
     h('header.home-head',
-      h('div.hh-brand', h('h1', 'رتّل'), h('span', P.hijri()?.text || 'القرآن الكريم، برواية حفص عن عاصم')),
-      prayerPill(),
+      h('div.hh-brand', h('h1', 'المصحف'), h('span', 'برواية حفص عن عاصم')),
+      h('a.icon-btn', { href: '#/search', 'aria-label': 'البحث في القرآن' }, icon('search')),
     ),
-    lc,
     last ? continueCard(last) : null,
+    h('h2.lib-h', 'وردي'),
     quick,
+    h('h2.lib-h', 'الفهرس'),
     h('form.search-bar', { role: 'search', onsubmit: (e) => e.preventDefault() }, icon('search'), input),
     tabs,
     listWrap,
@@ -68,7 +65,6 @@ export function renderHome() {
   );
   renderList();
   mount(el);
-  return { cleanup: () => lc.cleanup() };
 }
 
 function continueCard(last) {
@@ -127,13 +123,4 @@ function juzList() {
       h('span.surah-en', JUZ_NAMES[i]),
     ));
   }));
-}
-
-function prayerPill() {
-  const loc = P.getLocation();
-  if (!loc) return h('a.pr-pill', { href: '#/prayer' }, icon('mosque'), 'حدّد موقعك لمواقيت الصلاة');
-  try {
-    const n = P.nextPrayer(loc);
-    return h('a.pr-pill', { href: '#/prayer' }, icon('mosque'), `${n.name} ${P.fmtTime(n.time, loc.tz)}، بعد ${P.countdown(n.time - new Date())}`);
-  } catch { return null; }
 }

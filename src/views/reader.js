@@ -40,7 +40,7 @@ export async function renderReader(params, _q, isStale) {
   const playBtn = h('button.icon-btn.play-main', { type: 'button', 'aria-label': 'تشغيل السورة', onclick: () => togglePlaySurah(n) }, icon('play'));
   const head = topbar({
     title: `سورة ${meta.nameAr}`,
-    back: '#/',
+    back: '#/quran',
     actions: [playBtn,
       h('button.icon-btn', { type: 'button', 'aria-label': 'عرض الصفحات (مصحف المدينة)', title: 'عرض الصفحات', onclick: () => { settings.set('readMode', 'pages'); navigate(`/page/${pageOf(n, currentTop || 1)}`); } }, icon('pages')),
       h('button.icon-btn', { type: 'button', 'aria-label': 'خيارات العرض', onclick: () => displaySheet() }, icon('more'))],

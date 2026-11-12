@@ -33,7 +33,7 @@ export function renderGroups() {
 
   const mine = G.myGroups();
   mount(h('div.groups',
-    topbar({ title: 'الختمة الجماعية', back: '#/' }),
+    topbar({ title: 'الختمة الجماعية', back: '#/quran' }),
     h('section.card.g-intro',
       h('h2', 'اقرأوا القرآن معًا'),
       h('p', 'أنشئ ختمة وشارك رابطها مع العائلة أو الأصدقاء. كل واحد يختار جزءًا أو أكثر من الثلاثين، ويعلّمه «تم» بعد قراءته. لما تكتمل الأجزاء تبدأ دورة جديدة تلقائيًا.'),

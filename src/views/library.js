@@ -34,7 +34,7 @@ const SECTIONS_ICON = { wudu: 'drop', nawaqid: 'info', shurut: 'check', salah: '
 export async function renderLibrary() {
   track('library');
   let index, sahabi, fiqh;
-  try { [index, sahabi, fiqh] = await Promise.all([load('index'), load('sahabi'), load('fiqh')]); } catch { return offlineEmpty('المكتبة', '#/'); }
+  try { [index, sahabi, fiqh] = await Promise.all([load('index'), load('sahabi'), load('fiqh')]); } catch { return offlineEmpty('المكتبة', '#/more'); }
   const today = sahabi[dayIndex(sahabi.length)];
   const hadithTopics = index.filter((t) => t.id !== 'sahaba' && t.id !== 'qisas');
   const topicCard = (t) => h('a.lib-card', { href: `#/library/${t.id}` },

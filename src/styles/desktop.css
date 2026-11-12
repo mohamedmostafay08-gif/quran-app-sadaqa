@@ -52,6 +52,7 @@
   .home-head { padding-top: var(--sp-6); }
   .ls-surahs { grid-template-columns: repeat(3, 1fr); }
   .home .quick-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-3); }
+  .today .quick-row { grid-template-columns: repeat(3, 1fr); }
   .home .quick { align-items: flex-start; }
   .home .quick-row > * { margin: 0; }
   .surah-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3); }

@@ -49,7 +49,7 @@ export function mountPlayerBar() {
     render();
   } });
   const sleepBtn = h('button.pb-chip', { type: 'button', 'aria-label': 'مؤقت النوم', onclick: () => sleepSheet() }, icon('timer'), h('span', 'النوم'));
-  const goBtn = h('a.pb-chip', { href: '#/', onclick: () => closeFull() }, icon('book'), h('span', 'في المصحف'));
+  const goBtn = h('a.pb-chip', { href: '#/quran', onclick: () => closeFull() }, icon('book'), h('span', 'في المصحف'));
   const recBtn = h('button.fp-reciter', { type: 'button', onclick: () => reciterSheet() });
   const full = h('div.full-player', { role: 'dialog', 'aria-modal': 'true', 'aria-label': 'المشغل' },
     h('div.fp-handle', { 'aria-hidden': 'true' }),

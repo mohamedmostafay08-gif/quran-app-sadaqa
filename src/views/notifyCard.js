@@ -56,6 +56,11 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
     }));
     const inApp = h('input', { type: 'checkbox', role: 'switch', checked: settings.get('adhanInApp') !== false });
     inApp.addEventListener('change', () => settings.set('adhanInApp', inApp.checked));
+    // الأذان مفعّل افتراضيًا؛ يبقى فقط السماح بالإشعارات ليصل والتطبيق مغلق
+    if (pushOk && hasLoc && Notification.permission === 'default' && (settings.get('notifyPrayers') || []).length) {
+      const en = h('button.btn.block', { type: 'button', onclick: () => { const perm = askPermission(); save(() => {}, perm).then(() => { if (Notification.permission === 'granted') en.remove(); }); } }, 'تفعيل تنبيه الأذان');
+      body.push(en);
+    }
     body.push(
       h('div.field', h('span', 'الأذان عند دخول وقت الصلاة'), chips,
         hasLoc ? null : h('small.muted', 'حدّد موقعك أولًا من شاشة المواقيت.')),

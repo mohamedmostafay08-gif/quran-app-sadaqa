@@ -5,7 +5,9 @@ import { route, start } from './router.js';
 import { loadReciters, player } from './audio/player.js';
 import { mountPlayerBar } from './audio/playerBar.js';
 import { initAutoDownload } from './offline/autoDownload.js';
-import { renderHome } from './views/home.js';
+import { renderQuran } from './views/home.js';
+import { renderToday } from './views/today.js';
+import { renderHelp } from './views/help.js';
 import { renderReader } from './views/reader.js';
 import { renderSearch } from './views/search.js';
 import { renderBookmarks } from './views/bookmarks.js';
@@ -29,7 +31,7 @@ import { initAdhanScheduler, playAdhan } from './features/adhan.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
-const TAB_FOR = { '/': 'home', '/surah': 'home', '/page': 'home', '/search': 'home', '/listen': 'listen', '/radio': 'listen', '/car': 'more', '/downloads': 'more', '/library': 'library', '/hadith': 'library', '/guide': 'library', '/sahabi': 'library', '/prayer': 'prayer', '/adhkar': 'prayer', '/more': 'more', '/bookmarks': 'more', '/settings': 'more', '/about': 'more', '/khatma': 'more', '/memorize': 'more', '/group': 'more' };
+const TAB_FOR = { '/': 'today', '/quran': 'quran', '/surah': 'quran', '/page': 'quran', '/search': 'quran', '/bookmarks': 'quran', '/khatma': 'quran', '/memorize': 'quran', '/group': 'quran', '/listen': 'listen', '/radio': 'listen', '/car': 'listen', '/downloads': 'more', '/library': 'more', '/hadith': 'more', '/guide': 'more', '/sahabi': 'more', '/prayer': 'prayer', '/adhkar': 'prayer', '/more': 'more', '/settings': 'more', '/about': 'more', '/help': 'more' };
 
 async function boot() {
   const status = document.querySelector('.boot p');
@@ -45,7 +47,9 @@ async function boot() {
     return;
   }
 
-  route('/', renderHome);
+  route('/', renderToday);
+  route('/quran', renderQuran);
+  route('/help', renderHelp);
   route('/surah/:surah/:ayah?', renderReader);
   route('/search', renderSearch);
   route('/bookmarks', renderBookmarks);
@@ -91,7 +95,7 @@ async function boot() {
     // أي انتقال يغلق الأوراق السفلية المفتوحة (مثل زر الرجوع في الموبايل)
     closeAllSheets();
     const base = '/' + (m.path.split('/')[1] || '');
-    const tab = TAB_FOR[base] || 'home';
+    const tab = TAB_FOR[base] || 'today';
     for (const a of document.querySelectorAll('.tabbar a')) {
       if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');

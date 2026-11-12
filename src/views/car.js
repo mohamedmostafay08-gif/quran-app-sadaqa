@@ -67,7 +67,7 @@ export function renderCar() {
 
   const el = h('div.car',
     h('header.car-head',
-      h('a.icon-btn', { href: '#/', 'aria-label': 'خروج من وضع السيارة' }, icon('close')),
+      h('a.icon-btn', { href: '#/listen', 'aria-label': 'خروج من وضع السيارة' }, icon('close')),
       h('button.car-reciter', { type: 'button', onclick: () => reciterSheet() }, icon('user'), 'القارئ'),
     ),
     h('div.car-now', title, sub),

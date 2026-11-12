@@ -378,3 +378,49 @@ button.link { min-height: 40px; padding: 0 var(--sp-1); }
 @media (prefers-reduced-motion: reduce) { .adhan-box { animation: none; } }
 .new-badge { display: inline-block; margin-inline-end: 6px; padding: 0 7px; border-radius: 999px; background: var(--gold); color: #fff; font-size: var(--fs-xs); font-weight: 700; line-height: 1.7; vertical-align: 1px; }
 .adh-by { font-size: var(--fs-sm); color: var(--text-3, var(--muted)); }
+
+/* ===== اليوم ===== */
+.td-prayer, .td-adhan {
+  display: flex; align-items: center; gap: var(--sp-3); margin: 0 0 var(--sp-4);
+  padding: var(--sp-4); border-radius: 18px; text-decoration: none; color: inherit;
+}
+.td-prayer { background: var(--accent); color: var(--on-accent, #fff); justify-content: space-between; }
+.td-pt { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.td-pt small { font-size: var(--fs-sm); opacity: .85; }
+.td-pt strong { font-size: var(--fs-xl); line-height: 1.4; }
+.td-time { font-size: var(--fs-md); opacity: .95; }
+.td-left { display: flex; flex-direction: column; align-items: flex-end; text-align: end; }
+.td-left small { font-size: var(--fs-sm); opacity: .85; }
+.td-left strong { font-size: var(--fs-lg); }
+.td-ic { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: rgba(255, 255, 255, .15); flex: none; }
+.td-ic svg { width: 24px; height: 24px; }
+.td-adhan { background: var(--surface); border: 1px solid var(--gold-line); }
+.td-adhan .td-ic { background: var(--accent-soft); color: var(--accent); }
+.td-adhan .td-pt strong { font-size: var(--fs-md); }
+.td-adhan .td-pt small { color: var(--text-2); opacity: 1; }
+.td-adhan .btn { flex: none; min-height: 44px; }
+.home-head .icon-btn { flex: none; }
+
+/* ===== طريقة الاستخدام ===== */
+.help-sec { padding: 0; overflow: hidden; }
+.help-sec summary { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-4); cursor: pointer; list-style: none; min-height: 56px; }
+.help-sec summary::-webkit-details-marker { display: none; }
+.help-sec summary strong { font-size: var(--fs-md); flex: 1; }
+.help-sec summary::after { content: '⌄'; color: var(--text-3); font-size: var(--fs-lg); transition: transform .2s; }
+.help-sec[open] summary::after { transform: rotate(180deg); }
+.help-tips { margin: 0; padding: 0 var(--sp-4) var(--sp-4); padding-inline-start: calc(var(--sp-4) + 20px); display: grid; gap: var(--sp-2); line-height: 1.9; }
+.help-tips li::marker { color: var(--gold); }
+
+/* ===== المصادر المطوية ===== */
+.sources-fold summary { cursor: pointer; font-weight: 700; color: var(--text-2); min-height: 32px; }
+.sources-fold[open] summary { margin-bottom: var(--sp-3); }
+.sources-fold .sources { font-size: var(--fs-sm); }
+
+/* بلاطات «وردي» واليوم: شبكة عمودين على الموبايل */
+@media (max-width: 1023px) {
+  .quran-home .quick-row, .today .quick-row { grid-template-columns: 1fr 1fr; gap: var(--sp-2); }
+  .quran-home .quick, .today .quick { flex-direction: column; align-items: flex-start; gap: var(--sp-2); padding: var(--sp-3); }
+  .quran-home .quick > span, .today .quick > span { gap: 2px; }
+  .quran-home .quick small, .today .quick small { font-size: var(--fs-xs); line-height: 1.6; }
+  .today .quick-row > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+}

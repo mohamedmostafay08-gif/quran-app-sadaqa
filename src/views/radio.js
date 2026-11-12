@@ -12,7 +12,7 @@ export async function renderRadio() {
   track('radio');
   let data;
   try { data = await load(); } catch {
-    mount(h('div', topbar({ title: 'الإذاعة', back: '#/' }), h('section.card', empty('radio', 'الإذاعة تحتاج اتصالًا بالإنترنت', 'البث المباشر لا يعمل بدون إنترنت.'))));
+    mount(h('div', topbar({ title: 'الإذاعة', back: '#/listen' }), h('section.card', empty('radio', 'الإذاعة تحتاج اتصالًا بالإنترنت', 'البث المباشر لا يعمل بدون إنترنت.'))));
     return;
   }
   const row = (r, big) => {
@@ -42,7 +42,7 @@ export async function renderRadio() {
   const unsub = player.subscribe(() => draw());
   draw();
   mount(h('div.radio-page',
-    topbar({ title: 'الإذاعة', sub: 'بث مباشر على مدار الساعة', back: '#/' }),
+    topbar({ title: 'الإذاعة', sub: 'بث مباشر على مدار الساعة', back: '#/listen' }),
     h('div.radio-search', input),
     h('h2.radio-h', 'الإذاعات'), featured,
     h('h2.radio-h', `إذاعات القراء (${ar(data.reciters.length)})`), list,

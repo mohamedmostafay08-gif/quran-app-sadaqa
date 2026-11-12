@@ -33,7 +33,7 @@ export async function renderKhatma(_p, _q, isStale) {
     ))));
   }
   body.append(h('a.quick', { href: '#/group' }, icon('user'), h('span', h('strong', 'ختمة جماعية أو مُهداة'), h('small', 'شارك رابطًا، وكل واحد يختار جزءًا'))));
-  mount(h('div.khatma', topbar({ title: 'الختمة والورد', back: '#/' }), body));
+  mount(h('div.khatma', topbar({ title: 'الختمة والورد', back: '#/quran' }), body));
 
 }
 

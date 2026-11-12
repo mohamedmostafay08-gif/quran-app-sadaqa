@@ -57,7 +57,7 @@ export async function renderMushaf(params, _q, isStale) {
   const spread = spreadMQ.matches;
   const nums = spread ? (n % 2 ? [n, n + 1] : [n - 1, n]).filter((p) => p >= 1 && p <= 604) : [n];
   let pagesLines;
-  try { pagesLines = await Promise.all(nums.map((p) => getPage(p))); } catch { if (!isStale()) { toast('صفحات المصحف غير متاحة بدون إنترنت قبل تحميلها'); navigate('/', { replace: true }); } return; }
+  try { pagesLines = await Promise.all(nums.map((p) => getPage(p))); } catch { if (!isStale()) { toast('صفحات المصحف غير متاحة بدون إنترنت قبل تحميلها'); navigate('/quran', { replace: true }); } return; }
   if (isStale()) return;
   const last = nums[nums.length - 1];
   getPage(Math.min(604, last + 1)).catch(() => {}); // تحميل مسبق
@@ -152,7 +152,7 @@ export async function renderMushaf(params, _q, isStale) {
     topbar({
       title: surahIds.map((s) => getSurahMeta(s).nameAr).join('، '),
       sub: `الجزء ${ar(juz)}${spread ? `، الصفحتان ${ar(nums[0])}–${ar(last)}` : ''}`,
-      back: '#/',
+      back: '#/quran',
       actions: [
         h('button.icon-btn', { type: 'button', 'aria-label': 'العرض المتصل', title: 'العرض المتصل', onclick: () => { settings.set('readMode', 'scroll'); navigate(`/surah/${firstAyah[1]}/${firstAyah[2]}`); } }, icon('scroll')),
         h('button.icon-btn', { type: 'button', 'aria-label': 'خيارات العرض', onclick: () => optionsSheet() }, icon('more')),

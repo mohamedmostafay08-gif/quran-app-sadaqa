@@ -39,7 +39,7 @@ export async function renderMemorize(_p, query, isStale) {
   };
 
   mount(h('div.memorize',
-    topbar({ title: 'الحفظ والمراجعة', back: '#/' }),
+    topbar({ title: 'الحفظ والمراجعة', back: '#/quran' }),
     h('section.card.review-card',
       h('div.kc-head',
         h('div', h('span.eyebrow', 'راجع النهارده'), h('h2', dueList.length ? `${ar(dueList.length)} آية للمراجعة` : 'لا توجد مراجعات اليوم')),

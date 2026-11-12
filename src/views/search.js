@@ -92,7 +92,7 @@ export function renderSearch(_p, query) {
   }, label)));
   applyMode();
   const el = h('div.search-page',
-    topbar({ title: 'البحث', back: '#/' }),
+    topbar({ title: 'البحث', back: '#/quran' }),
     modeSeg,
     h('form.search-bar', { role: 'search', onsubmit: (e) => { e.preventDefault(); run(); } }, icon('search'), input),
     exactLabel,
