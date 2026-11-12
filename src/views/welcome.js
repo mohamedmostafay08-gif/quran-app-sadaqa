@@ -68,7 +68,7 @@ export function renderWelcome() {
     draw();
     return h('section.wl-step',
       h('h1', { tabindex: '-1' }, 'اختر قارئك المفضل'),
-      h('p.muted', 'المرتّل للقراءة اليومية، والمجوّد بأداء المحافل، والمعلّم للتعلّم والحفظ. اضغط ▶ لتسمع عينة، وتقدر تغيّر القارئ في أي وقت.'),
+      h('p.muted', 'المرتّل للقراءة اليومية، والمجوّد بأداء المحافل، والمعلّم للتعلّم والحفظ. اضغط ▶ لتسمع عينة، ويمكنك تغيير القارئ في أي وقت.'),
       tabs,
       input,
       list,
@@ -94,14 +94,14 @@ export function renderWelcome() {
   }
 
   function stepKhatma() {
-    const opts = [[30, 'ختمة في شهر', '≈ ٢١ صفحة يوميًا'], [60, 'في شهرين', '≈ ١١ صفحة يوميًا'], [90, 'في ٣ أشهر', '≈ ٧ صفحات يوميًا'], [0, 'لاحقًا', 'تقدر تبدأها من الرئيسية']];
+    const opts = [[30, 'ختمة في شهر', '≈ ٢١ صفحة يوميًا'], [60, 'في شهرين', '≈ ١١ صفحة يوميًا'], [90, 'في ٣ أشهر', '≈ ٧ صفحات يوميًا'], [0, 'لاحقًا', 'يمكنك بدؤها من الرئيسية']];
     const list = h('div.wl-options', opts.map(([d, t, sub]) => h('button.wl-option', {
       type: 'button', 'aria-pressed': String(d === khatmaDays),
       onclick: (e) => { khatmaDays = d; for (const b of list.children) b.setAttribute('aria-pressed', String(b === e.currentTarget)); },
     }, h('strong', t), h('small', sub))));
     return h('section.wl-step',
       h('h1', { tabindex: '-1' }, 'ابدأ رحلتك مع القرآن'),
-      h('p.muted', 'ورد يومي بالصفحات يتعدّل تلقائيًا لو فاتك يوم. وفيه كمان وضع للحفظ والمراجعة.'),
+      h('p.muted', 'ورد يومي بالصفحات يتعدّل تلقائيًا إذا فاتك يوم، ومعه وضع للحفظ والمراجعة.'),
       list,
     );
   }

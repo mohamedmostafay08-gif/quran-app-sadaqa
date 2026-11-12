@@ -20,6 +20,7 @@ import { renderWelcome } from './views/welcome.js';
 import { renderPrayer, renderAdhkarChapter } from './views/prayer.js';
 import { renderGroups, renderGroup } from './views/group.js';
 import { renderRadio } from './views/radio.js';
+import { renderListen, renderMore } from './views/listen.js';
 import { renderLibrary, renderTopic, renderHadith, renderGuide, renderSahabi } from './views/library.js';
 import { initInstall, isStandalone } from './features/install.js';
 import { track } from './features/stats.js';
@@ -27,7 +28,7 @@ import { refreshPush } from './features/push.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
-const TAB_FOR = { '/': 'home', '/surah': 'home', '/search': 'search', '/bookmarks': 'bookmarks', '/downloads': 'settings', '/prayer': 'prayer', '/adhkar': 'prayer', '/settings': 'settings', '/about': 'settings', '/khatma': 'home', '/memorize': 'home', '/car': 'home', '/page': 'home', '/group': 'home', '/radio': 'home', '/library': 'library', '/hadith': 'library', '/guide': 'library', '/sahabi': 'library' };
+const TAB_FOR = { '/': 'home', '/surah': 'home', '/page': 'home', '/search': 'home', '/listen': 'listen', '/radio': 'listen', '/car': 'more', '/downloads': 'more', '/library': 'library', '/hadith': 'library', '/guide': 'library', '/sahabi': 'library', '/prayer': 'prayer', '/adhkar': 'prayer', '/more': 'more', '/bookmarks': 'more', '/settings': 'more', '/about': 'more', '/khatma': 'more', '/memorize': 'more', '/group': 'more' };
 
 async function boot() {
   const status = document.querySelector('.boot p');
@@ -60,6 +61,8 @@ async function boot() {
   route('/group', renderGroups);
   route('/group/:id', renderGroup);
   route('/radio', renderRadio);
+  route('/listen', renderListen);
+  route('/more', renderMore);
   route('/library', renderLibrary);
   route('/library/:topic', renderTopic);
   route('/hadith/:topic/:id', renderHadith);
@@ -115,7 +118,7 @@ function showUpdateBanner() {
   if (document.querySelector('.update-banner')) return;
   const bar = h('div.install-banner.update-banner', { role: 'status' },
     h('img', { src: 'public/icons/icon-192.png', alt: '', width: 40, height: 40 }),
-    h('div.ib-text', h('strong', 'نسخة جديدة من «رتّل» جاهزة'), h('small', 'حدّث علشان تاخد آخر التحسينات')),
+    h('div.ib-text', h('strong', 'نسخة جديدة من «رتّل» جاهزة'), h('small', 'حدّث التطبيق لتحصل على آخر التحسينات')),
     h('button.btn.ib-go', { type: 'button', onclick: () => location.reload() }, 'حدّث الآن'),
     h('button.icon-btn.ib-close', { type: 'button', 'aria-label': 'لاحقًا', onclick: () => bar.remove() }, '✕'),
   );

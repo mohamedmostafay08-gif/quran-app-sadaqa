@@ -35,7 +35,7 @@ body { background: var(--bg); }
   background: var(--surface);
 }
 .hero h1 { font-size: 46px; margin: 0; line-height: 1.4; }
-.hero .hero-sub { font-size: 13px; color: var(--text-2); }
+.hero .hero-sub { font-size: var(--fs-base); color: var(--text-2); }
 .hero-mark { color: var(--gold); }
 
 /* ===== شريط التبويب الثابت ===== */
@@ -74,10 +74,10 @@ body:has(.mini-player.show) .main { padding-bottom: calc(var(--tabbar-h) + var(-
 .mini-player > * { max-width: 760px; }
 .mini-player.show { transform: none; opacity: 1; visibility: visible; transition: transform .3s var(--ease), opacity .2s; }
 .mp-open { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; border: 0; background: none; padding: 0 4px; text-align: start; height: 100%; }
-.mp-art { flex: none; width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-family: var(--font-quran); font-size: 20px; line-height: 1; border: 1px solid var(--gold-line); }
+.mp-art { flex: none; width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-family: var(--font-quran); font-size: var(--fs-xl); line-height: 1; border: 1px solid var(--gold-line); }
 .mp-text { min-width: 0; display: grid; }
-.mp-text strong { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mp-text small { font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mp-text strong { font-size: var(--fs-md); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mp-text small { font-size: var(--fs-sm); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mp-text small.err { color: var(--danger); }
 .mp-play { flex: none; width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; }
 .mp-play svg { width: 18px; height: 18px; }
@@ -103,7 +103,7 @@ body:has(.mini-player.show) .main { padding-bottom: calc(var(--tabbar-h) + var(-
 .fp-handle { width: 44px; height: 5px; border-radius: 4px; background: var(--border); margin: 4px auto 0; }
 .fp-title { text-align: center; }
 .fp-title h2 { margin: 0; font-family: var(--font-quran); font-weight: 400; font-size: clamp(30px, 9vw, 44px); color: var(--accent); line-height: 1.6; }
-.fp-title p { margin: 0; color: var(--text-2); font-size: 13px; }
+.fp-title p { margin: 0; color: var(--text-2); font-size: var(--fs-base); }
 .fp-ayah {
   flex: 1; min-height: 0; overflow: auto; display: grid; place-items: center;
   font-family: var(--font-quran); font-size: calc(1.55rem * var(--quran-scale)); line-height: 2.2; text-align: center;
@@ -113,7 +113,7 @@ body:has(.mini-player.show) .main { padding-bottom: calc(var(--tabbar-h) + var(-
 .fp-ayah p { margin: 0; }
 .fp-seek { display: grid; gap: 4px; }
 .fp-seek input { width: 100%; accent-color: var(--accent); }
-.fp-times { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.fp-times { display: flex; justify-content: space-between; font-size: var(--fs-sm); color: var(--text-2); font-variant-numeric: tabular-nums; }
 .fp-controls { display: flex; align-items: center; justify-content: center; gap: 18px; }
 .fp-controls .icon-btn { width: 56px; height: 56px; }
 .fp-controls .icon-btn svg { width: 28px; height: 28px; }
@@ -121,7 +121,7 @@ body:has(.mini-player.show) .main { padding-bottom: calc(var(--tabbar-h) + var(-
 .fp-play svg { width: 30px; height: 30px; }
 .fp-play .spinner { width: 30px; height: 30px; }
 .fp-extra { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
-.fp-extra .pb-chip { min-height: 38px; padding: 0 14px; font-size: 13px; background: var(--surface); text-decoration: none; }
+.fp-extra .pb-chip { min-height: 38px; padding: 0 14px; font-size: var(--fs-base); background: var(--surface); text-decoration: none; }
 .fp-reciter { display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border); background: var(--surface-2); border-radius: 999px; min-height: 44px; padding: 0 16px; font-weight: 700; margin: 0 auto; }
 
 /* الأوراق السفلية */
@@ -136,9 +136,9 @@ body.immersive .mini-player.show { transform: translateY(calc(var(--tabbar-h) + 
 body.immersive .topbar { transform: translateY(calc(-100% - env(safe-area-inset-top, 0px))); }
 
 body.car-mode .mini-player { display: none; }
-.hero-date { margin: 12px 0 0; color: var(--accent); font-weight: 700; font-size: 14px; }
+.hero-date { margin: 12px 0 0; color: var(--accent); font-weight: 700; font-size: var(--fs-md); }
 .pr-pill { background: var(--surface); border: 1px solid var(--border); -webkit-backdrop-filter: none; backdrop-filter: none; }
-.rs-hint { margin: 8px 2px; font-size: 12px; }
+.rs-hint { margin: 8px 2px; font-size: var(--fs-sm); }
 
 /* ===== اقتراح التثبيت ===== */
 .install-banner {
@@ -152,15 +152,15 @@ body:has(.mini-player.show) .install-banner { bottom: calc(var(--tabbar-h) + var
 .install-banner.show { transform: translate(-50%, 0); opacity: 1; }
 .install-banner img { border-radius: 10px; flex: none; }
 .ib-text { flex: 1; min-width: 0; display: grid; }
-.ib-text strong { font-size: 14px; }
-.ib-text small { font-size: 12px; color: var(--text-2); }
+.ib-text strong { font-size: var(--fs-md); }
+.ib-text small { font-size: var(--fs-sm); color: var(--text-2); }
 .ib-go { min-height: 40px; padding: 0 16px; }
 .ib-close { width: 36px; height: 36px; }
 .ib-steps { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 14px; }
-.ib-steps li { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; line-height: 1.9; }
+.ib-steps li { display: flex; gap: 12px; align-items: flex-start; font-size: var(--fs-md); line-height: 1.9; }
 .ib-n { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-weight: 700; }
 .ib-ico, .ib-steps svg { width: 22px; height: 22px; vertical-align: middle; color: var(--accent); display: inline-block; }
-.home-foot { text-align: center; margin: 22px 0 6px; font-size: 13px; } .home-foot a { color: var(--accent); }
+.home-foot { text-align: center; margin: 22px 0 6px; font-size: var(--fs-base); } .home-foot a { color: var(--accent); }
 
 /* الأوراق والتنبيهات فوق المشغّل الكامل (الذي يفتح منها: السرعة، القارئ، مؤقت النوم) */
 .scrim { z-index: 60; }
@@ -168,4 +168,4 @@ body:has(.mini-player.show) .install-banner { bottom: calc(var(--tabbar-h) + var
 .toast { z-index: 70; }
 .backup-sum { margin: 6px 0; padding-inline-start: 20px; line-height: 1.9; }
 .fp-untimed { display: grid; gap: 10px; }
-.fp-untimed small { font-family: var(--font-ui, inherit); font-size: 14px; line-height: 1.9; color: var(--text-2); }
+.fp-untimed small { font-family: var(--font-ui, inherit); font-size: var(--fs-md); line-height: 1.9; color: var(--text-2); }

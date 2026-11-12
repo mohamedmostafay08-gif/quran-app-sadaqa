@@ -1,6 +1,7 @@
 // الرئيسية: متابعة القراءة + قائمة السور/الأجزاء
 import { h, icon, ar } from '../lib/dom.js';
 import { sahabiTile } from './library.js';
+import { listenCard } from './listen.js';
 import { normalize, latinDigits } from '../lib/arabic.js';
 import { getSurahs, getSurahMeta, juzStart, juzOf, pageOf } from '../data.js';
 import * as settings from '../state.js';
@@ -47,31 +48,27 @@ export function renderHome() {
     quick.append(
       wird,
       sahabiTile(),
-      h('a.quick', { href: '#/radio' }, icon('radio'), h('span', h('strong', 'إذاعة القرآن الكريم'), h('small', 'القاهرة والسعودية وإذاعات القراء'))),
       h('a.quick', { href: '#/memorize' }, icon('repeat'), h('span', h('strong', 'الحفظ والمراجعة'), h('small', due.length ? `${ar(due.length)} آية للمراجعة اليوم` : 'إخفاء تدريجي وتكرار'))),
-      h('a.quick', { href: '#/group' }, icon('user'), h('span', h('strong', 'ختمة جماعية أو مُهداة'), h('small', 'اقرأوا معًا برابط واحد'))),
-      h('a.quick', { href: '#/car' }, icon('play'), h('span', h('strong', 'وضع السيارة'), h('small', 'أزرار كبيرة وتحكم صوتي'))),
+      h('a.quick', { href: '#/group' }, icon('users'), h('span', h('strong', 'ختمة جماعية أو مُهداة'), h('small', 'اقرأوا معًا برابط واحد'))),
     );
   });
+  const lc = listenCard();
   const el = h('div.home',
-    h('header.hero',
-      h('div.hero-frame',
-        h('div.hero-mark', { 'aria-hidden': 'true' }, '۞'),
-        h('h1', 'رتّل'),
-        h('span.hero-sub', 'القرآن الكريم، برواية حفص عن عاصم'),
-      ),
-      h('p.hero-date', P.hijri()?.text || ''),
+    h('header.home-head',
+      h('div.hh-brand', h('h1', 'رتّل'), h('span', P.hijri()?.text || 'القرآن الكريم، برواية حفص عن عاصم')),
       prayerPill(),
     ),
-    h('form.search-bar', { role: 'search', onsubmit: (e) => e.preventDefault() }, icon('search'), input),
+    lc,
     last ? continueCard(last) : null,
     quick,
+    h('form.search-bar', { role: 'search', onsubmit: (e) => e.preventDefault() }, icon('search'), input),
     tabs,
     listWrap,
     h('p.home-foot', h('a', { href: 'sura/' }, 'السور مكتوبة كاملة (صفحات للقراءة والمشاركة)')),
   );
   renderList();
   mount(el);
+  return { cleanup: () => lc.cleanup() };
 }
 
 function continueCard(last) {

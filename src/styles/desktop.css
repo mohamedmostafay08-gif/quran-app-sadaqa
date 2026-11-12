@@ -16,9 +16,9 @@
   }
   .tabbar::before {
     content: 'رتّل'; display: block; text-align: center; margin: 0 0 18px;
-    font-family: var(--font-quran); font-size: 34px; line-height: 1.6; color: var(--accent);
+    font-family: var(--font-quran); font-size: var(--fs-2xl); line-height: 1.6; color: var(--accent);
   }
-  .tabbar a { flex: none; max-width: none; height: 72px; margin: 0; gap: 6px; border-radius: 14px; font-size: 12px; }
+  .tabbar a { flex: none; max-width: none; height: 72px; margin: 0; gap: 6px; border-radius: 14px; font-size: var(--fs-sm); }
   .tabbar a:hover { background: var(--surface-2); color: var(--text); }
   .tabbar a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
   .tabbar a[aria-current="page"]::before { display: none; }
@@ -27,7 +27,7 @@
   .main { max-width: var(--maxw); padding-inline: var(--gutter); padding-bottom: 40px; }
   body:has(.mini-player.show) .main { padding-bottom: calc(var(--mini-h) + 56px); }
   .topbar { min-height: 72px; }
-  .topbar-title h1 { font-size: 22px; }
+  .topbar-title h1 { font-size: var(--fs-xl); }
 
   /* ===== المشغّل الصغير: شريط عائم في المنتصف ===== */
   .mini-player {
@@ -49,8 +49,9 @@
 
   /* ===== الرئيسية ===== */
   .home { display: grid; grid-template-columns: 1fr; gap: 0; }
-  .hero { padding-top: 32px; }
-  .home .quick-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .home-head { padding-top: 28px; }
+  .ls-surahs { grid-template-columns: repeat(3, 1fr); }
+  .home .quick-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
   .home .quick { align-items: flex-start; }
   .home .quick-row > * { margin: 0; }
   .surah-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
@@ -67,7 +68,7 @@
   .m-spread .m-page { width: min(600px, calc((100dvh - 250px) / 1.62)); max-width: none; flex: none; padding-bottom: 10px; display: flex; flex-direction: column; }
   .m-spread .m-page:first-child { border-radius: 0 22px 22px 0; border-inline-end-width: 0; box-shadow: inset 18px 0 22px -18px rgba(60, 45, 15, .28), 0 12px 30px rgba(20, 45, 38, .08); }
   .m-spread .m-page:last-child:not(:first-child) { border-radius: 22px 0 0 22px; box-shadow: inset -18px 0 22px -18px rgba(60, 45, 15, .28), 0 12px 30px rgba(20, 45, 38, .08); border-inline-start: 1px solid var(--gold-soft); }
-  .m-folio { margin-top: auto; padding-top: 6px; text-align: center; font-family: var(--font-ui, inherit); font-size: 13px; color: var(--gold); }
+  .m-folio { margin-top: auto; padding-top: 6px; text-align: center; font-family: var(--font-ui, inherit); font-size: var(--fs-base); color: var(--gold); }
   .m-spread ~ .m-nav { max-width: 520px; }
 
   /* ===== الإذاعة ===== */
@@ -104,7 +105,6 @@
 }
 
 @media (min-width: 1440px) {
-  .home .quick-row { grid-template-columns: repeat(6, 1fr); }
   :root { --maxw: 1320px; }
   .surah-list, .radio-list { grid-template-columns: repeat(4, 1fr); }
 }

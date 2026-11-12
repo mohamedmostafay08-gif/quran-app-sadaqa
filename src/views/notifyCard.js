@@ -6,9 +6,9 @@ import { pushStatus, syncPush, PUSH_PRAYERS, askPermission, testPush } from '../
 
 const NAMES = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
 const STATUS_MSG = {
-  unsupported: 'المتصفح ده لا يدعم الإشعارات. جرّب Chrome أو Edge أو Firefox، أو ثبّت التطبيق.',
-  'ios-install': 'على الآيفون: الإشعارات تعمل بعد تثبيت التطبيق على الشاشة الرئيسية (مشاركة ← «إضافة إلى الشاشة الرئيسية») ثم فتحه من الأيقونة.',
-  denied: 'الإشعارات محظورة لهذا الموقع. فعّلها من إعدادات المتصفح (رمز القفل بجوار العنوان) ثم ارجع هنا.',
+  unsupported: 'هذا المتصفح لا يدعم الإشعارات. جرّب Chrome أو Edge أو Firefox، أو ثبّت التطبيق.',
+  'ios-install': 'على الآيفون: تعمل الإشعارات بعد تثبيت التطبيق على الشاشة الرئيسية (مشاركة ← «إضافة إلى الشاشة الرئيسية») ثم فتحه من أيقونته.',
+  denied: 'الإشعارات محظورة لهذا الموقع. فعّلها من إعدادات المتصفح (رمز القفل بجوار العنوان) ثم عد إلى هنا.',
 };
 
 export function notifyCard({ prayers = true, wird = true } = {}) {
@@ -16,8 +16,8 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
   const note = h('p.small-note', { 'aria-live': 'polite' });
   const testBtn = h('button.btn.ghost.block', { type: 'button', hidden: !((settings.get('notifyPrayers') || []).length || settings.get('wirdTime')), onclick: async () => {
     testBtn.disabled = true; note.textContent = 'جارٍ الإرسال…';
-    try { await testPush(); note.textContent = 'اتبعت. لو ما وصلكش خلال دقيقة: تأكد إن إشعارات «رتّل» مسموحة من إعدادات الجهاز، وإن وضع «عدم الإزعاج/التركيز» مقفول.'; }
-    catch (e) { note.textContent = e.message === 'too soon' ? 'استنى نص دقيقة وجرّب تاني.' : 'تعذر الإرسال؛ جرّب تقفل التنبيهات وتفتحها تاني.'; }
+    try { await testPush(); note.textContent = 'أُرسل الإشعار. إذا لم يصلك خلال دقيقة، فتأكد أن إشعارات «رتّل» مسموحة في إعدادات الجهاز، وأن وضع «عدم الإزعاج» أو «التركيز» غير مفعّل.'; }
+    catch (e) { note.textContent = e.message === 'too soon' ? 'انتظر نصف دقيقة ثم أعد المحاولة.' : 'تعذر الإرسال؛ جرّب إيقاف التنبيهات ثم تفعيلها من جديد.'; }
     setTimeout(() => { testBtn.disabled = false; }, 30000);
   } }, 'إرسال إشعار تجريبي');
   const save = async (rollback, perm) => {
@@ -69,7 +69,7 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
       });
       body.push(h('div.field', h('span', 'تذكير بالورد اليومي'), h('div.notify-time', time, clear)));
     }
-    body.push(h('p.small-note', 'لتصلك التنبيهات والتطبيق مغلق، نحفظ على الخادم: موقعك مقرّبًا (حوالي ١ كم)، وطريقة الحساب، والمواعيد التي اخترتها فقط — بلا اسم أو أي بيانات أخرى. إلغاء كل التنبيهات يحذفها من الخادم.'));
+    body.push(h('p.small-note', 'لتصلك التنبيهات والتطبيق مغلق، نحفظ على الخادم موقعك مقرّبًا (نحو ١ كم)، وطريقة الحساب، والمواعيد التي اخترتها فقط، بلا اسم أو أي بيانات أخرى. وإلغاء كل التنبيهات يحذفها من الخادم.'));
   }
   return h('section.card.notify-card', h('h2', 'التنبيهات'), ...body, status === 'ok' ? testBtn : null, note);
 }
