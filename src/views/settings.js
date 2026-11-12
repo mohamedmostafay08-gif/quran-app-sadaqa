@@ -35,7 +35,7 @@ export function renderSettings() {
   const unsub = settings.subscribe((k) => { if (k === 'reciter') recName.textContent = getReciter(settings.get('reciter'))?.nameAr || ''; });
 
   mount(h('div.settings',
-    topbar({ title: 'الإعدادات' }),
+    topbar({ title: 'الإعدادات', back: '#/more' }),
     h('section.card',
       h('h2', 'العرض'),
       h('div.field', h('span', 'الثيم'), seg('theme', [['auto', 'تلقائي'], ['light', 'فاتح'], ['sepia', 'سيبيا'], ['dark', 'ليلي']])),

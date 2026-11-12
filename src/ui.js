@@ -4,8 +4,13 @@ import { h, icon } from './lib/dom.js';
 const main = () => document.getElementById('main');
 
 /** يستبدل محتوى الشاشة */
+// عدد مرات عرض المحتوى: يمنع شاشة التحميل من الظهور فوق محتوى عُرض بالفعل
+export let mountCount = 0;
 export function mount(el, { scroll = 'top' } = {}) {
   const m = main();
+  mountCount++;
+  // حركة دخول خفيفة (تُلغى مع «تقليل الحركة»)
+  if (el?.classList && !m.querySelector('.skeleton')) el.classList.add('page-in');
   m.replaceChildren(el);
   if (scroll === 'top') window.scrollTo(0, 0);
 }
@@ -88,4 +93,14 @@ export function actionRow(iconName, label, onclick, extra) {
 /** حالة فارغة */
 export function empty(iconName, title, text, action) {
   return h('div.empty', icon(iconName), h('h2', title), text ? h('p', text) : null, action || null);
+}
+
+/** هيكل تحميل مؤقت يظهر إذا تأخرت الشاشة */
+export function showSkeleton() {
+  const bar = (w, hgt = 14) => h('span.sk', { style: `width:${w};height:${hgt}px` });
+  main().replaceChildren(h('div.skeleton', { 'aria-busy': 'true', 'aria-label': 'جارٍ التحميل' },
+    h('div.sk-top', bar('40%', 20), bar('22%', 12)),
+    h('div.sk-card', bar('30%', 12), bar('70%', 22), bar('50%', 12)),
+    ...[0, 1, 2, 3].map(() => h('div.sk-row', h('span.sk.sk-dot'), h('div', bar('55%', 14), bar('35%', 10)))),
+  ));
 }

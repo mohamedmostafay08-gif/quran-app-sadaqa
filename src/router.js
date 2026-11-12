@@ -1,4 +1,5 @@
 // hash router بسيط: #/surah/2/255 ، #/search?q=...
+import * as ui from './ui.js';
 const routes = [];
 let current = null;   // { cleanup }
 let onChange = null;
@@ -38,7 +39,10 @@ async function resolve() {
   if (current?.cleanup) { try { current.cleanup(); } catch (e) { console.error(e); } }
   current = null;
   onChange?.(match);
+  const mounted = ui.mountCount;
+  const sk = setTimeout(() => { if (my === seq && ui.mountCount === mounted) ui.showSkeleton(); }, 160);
   const result = await match.route.handler(match.params, match.query, () => my !== seq);
+  clearTimeout(sk);
   if (my !== seq) { result?.cleanup?.(); return; }
   current = result || null;
 }

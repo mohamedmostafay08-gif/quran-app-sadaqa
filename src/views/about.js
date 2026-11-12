@@ -9,7 +9,7 @@ export function renderAbout() {
   const n = getNotice() || {};
   const link = (href, text) => h('a', { href, target: '_blank', rel: 'noopener' }, text);
   mount(h('div.about',
-    topbar({ title: 'عن التطبيق', back: '#/settings' }),
+    topbar({ title: 'عن التطبيق', back: '#/more' }),
     h('section.card',
       h('h2', 'رتّل — القرآن الكريم'),
       h('p', 'تطبيق ويب مجاني يعمل بدون إنترنت بعد أول فتح. كل بياناتك (العلامات والإعدادات والتنزيلات) محفوظة على جهازك فقط، ولا يوجد حسابات ولا تتبع.'),

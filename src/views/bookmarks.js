@@ -83,7 +83,7 @@ export async function renderBookmarks(_p, query, isStale) {
   const draw = async () => panel.replaceChildren(await (tab === 'notes' ? notesPanel() : bookmarksPanel()));
 
   mount(h('div.bookmarks',
-    topbar({ title: 'العلامات والملاحظات' }),
+    topbar({ title: 'العلامات والملاحظات', back: '#/more' }),
     last ? h('a.continue', { href: `#/surah/${last.surah}/${last.ayah}` },
       h('div', h('span.eyebrow', 'آخر موضع قراءة'), h('strong', `سورة ${getSurahMeta(last.surah).nameAr}`), h('span.muted', `الآية ${ar(last.ayah)}`)),
       h('span.continue-go', icon('forward'))) : null,

@@ -137,7 +137,7 @@ export async function renderDownloads(_p, _q, isStale) {
   );
 
   mount(h('div.downloads',
-    topbar({ title: 'التنزيلات' }),
+    topbar({ title: 'التنزيلات', back: '#/more' }),
     extrasCard,
     h('section.card',
       h('button.row-btn', { type: 'button', onclick: () => reciterSheet() },
