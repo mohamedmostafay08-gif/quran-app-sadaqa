@@ -29,12 +29,32 @@ export const timedFallback = (id) => (isUntimed(id) ? (reciters.find((r) => !r.u
 /** سورة غير مسجّلة في هذا المصحف: تُشغَّل من مصحف بديل للقارئ نفسه */
 export const substituteFor = (reciterId, s) => { const r = getReciter(reciterId); return r?.missing?.includes(s) ? getReciter(r.fallback) : null; };
 
+// تظليل كلمة بكلمة: نفس القارئ من Quran.com (فيه توقيت كل كلمة) — حسب مسار مصحفه في mp3quran
+const WORD_QDC = {
+  'mishary-alafasy/r1': [7, 'https://download.quranicaudio.com/qdc/mishari_al_afasy/murattal/', false],
+  'abdulbasit-abdulsamad/r3': [2, 'https://download.quranicaudio.com/qdc/abdul_baset/murattal/', false],
+  'mahmoud-husary/r1': [6, 'https://download.quranicaudio.com/qdc/khalil_al_husary/murattal/', false],
+  'muhammad-minshawi/r1': [9, 'https://download.quranicaudio.com/qdc/siddiq_minshawi/murattal/', false],
+  'abdulrahman-sudais/r1': [3, 'https://download.quranicaudio.com/qdc/abdurrahmaan_as_sudais/murattal/', false],
+  'abubakr-shatri/r1': [4, 'https://download.quranicaudio.com/qdc/abu_bakr_shatri/murattal/', false],
+  'hani-rifai/r1': [5, 'https://download.quranicaudio.com/qdc/hani_ar_rifai/murattal/', false],
+  'saud-shuraim/r1': [10, 'https://download.quranicaudio.com/qdc/saud_ash-shuraym/murattal/', true],
+};
+const serverKey = (url) => (url.match(/audio\/(.+?)\/?$/) || [])[1];
+/** المصدر الفعلي للقارئ: نسخة Quran.com بتوقيت الكلمات إن كانت متاحة ومفعّلة (وبوجود إنترنت) */
+export function effectiveReciter(reciterId) {
+  const r = getReciter(reciterId);
+  const w = settings.get('wordHighlight') !== false && navigator.onLine && r.source !== 'qdc' && !r.untimed && WORD_QDC[serverKey(r.server || '')];
+  return w ? { ...r, source: 'qdc', qdc: w[0], server: w[1], pad: w[2], words: true } : r;
+}
+export const hasWordTiming = (reciterId) => !!effectiveReciter(reciterId).words;
+
 export function surahUrl(reciterId, s) {
-  const r = substituteFor(reciterId, s) || getReciter(reciterId);
+  const r = substituteFor(reciterId, s) || effectiveReciter(reciterId);
   return `${r.server}${r.source === 'qdc' && !r.pad ? s : pad(s)}.mp3`;
 }
 export function timingUrl(reciterId, s) {
-  const r = getReciter(reciterId);
+  const r = effectiveReciter(reciterId);
   return r.source === 'qdc' ? `${QDC_API}/${r.qdc}/${s}?segments=true` : `${TIMING_API}?surah=${s}&read=${reciterId}`;
 }
 
@@ -42,16 +62,19 @@ export function timingUrl(reciterId, s) {
 const timingCache = new Map();
 /** يرجع مصفوفة [start, end] بالثواني؛ الفهرس 0 = البسملة/الاستعاذة قبل الآية الأولى */
 export async function getTimings(reciterId, s) {
-  const key = `${reciterId}:${s}`;
+  const eff = effectiveReciter(reciterId);
+  const key = `${reciterId}:${s}:${eff.words ? 'w' : ''}`;
   if (timingCache.has(key)) return timingCache.get(key);
   const res = await fetch(timingUrl(reciterId, s));
   if (!res.ok) throw new Error('timing ' + res.status);
   const data = await res.json();
   const t = [];
-  if (getReciter(reciterId).source === 'qdc') {
+  const words = [];
+  if (eff.source === 'qdc') {
     for (const x of data.audio_file?.timestamps || []) {
       const a = +x.verse_key.split(':')[1];
       t[a] = [x.timestamp_from / 1000, x.timestamp_to / 1000];
+      if (x.segments?.length) words[a] = x.segments.filter((g) => g.length >= 3).map(([w, f, e]) => [w, f / 1000, e / 1000]);
     }
   } else {
     for (const x of data) if (x.ayah >= 1) t[x.ayah] = [x.start_time / 1000, x.end_time / 1000];
@@ -66,6 +89,7 @@ export async function getTimings(reciterId, s) {
     await fillGaps(t, count, await getSurahText(s));
   }
   t[0] = [0, t[1][0]];
+  if (words.length) t.words = words;
   timingCache.set(key, t);
   if (timingCache.size > 30) timingCache.delete(timingCache.keys().next().value);
   return t;
@@ -223,7 +247,14 @@ function tick() {
     st.ayah = at;
     emit();
   }
+  // الكلمة المقروءة الآن (لمن له توقيت كلمات)
+  const segs = timings.words?.[st.ayah];
+  let w = 0;
+  if (segs) for (const [wi, f, e] of segs) { if (t >= f && t < e) { w = wi; break; } if (t >= e) w = wi; }
+  if (w !== curWord) { curWord = w; for (const fn of wordListeners) fn(st.surah, st.ayah, w); }
 }
+let curWord = 0;
+const wordListeners = new Set();
 
 /** قرار عند نهاية آية: يرجع true لو تدخّلنا (قفز/إيقاف) */
 function boundary(a) {
@@ -343,6 +374,8 @@ addEventListener('pagehide', () => saveListen(true));
 
 export const player = {
   state: () => st,
+  /** يُستدعى عند تغيّر الكلمة المقروءة: fn(surah, ayah, wordIndex) */
+  onWord(fn) { wordListeners.add(fn); return () => wordListeners.delete(fn); },
   subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
 
   /** يبدأ من آية؛ {only:true} يكرر آية واحدة، {range:{from,to,loop,times}} نطاق محدد */

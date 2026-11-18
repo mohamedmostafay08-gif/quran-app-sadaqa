@@ -1,6 +1,6 @@
 // push-tick: تُستدعى كل دقيقة من pg_cron. تحسب مواقيت الصلاة لكل مشترك بمدينته وطريقته،
 // وترسل إشعار الأذان عند دخول الوقت، وتذكير الورد في الموعد الذي اختاره،
-// وتذكيرات الجمعة والصيام، والتنبيه قبل الأذان، وأذكار ما بعد الصلاة لمن فعّلها.
+// وتذكيرات الجمعة والصيام، والتنبيه قبل الأذان، وأذكار ما بعد الصلاة، وآية الصباح، وقيام الليل لمن فعّلها.
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 import { sendPush } from './webpush.js';
 import { Coordinates, CalculationMethod, PrayerTimes, Madhab, HighLatitudeRule } from 'npm:adhan@4.4.3';
@@ -31,6 +31,10 @@ function prayerTimes(s: Sub, lp: ReturnType<typeof localParts>) {
   // adhan يأخذ اليوم من التاريخ المُعطى (الخادم يعمل بتوقيت UTC)
   return new PrayerTimes(new Coordinates(s.lat, s.lng), new Date(Date.UTC(lp.y, lp.m - 1, lp.d, 12)), params);
 }
+
+/** آيات اليوم من ملفات التطبيق المنشورة (تُحمَّل مرة لكل نسخة من الدالة) */
+let ayahsCache: Promise<{ s: number; a: number; name: string; text: string }[] | null> | null = null;
+const dailyAyahs = () => (ayahsCache ||= fetch(APP + 'public/data/daily-ayahs.json').then((r) => (r.ok ? r.json() : null)).catch(() => null).then((x) => { if (!x) ayahsCache = null; return x; }));
 
 Deno.serve(async (req) => {
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
@@ -63,7 +67,7 @@ Deno.serve(async (req) => {
 
   let sent = 0, removed = 0;
   const jobs = (subs as Sub[]).map(async (s) => {
-    const due: { key: string; tag: string; ttl?: number; payload: Record<string, unknown> }[] = [];
+    const due: { key: string; tag: string; ttl?: number; mark?: string; payload: Record<string, unknown> }[] = [];
     let tz = s.tz || 'UTC', lp;
     try { lp = localParts(now, tz); } catch { tz = 'UTC'; lp = localParts(now, tz); } // منطقة زمنية غير صالحة
     if (s.prayers?.length && s.lat != null && s.lng != null) {
@@ -124,6 +128,30 @@ Deno.serve(async (req) => {
       const white = hd === 12;
       if (tomorrow || white) due.push({ key: 'fasting', tag: 'fasting', payload: { title: 'تذكير بالصيام', body: white ? 'تبدأ الأيام البيض غدًا (١٣ و١٤ و١٥ من الشهر الهجري).' : `غدًا يوم ${tomorrow}، يُستحب صيامه.`, url: '#/calendar', tag: 'fasting' } });
     }
+    // آية الصباح (٨:٠٠ بتوقيت الجهاز): نفس آية اليوم التي يعرضها التطبيق
+    if (ex.includes('aod') && at(8) && s.last_sent?.aod !== lp.date) {
+      const list = await dailyAyahs();
+      if (list?.length) {
+        const x = list[Math.floor(Date.UTC(lp.y, lp.m - 1, lp.d) / 86_400_000) % list.length];
+        due.push({ key: 'aod', tag: 'aod', ttl: 4 * 3600, payload: { title: `آية اليوم — سورة ${x.name}`, body: `﴿${x.text}﴾`, url: `#/surah/${x.s}/${x.a}`, tag: 'aod' } });
+      }
+    }
+    // قيام الليل والوتر: أول الثلث الأخير من الليل (بين مغرب الأمس وفجر اليوم)
+    if (ex.includes('qiyam') && s.lat != null && s.lng != null) {
+      for (const off of [0, 1]) { // الثلث الأخير قد يبدأ قبل منتصف الليل في بعض البلاد
+        const base = new Date(Date.UTC(lp.y, lp.m - 1, lp.d + off, 12));
+        const dayLp = { y: base.getUTCFullYear(), m: base.getUTCMonth() + 1, d: base.getUTCDate() } as any;
+        const prev = new Date(Date.UTC(dayLp.y, dayLp.m - 1, dayLp.d - 1, 12));
+        const fajr = (prayerTimes(s, dayLp) as any).fajr as Date;
+        const mg = (prayerTimes(s, { y: prev.getUTCFullYear(), m: prev.getUTCMonth() + 1, d: prev.getUTCDate() } as any) as any).maghrib as Date;
+        const start = fajr.getTime() - (fajr.getTime() - mg.getTime()) / 3;
+        const key = base.toISOString().slice(0, 10);
+        const diff = now.getTime() - start;
+        if (diff >= 0 && diff < WINDOW_AFTER && s.last_sent?.qiyam !== key) {
+          due.push({ key: 'qiyam', tag: 'qiyam', ttl: 3600, payload: { title: 'الثلث الأخير من الليل', body: '«ينزل ربنا تبارك وتعالى كل ليلة إلى السماء الدنيا حين يبقى ثلث الليل الآخر» متفق عليه. صلِّ ركعتين، واختم بالوتر.', url: '#/prayer', tag: 'qiyam' }, mark: key });
+        }
+      }
+    }
     if (!due.length) return;
     const last = { ...(s.last_sent || {}) };
     let gone = false, failed = false;
@@ -131,7 +159,7 @@ Deno.serve(async (req) => {
       try {
         const r = await sendPush({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(d.payload), { vapid, topic: d.tag, ttl: d.ttl || 1800 });
         if (r.status === 404 || r.status === 410) { gone = true; break; }
-        if (r.status >= 200 && r.status < 300) { last[d.key] = lp.date; sent++; }
+        if (r.status >= 200 && r.status < 300) { last[d.key] = d.mark || lp.date; sent++; }
         else { failed = true; console.error('push', r.status, r.text.slice(0, 200)); }
       } catch (e) { failed = true; console.error('push error', String(e)); }
     }

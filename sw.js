@@ -3,12 +3,12 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '6b50465f3d';
+const VERSION = '99d4fd6c4b';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
 // البيانات الإضافية (الكلمات، التفسير، الصفحات، الترجمات…) تُخزَّن عند أول استخدام في كاش مستقل
-const EXTRAS_VERSION = '5b60f76a36';
+const EXTRAS_VERSION = 'e1adbc666a';
 const EXTRAS_CACHE = 'extras-' + EXTRAS_VERSION;
 const isExtra = (path) => /\/public\/data\/(words|tafsir|tafsir-saadi|mushaf|trans|library)\//.test(path) || /\/public\/data\/(roots|tajweed|tajweed-qpc)\.json$/.test(path);
 const ASSETS = [
@@ -41,6 +41,7 @@ const ASSETS = [
   'src/features/shareCard.js',
   'src/features/srs.js',
   'src/features/stats.js',
+  'src/features/sync.js',
   'src/lib/arabic.js',
   'src/lib/dom.js',
   'src/main.js',
@@ -75,6 +76,7 @@ const ASSETS = [
   'src/views/listen.js',
   'src/views/memorize.js',
   'src/views/mushaf.js',
+  'src/views/nawawi.js',
   'src/views/notifyCard.js',
   'src/views/prayer.js',
   'src/views/qada.js',
@@ -84,12 +86,14 @@ const ASSETS = [
   'src/views/reader.js',
   'src/views/search.js',
   'src/views/settings.js',
+  'src/views/sleep.js',
   'src/views/stats.js',
   'src/views/tasbih.js',
   'src/views/today.js',
   'src/views/wallpaper.js',
   'src/views/welcome.js',
   'public/data/adhkar.json',
+  'public/data/daily-ayahs.json',
   'public/data/extra-notice.json',
   'public/data/quran-meta.json',
   'public/data/quran-simple.json',

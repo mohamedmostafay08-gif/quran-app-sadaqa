@@ -49,5 +49,8 @@ const names = asma.map(([n, m]) => {
 if (asma.length !== 99) errors.push('asma count ' + asma.length);
 if (errors.length) { console.error('✗', errors); process.exit(1); }
 fs.writeFileSync(path.join(ROOT, 'public/data/selections.json'), JSON.stringify({ quranDuas: src.quranDuas, dailyAyahs: src.dailyAyahs, asma: names }));
+// نصوص آيات اليوم (بالرسم العثماني) لإشعار «آية الصباح» من الخادم
+const uth = JSON.parse(fs.readFileSync(path.join(ROOT, 'public/data/quran-uthmani.json'), 'utf8')).ayahs;
+fs.writeFileSync(path.join(ROOT, 'public/data/daily-ayahs.json'), JSON.stringify(src.dailyAyahs.map((r) => { const [s, a] = r.split(':').map(Number); return { s, a, name: surahs[s - 1].nameAr, text: uth[s - 1][a - 1] }; })));
 console.log(`✓ ${src.quranDuas.length} دعاء قرآني، ${src.dailyAyahs.length} آية لليوم، ${names.length} اسمًا (${names.filter((x) => x.ref).length} بآية)`);
 if (process.argv.includes('--list')) for (const x of names) console.log(x.n, '|', x.ref || '—', x.ref ? '| ' + quran[x.ref.split(':')[0] - 1][x.ref.split(':')[1] - 1].slice(0, 90) : '');

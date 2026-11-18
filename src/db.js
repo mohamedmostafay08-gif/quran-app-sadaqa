@@ -45,12 +45,23 @@ async function store(name, mode = 'readonly') {
   return db.transaction(name, mode).objectStore(name);
 }
 
+// سجل المحذوفات حتى لا تعود العناصر المحذوفة عند المزامنة بين الأجهزة
+const SYNCED = new Set(['bookmarks', 'notes', 'memorize', 'khatma']);
+function tombstone(name, key) {
+  if (!SYNCED.has(name)) return;
+  try {
+    const t = JSON.parse(localStorage.getItem('qa:sync:deleted') || '{}');
+    t[`${name}|${key}`] = Date.now();
+    localStorage.setItem('qa:sync:deleted', JSON.stringify(t));
+  } catch { /* التخزين محظور */ }
+}
+
 export const db = {
   async get(name, key) { return wrap((await store(name)).get(key)); },
   async all(name) { return wrap((await store(name)).getAll()); },
   async keys(name) { return wrap((await store(name)).getAllKeys()); },
   async put(name, value) { return wrap((await store(name, 'readwrite')).put(value)); },
-  async del(name, key) { return wrap((await store(name, 'readwrite')).delete(key)); },
+  async del(name, key) { tombstone(name, key); return wrap((await store(name, 'readwrite')).delete(key)); },
   async clear(name) { return wrap((await store(name, 'readwrite')).clear()); },
   async count(name) { return wrap((await store(name)).count()); },
   /** كتابة مجموعة قيم في معاملة واحدة */

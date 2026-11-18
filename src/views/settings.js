@@ -6,6 +6,7 @@ import { reciterSheet } from '../audio/playerBar.js';
 import { mount, topbar } from '../ui.js';
 import { install, isStandalone } from '../features/install.js';
 import * as B from '../features/backup.js';
+import * as Sync from '../features/sync.js';
 import { download } from '../features/notes.js';
 import { sheet, toast } from '../ui.js';
 import { translationPicker } from './reader.js';
@@ -57,6 +58,7 @@ export function renderSettings() {
       h('div.field', h('span', 'تكرار كل آية'), seg('repeat', [[1, 'مرة'], [2, ar(2)], [3, ar(3)], [5, ar(5)], [10, ar(10)]])),
       toggle('autoNext', 'الانتقال للسورة التالية تلقائيًا'),
       toggle('autoScroll', 'تتبع الآية أثناء التلاوة'),
+      toggle('wordHighlight', 'تظليل الكلمة المقروءة', 'للعفاسي والحصري والمنشاوي وعبدالباسط والسديس والشاطري والرفاعي والشريم'),
     ),
     h('section.card',
       h('h2', 'التنزيل'),
@@ -69,6 +71,7 @@ export function renderSettings() {
       h('h2', 'الخصوصية'),
       toggle('stats', 'المساهمة في تحسين التطبيق', 'إحصائيات مجهولة بلا أي بيانات عنك'),
     ),
+    syncCard(),
     backupCard(),
     !isStandalone() ? h('section.card',
       h('button.row-btn', { type: 'button', onclick: () => install() }, h('span', h('strong', 'تثبيت التطبيق على الشاشة الرئيسية'), h('small', 'يفتح كتطبيق ويعمل بدون إنترنت')), icon('download')),
@@ -78,6 +81,46 @@ export function renderSettings() {
     ),
   ));
   return { cleanup: unsub };
+}
+
+// المزامنة بين الأجهزة برمز واحد (البيانات مشفّرة على الجهاز)
+function syncCard() {
+  const rerender = () => dispatchEvent(new HashChangeEvent('hashchange'));
+  const code = settings.get('syncCode');
+  const run = async (btn) => {
+    btn.disabled = true;
+    try { const { changed } = await Sync.syncNow(); toast(changed ? 'تمت المزامنة، جارٍ التحديث…' : 'بياناتك متزامنة ✓'); if (changed) setTimeout(() => location.reload(), 800); else rerender(); }
+    catch (e) { toast(e.message || 'تعذرت المزامنة'); btn.disabled = false; }
+  };
+  if (!code) {
+    const input = h('input.note-input.sync-input', { type: 'text', inputmode: 'text', autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', placeholder: 'XXXX-XXXX-XXXX-XXXX', 'aria-label': 'رمز المزامنة', dir: 'ltr' });
+    const join = async (e) => {
+      const btn = e.currentTarget;
+      const c = Sync.normalizeCode(input.value);
+      if (!c) return toast('الرمز غير صحيح؛ ١٦ حرفًا ورقمًا');
+      await settings.set('syncCode', c);
+      run(btn);
+    };
+    return h('section.card.sync-card',
+      h('h2', 'المزامنة بين أجهزتك'),
+      h('p.muted', 'علاماتك وملاحظاتك وحفظك وختماتك ومتابعة صلاتك على كل أجهزتك تلقائيًا.'),
+      h('button.btn.block', { type: 'button', onclick: async (e) => { const btn = e.currentTarget; await settings.set('syncCode', Sync.newCode()); run(btn); } }, icon('sync'), 'ابدأ المزامنة على هذا الجهاز'),
+      h('div.field', h('span', 'أو اكتب الرمز من جهازك الآخر'), h('div.qd-days', input, h('button.btn.ghost', { type: 'button', onclick: join }, 'ربط'))));
+  }
+  const last = Sync.lastSync();
+  const copy = () => navigator.clipboard.writeText(code).then(() => toast('تم نسخ الرمز'), () => toast('تعذر النسخ'));
+  return h('section.card.sync-card',
+    h('h2', 'المزامنة بين أجهزتك'),
+    h('p.muted', 'اكتب هذا الرمز في «الإعدادات» على جهازك الآخر. احتفظ به ولا تشاركه مع أحد.'),
+    h('div.sync-code', h('code', { dir: 'ltr' }, code), h('button.icon-btn', { type: 'button', 'aria-label': 'نسخ الرمز', onclick: copy }, icon('copy'))),
+    h('small.muted', last ? `آخر مزامنة: ${new Date(last).toLocaleString('ar-EG', { day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' })}` : 'لم تتم المزامنة بعد'),
+    h('div.btn-row',
+      h('button.btn', { type: 'button', onclick: (e) => run(e.currentTarget) }, icon('sync'), 'زامن الآن'),
+      h('button.btn.ghost', { type: 'button', onclick: () => sheet({ title: 'إيقاف المزامنة', content: (close) => h('div',
+        h('p', 'تبقى بياناتك على هذا الجهاز كما هي.'),
+        h('div.btn-row',
+          h('button.btn.ghost', { type: 'button', onclick: async () => { await Sync.stopSync(); close(); rerender(); } }, 'إيقاف على هذا الجهاز'),
+          h('button.btn.ghost.danger', { type: 'button', onclick: async () => { try { await Sync.stopSync({ wipe: true }); close(); toast('حُذفت النسخة من الخادم'); rerender(); } catch { toast('تعذر الاتصال'); } } }, 'إيقاف وحذف النسخة من الخادم'))) }) }, 'إيقاف')));
 }
 
 function backupCard() {

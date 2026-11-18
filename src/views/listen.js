@@ -113,6 +113,7 @@ export function renderMore() {
       row('#/kids', 'star', 'وضع الأطفال', 'حفظ جزء عمّ بالنجوم')),
     h('h2.lib-h', 'الاستماع'),
     h('div.more-group',
+      row('#/sleep', 'moon', 'روتين النوم', 'أذكار النوم وسورة الملك بمؤقت'),
       row('#/car', 'play', 'وضع السيارة', 'أزرار كبيرة وتحكم صوتي'),
       row('#/downloads', 'download', 'التنزيلات والمساحة')),
     h('h2.lib-h', 'التطبيق'),

@@ -112,7 +112,7 @@ function adhkarTile(loc) {
   try {
     const t = loc ? P.computeTimes(loc) : null;
     const now = new Date();
-    if (t && now >= t.isha) { id = 28; title = 'أذكار النوم'; sub = 'قبل أن تنام'; }
+    if (t && now >= t.isha) return h('a.quick', { href: '#/sleep' }, icon('moon'), h('span', h('strong', 'روتين النوم'), h('small', 'أذكار النوم وسورة الملك')));
     else if (t && now >= t.asr) { title = 'أذكار المساء'; sub = 'من العصر إلى المغرب'; }
     else if (t && now >= t.dhuhr) { id = 25; title = 'أذكار بعد الصلاة'; sub = 'بعد السلام من الصلاة'; }
     else if (!t) { const hr = now.getHours(); if (hr >= 15 && hr < 20) { title = 'أذكار المساء'; sub = 'من العصر إلى المغرب'; } else if (hr >= 20 || hr < 4) { id = 28; title = 'أذكار النوم'; sub = 'قبل أن تنام'; } }

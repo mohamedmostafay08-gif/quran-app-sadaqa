@@ -82,7 +82,7 @@ export async function renderMushaf(params, _q, isStale) {
     const note = noteOf(s, a);
     const cls = 'm-w' + (note?.color ? ` hl-${note.color}` : '');
     const ranges = tj?.ayahs[`${s}:${a}`]?.filter((x) => x[0] === wi);
-    if (!ranges?.length) return h('span', { class: cls, dataset: { s, a } }, rubify(text));
+    if (!ranges?.length) return h('span', { class: cls, dataset: { s, a, w: wi + 1 } }, rubify(text));
     const parts = [];
     let cur = 0;
     for (const [, st, en, rule] of ranges) {
@@ -91,7 +91,7 @@ export async function renderMushaf(params, _q, isStale) {
       cur = en;
     }
     if (cur < text.length) parts.push(text.slice(cur));
-    return h('span', { class: cls, dataset: { s, a } }, parts);
+    return h('span', { class: cls, dataset: { s, a, w: wi + 1 } }, parts);
   };
   const endNode = (text, s, a) => {
     const note = noteOf(s, a);
@@ -187,7 +187,13 @@ export async function renderMushaf(params, _q, isStale) {
   const unsub = player.subscribe(sync);
   sync();
 
-  return { cleanup() { unsub(); removeEventListener('keydown', onKey); spreadMQ.removeEventListener('change', onMQ); clearTimeout(tapTimer); document.body.classList.remove('immersive'); } };
+  let wordEl = null;
+  const unWord = player.onWord((s, a, w) => {
+    wordEl?.classList.remove('w-now');
+    wordEl = w ? wrap.querySelector(`.m-w[data-s="${s}"][data-a="${a}"][data-w="${w}"]`) : null;
+    wordEl?.classList.add('w-now');
+  });
+  return { cleanup() { unsub(); unWord(); removeEventListener('keydown', onKey); spreadMQ.removeEventListener('change', onMQ); clearTimeout(tapTimer); document.body.classList.remove('immersive'); } };
 }
 
 function optionsSheet() {

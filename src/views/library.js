@@ -75,6 +75,8 @@ export async function renderLibrary() {
       h('strong', today.name),
       h('p', today.bio.split('\n')[0].slice(0, 190).replace(/\s+\S*$/, '') + '…'),
       h('span.sh-more', 'اقرأ سيرته', icon('back'))),
+    h('a.lib-card.nw-entry', { href: '#/nawawi' }, h('span.lib-icon', { 'aria-hidden': 'true' }, icon('book')),
+      h('span.lib-text', h('strong', 'الأربعون النووية'), h('small', 'جوامع كلمه ﷺ — اقرأ واحفظ وتابع تقدمك'))),
     h('h2.lib-h', 'أحاديث صحيحة مختارة'),
     h('div.lib-grid', hadithTopics.map(topicCard)),
     h('h2.lib-h', 'الصحابة رضي الله عنهم'),

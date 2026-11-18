@@ -182,8 +182,15 @@ export async function renderReader(params, _q, isStale) {
   const stopImmersive = setupImmersive({ n, container });
   gestureHintOnce();
 
+  // تظليل الكلمة المقروءة (للقراء الذين لهم توقيت كلمات)
+  let wordEl = null;
+  const unWord = player.onWord((s, a, w) => {
+    wordEl?.classList.remove('w-now');
+    wordEl = s === n && w ? container.querySelector(`.ayah[data-a="${a}"] .w[data-w="${w}"]`) : null;
+    wordEl?.classList.add('w-now');
+  });
   return {
-    cleanup() { io.disconnect(); unsub(); stopImmersive(); clearTimeout(tapTimer); },
+    cleanup() { io.disconnect(); unsub(); unWord(); stopImmersive(); clearTimeout(tapTimer); },
   };
 }
 
@@ -225,6 +232,12 @@ export async function ayahSheet(n, a, el) {
           try { await navigator.clipboard.writeText(shareText); toast('تم النسخ'); }
           catch { toast('تعذر النسخ'); }
           close();
+        }),
+        actionRow('link', 'رابط الآية', async () => {
+          close();
+          const url = `${location.origin}${location.pathname}#/surah/${n}/${a}`;
+          if (navigator.share) { try { await navigator.share({ title: `سورة ${getSurahMeta(n).nameAr}: ${ar(a)}`, text: shareText, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+          try { await navigator.clipboard.writeText(`${shareText}\n${url}`); toast('تم نسخ رابط الآية'); } catch { toast('تعذر النسخ'); }
         }),
         actionRow('share', 'بطاقة مشاركة (صورة)', () => { close(); shareCardSheet(n, a); }),
         actionRow('download', 'خلفية للموبايل', () => { close(); navigate(`/wallpaper?s=${n}&a=${a}`); }),

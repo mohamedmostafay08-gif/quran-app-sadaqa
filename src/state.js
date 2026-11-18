@@ -41,6 +41,12 @@ export const DEFAULTS = {
   adhkarLog: {},          // { 'YYYY-MM-DD': { sabah, masa, nawm } }
   autoNight: false,       // (يُستخدم مع theme = 'prayer')
   bigUI: false,           // وضع كبار السن: تكبير خط التطبيق كله
+  wordHighlight: true,    // تظليل الكلمة المقروءة لأشهر القراء
+  sleepMinutes: 20,       // مؤقت روتين النوم
+  notifyAod: true,        // آية الصباح إشعارًا (٨ صباحًا)
+  notifyQiyam: false,     // تذكير بقيام الليل والوتر (الثلث الأخير)
+  nawawi: {},             // الأربعون النووية: { رقم: تاريخ الحفظ }
+  syncCode: null,         // رمز المزامنة بين الأجهزة
   qada: null,             // حاسبة القضاء { prayers: {fajr: n…}, fasting: n, start: {...} }
   notifyAfter: false,     // إشعار بالأذكار بعد كل صلاة
   prayerLog: {},          // متابعة الصلوات { 'YYYY-MM-DD': { fajr: 'jamaah'|'ontime'|'late', sunnah: [...] } }
