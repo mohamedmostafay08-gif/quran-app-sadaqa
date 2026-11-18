@@ -31,6 +31,9 @@ const EXTRA_UNTIMED = [
     server: 'https://cdn.mp3quran.net/audio/muhammad-minshawi/r4/', missing: [16, 23, 24, 35], fallback: '112', isNew: true },
 ];
 
+// روايات أخرى (ورش وقالون عن نافع) لأشهر القراء: بلا توقيت آيات، والنص المعروض برواية حفص
+const OTHER_RIWAYAT = [[120, "محمود خليل الحصري", "ورش", "https://cdn.mp3quran.net/audio/mahmoud-husary/r3/"], [52, "عبدالباسط عبدالصمد", "ورش", "https://cdn.mp3quran.net/audio/abdulbasit-abdulsamad/r2/"], [80, "عمر القزابري", "ورش", "https://cdn.mp3quran.net/audio/omar-kazabri/r1/"], [16, "العيون الكوشي", "ورش", "https://cdn.mp3quran.net/audio/laayoun-kouchi/r1/"], [14, "ياسين الجزائري", "ورش", "https://cdn.mp3quran.net/audio/yassen-jazairi/r1/"], [178, "إبراهيم الدوسري", "ورش", "https://cdn.mp3quran.net/audio/ibrahim-dosari/r1/"], [27, "رشيد بلعالية", "ورش", "https://cdn.mp3quran.net/audio/rachid-belalia/r1/"], [270, "محمود خليل الحصري", "قالون", "https://cdn.mp3quran.net/audio/mahmoud-husary/r5/"], [75, "علي بن عبدالرحمن الحذيفي", "قالون", "https://cdn.mp3quran.net/audio/ali-hudhaifi/r2/"], [199, "أحمد الطرابلسي", "قالون", "https://cdn.mp3quran.net/audio/ahmad-tarabulsi/r1/"], [208, "الدوكالي محمد العالم", "قالون", "https://cdn.mp3quran.net/audio/dokali-alim/r1/"], [287, "مروان العكري", "قالون", "https://cdn.mp3quran.net/audio/marwan-akri/r1/"]];
+
 async function getJSON(url) {
   for (let i = 0; i < 4; i++) {
     try { const r = await fetch(url); if (r.ok) return await r.json(); throw new Error(r.status); }
@@ -114,6 +117,11 @@ async function main() {
     if (!head?.ok) { console.warn('✗ بدون صوت:', x.nameAr, x.server); continue; }
     const at = final.findIndex((r) => r.id === x.fallback);
     final.splice(at < 0 ? final.length : at + 1, 0, { ...x, untimed: true, featured: at >= 0 });
+  }
+  for (const [mid, nameAr, style, server] of OTHER_RIWAYAT) {
+    const head = await fetch(server + '001.mp3', { method: 'HEAD' }).catch(() => null);
+    if (!head?.ok) { console.warn('✗ بدون صوت:', nameAr, style); continue; }
+    final.push({ id: 'm' + mid, nameAr, style, server, untimed: true, featured: false });
   }
   fs.writeFileSync(OUT, JSON.stringify(final, null, 1));
   console.log(`✓ ${final.length} قارئ (${final.filter((r) => r.featured).length} من الأشهر)`);

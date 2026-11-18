@@ -109,6 +109,7 @@ export function renderMore() {
       row('#/stats', 'timer', 'إحصائياتي', 'القراءة والاستماع والشارات'),
       row('#/ramadan', 'moon', 'رمضان', 'الإمساكية وختمة رمضان'),
       row('#/greetings', 'share', 'بطاقات التهنئة', 'رمضان والعيدين والجمعة'),
+      row('#/wallpaper', 'download', 'خلفيات للموبايل', 'آية أو ذكر بخط المصحف'),
       row('#/kids', 'star', 'وضع الأطفال', 'حفظ جزء عمّ بالنجوم')),
     h('h2.lib-h', 'الاستماع'),
     h('div.more-group',

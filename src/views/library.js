@@ -40,8 +40,36 @@ export async function renderLibrary() {
   const topicCard = (t) => h('a.lib-card', { href: `#/library/${t.id}` },
     h('span.lib-icon', { 'aria-hidden': 'true' }, icon(t.icon)),
     h('span.lib-text', h('strong', t.title), h('small', `${countWord(t.count, 'أحاديث', 'حديثًا')}، منها ${ar(t.agreed)} متفق عليه`)));
+  // البحث في كل الأحاديث (تُحمَّل الموضوعات عند أول بحث)
+  const q = h('input.note-input', { type: 'search', placeholder: 'ابحث في الأحاديث بكلمة…', 'aria-label': 'ابحث في الأحاديث' });
+  const results = h('div.hd-search-results', { 'aria-live': 'polite' });
+  const browse = h('div.lib-browse');
+  let allP = null, timer = 0;
+  const loadAll = () => (allP ||= Promise.all(index.map((t) => load(t.id).then((items) => items.map((x) => ({ x, t, n: normalize(`${x.title} ${x.text}`) }))).catch(() => []))).then((a) => a.flat()));
+  q.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      const term = normalize(q.value.trim());
+      browse.hidden = term.length >= 2;
+      if (term.length < 2) { results.replaceChildren(); return; }
+      results.replaceChildren(h('p.muted', 'جارٍ البحث…'));
+      const all = await loadAll();
+      // «الصبر» تطابق أيضًا «صبر» و«يصبر»: نحذف «ال» من أول الكلمة الطويلة
+      const words = term.split(/\s+/).filter(Boolean).map((w) => (w.length >= 5 ? w.replace(/^ال/, '') : w));
+      const hits = all.filter((r) => words.every((w) => r.n.includes(w)));
+      const seen = new Set();
+      const uniq = hits.filter((r) => (seen.has(r.x.id) ? false : seen.add(r.x.id)));
+      results.replaceChildren(
+        h('p.muted.hd-count', uniq.length ? `${countWord(uniq.length, 'أحاديث', 'حديثًا')}` : 'لا توجد نتائج.'),
+        h('ol.hd-list', uniq.slice(0, 60).map(({ x, t }) => h('li', h('a.hd-item', { href: `#/hadith/${t.id}/${x.id}` }, h('p.hd-title', x.title.split('\n')[0]), h('div.hd-badges', h('span.hd-badge', t.title), h('span.hd-badge.hd-grade', byLabel(x))))))));
+    }, 250);
+  });
   mount(h('div.library',
     topbar({ title: 'المكتبة', sub: 'أحاديث صحيحة، وسير الصحابة، وتعلّم الصلاة' }),
+    h('div.search-bar.adk-search', icon('search'), q),
+    results,
+    browse));
+  browse.append(
     h('a.sahabi-hero', { href: '#/sahabi' },
       h('span.eyebrow', 'صحابي اليوم'),
       h('strong', today.name),
@@ -58,7 +86,7 @@ export async function renderLibrary() {
     h('div.lib-grid', fiqh.sections.map((s) => h('a.lib-card', { href: `#/guide/${s.id}` },
       h('span.lib-icon', { 'aria-hidden': 'true' }, icon(SECTIONS_ICON[s.id] || 'book')),
       h('span.lib-text', h('strong', s.title), h('small', (s.id === 'wudu' || s.id === 'salah' ? countWord(s.steps.length, 'خطوات', 'خطوة') : countWord(s.steps.length, 'نقاط', 'نقطة')) + ' بالدليل'))))),
-  ));
+  );
 }
 
 // ================= أحاديث موضوع =================

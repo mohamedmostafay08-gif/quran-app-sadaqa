@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '7c3769afda';
+const VERSION = '6b50465f3d';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -87,6 +87,7 @@ const ASSETS = [
   'src/views/stats.js',
   'src/views/tasbih.js',
   'src/views/today.js',
+  'src/views/wallpaper.js',
   'src/views/welcome.js',
   'public/data/adhkar.json',
   'public/data/extra-notice.json',
@@ -182,6 +183,19 @@ self.addEventListener('fetch', (event) => {
       if (hit) return hit;
       const res = await fetch(req);
       if (res.ok) (await caches.open(TIMING_CACHE)).put(req.url, res.clone());
+      return res;
+    })());
+    return;
+  }
+
+  // التفاسير الإضافية (jsDelivr): كاش أولًا لتعمل بدون إنترنت بعد أول فتح
+  if (url.hostname === 'cdn.jsdelivr.net' && url.pathname.includes('/tafsir_api')) {
+    event.respondWith((async () => {
+      const cache = await caches.open('tafsir-remote-v1');
+      const hit = await cache.match(req);
+      if (hit) return hit;
+      const res = await fetch(req);
+      if (res.ok) cache.put(req, res.clone());
       return res;
     })());
     return;

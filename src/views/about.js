@@ -28,6 +28,7 @@ export function renderAbout() {
       h('dl.sources',
         ...src('نص المصحف', link('https://tanzil.net', 'مشروع تنزيل'), ' (CC BY 3.0)، ومصحف المدينة من مجمع الملك فهد عبر ', link('https://quran.com', 'Quran.com'), '.'),
         ...src('التفسير والترجمات', 'التفسير الميسر وتفسير السعدي عبر ', link('https://quran.com', 'Quran.com'), '، وترجمات المعاني من ', link('https://tanzil.net/trans/', 'تنزيل'), '.'),
+        ...src('التفاسير الإضافية وغريب القرآن', 'ابن كثير والطبري والقرطبي والبغوي والجلالين والوسيط، و«الميسر في غريب القرآن»، عبر مشروع ', link('https://github.com/spa5k/tafsir_api', 'Tafsir API'), ' المفتوح.'),
         ...src('تفسير الشعراوي', 'خواطر الشيخ محمد متولي الشعراوي الصوتية من ', link('https://archive.org/details/Islamic_Tape-233_uP_bY_mUSLEm', 'أرشيف الإنترنت'), '.'),
         ...src('الصرف والجذور', link('https://corpus.quran.com', 'Quranic Arabic Corpus'), ' (GNU GPL).'),
         ...src('التلاوات والإذاعات', link('https://mp3quran.net', 'mp3quran.net'), '، وإذاعتا القاهرة والسعودية.'),

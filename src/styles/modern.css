@@ -250,3 +250,19 @@ button.bd { font: inherit; color: inherit; cursor: pointer; }
 .qd-link { padding: var(--sp-3) var(--sp-4); }
 .past-share { margin-inline-start: auto; min-height: 36px; display: inline-flex; align-items: center; gap: 6px; }
 .past-list li { display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-2); }
+.tafsir-text { white-space: pre-line; }
+.tf-seg { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+.tf-seg::-webkit-scrollbar { display: none; }
+.tf-seg button { flex: none; padding: 0 var(--sp-3); }
+.word-gharib { padding: var(--sp-3); border-radius: 12px; background: var(--accent-soft); margin-bottom: var(--sp-3); }
+.word-gharib strong { color: var(--accent); font-size: var(--fs-sm); }
+.word-gharib p { margin: 4px 0 0; font-size: var(--fs-lg); line-height: 1.8; }
+.word-gharib-all { margin-bottom: var(--sp-3); }
+.word-gharib-all summary { cursor: pointer; font-weight: 600; color: var(--accent); min-height: 36px; }
+.wp-preview { max-width: 300px; }
+.wp-preview canvas { width: 100%; height: auto; border-radius: 22px; box-shadow: var(--shadow-lg); }
+.wp-dhikr { font-family: var(--font-quran); }
+.hd-search-results:empty { display: none; }
+.lib-browse[hidden] { display: none; }
+.word-gharib dt, .word-gharib-all dt { font-family: var(--font-quran); font-size: 1.15em; color: var(--accent); }
+.tf-seg { -webkit-mask-image: linear-gradient(to left, #000 85%, transparent); mask-image: linear-gradient(to left, #000 85%, transparent); }

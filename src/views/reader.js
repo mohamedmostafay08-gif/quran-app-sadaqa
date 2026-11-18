@@ -213,7 +213,7 @@ export async function ayahSheet(n, a, el) {
         actionRow('repeat', 'تكرار هذه الآية', () => { close(); player.playFrom(n, a, { only: true }); }),
         actionRow('compare', 'مقارنة القراء', () => { close(); compareSheet(n, a); }),
         actionRow('book', 'التفسير (الميسر والسعدي)', () => { close(); tafsirSheet(n, a); }),
-        actionRow('info', 'معاني الكلمات وجذورها', () => { close(); wordsListSheet(n, a); }),
+        actionRow('info', 'معاني الكلمات وغريبها', () => { close(); wordsListSheet(n, a); }),
         actionRow(isMarked ? 'bookmarkFill' : 'bookmark', isMarked ? 'إزالة العلامة' : 'إضافة علامة', async () => {
           const on = await bookmarks.toggle(n, a);
           if (el) el.className = ayahClass(on, await notes.get(n, a));
@@ -227,6 +227,7 @@ export async function ayahSheet(n, a, el) {
           close();
         }),
         actionRow('share', 'بطاقة مشاركة (صورة)', () => { close(); shareCardSheet(n, a); }),
+        actionRow('download', 'خلفية للموبايل', () => { close(); navigate(`/wallpaper?s=${n}&a=${a}`); }),
         actionRow('play', 'مقطع صوتي من الآية (مشاركة/تنزيل)', () => { close(); shareAudioSheet(n, a); }),
         navigator.share ? actionRow('share', 'مشاركة كنص', async () => {
           close();
@@ -381,13 +382,18 @@ async function wordSheet(n, a, w, el) {
   let words = null;
   try { words = (await getWords(n))[a - 1]; } catch { /* أوفلاين ولم تُحمّل */ }
   const info = words?.[w - 1];
+  const gh = await gharibOf(n, a);
+  const me = stripAr(el.textContent);
+  const ghMatch = gh.find(([w2]) => { const x = stripAr(w2); return x && (x === me || x.split(' ').includes(me) || (me.length > 3 && x.includes(me))); });
   const rulesHere = [...el.querySelectorAll('.tj')].map((x) => [...x.classList].find((c) => c.startsWith('tj-'))?.slice(3)).filter((r, i, arr) => r && arr.indexOf(r) === i);
   sheet({
     title: `سورة ${meta.nameAr}، ${ar(a)}، الكلمة ${ar(w)}`,
     content: (close) => h('div.word-info',
       h('p.word-big', { lang: 'ar' }, el.textContent),
+      ghMatch ? h('div.word-gharib', h('strong', 'المعنى'), h('p', ghMatch[1])) : null,
+      !ghMatch && gh.length ? h('details.word-gharib-all', h('summary', 'كلمات غريبة في هذه الآية'), h('dl.word-dl', gh.flatMap(([w2, m]) => [h('dt', { lang: 'ar' }, w2), h('dd', m)]))) : null,
       info ? h('dl.word-dl',
-        info.gloss ? [h('dt', 'المعنى (إنجليزي)'), h('dd', { lang: 'en', dir: 'ltr' }, info.gloss)] : null,
+        info.gloss ? [h('dt', ghMatch ? 'بالإنجليزية' : 'المعنى (إنجليزي)'), h('dd', { lang: 'en', dir: 'ltr' }, info.gloss)] : null,
         [h('dt', 'نوع الكلمة'), h('dd', info.pos + (info.extra ? ` (${info.extra})` : ''))],
         info.root ? [h('dt', 'الجذر'), h('dd', h('button.root-chip', { type: 'button', onclick: () => { close(); navigate('/search?root=' + encodeURIComponent(info.root)); } }, info.root.split('').join(' '), icon('search')))] : null,
         info.lemma ? [h('dt', 'الأصل (اللَّمّة)'), h('dd', { lang: 'ar', class: 'lemma' }, info.lemma)] : null,
@@ -396,6 +402,40 @@ async function wordSheet(n, a, w, el) {
       h('button.btn.ghost.block', { type: 'button', onclick: () => { close(); ayahSheet(n, a, el.closest('.ayah')); } }, 'خيارات الآية'),
     ),
   });
+}
+
+// ---- تفاسير إضافية تُحمَّل عند الطلب (مشروع tafsir_api المفتوح عبر jsDelivr) وتُحفظ للاستخدام بدون إنترنت ----
+const REMOTE_TAFSIRS = {
+  gharib: { name: 'غريب الكلمات', slug: 'al-muyassar-fi-al-gharib', source: 'الميسر في غريب القرآن (مجمع الملك فهد)' },
+  jalalayn: { name: 'الجلالين', slug: 'ar-tafsir-al-jalalayn', source: 'تفسير الجلالين للمحلّي والسيوطي' },
+  ibnkathir: { name: 'ابن كثير', slug: 'ar-tafsir-ibn-kathir', source: 'تفسير القرآن العظيم لابن كثير' },
+  tabari: { name: 'الطبري', slug: 'ar-tafsir-al-tabari', source: 'جامع البيان للطبري' },
+  qurtubi: { name: 'القرطبي', slug: 'ar-tafseer-al-qurtubi', source: 'الجامع لأحكام القرآن للقرطبي' },
+  baghawi: { name: 'البغوي', slug: 'ar-tafsir-al-baghawi', source: 'معالم التنزيل للبغوي' },
+  wasit: { name: 'الوسيط', slug: 'ar-tafsir-al-wasit', source: 'التفسير الوسيط لمحمد سيد طنطاوي' },
+};
+const TAFSIR_CDN = 'https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir';
+// علامات خاصة بخط مجمع الملك فهد لا تظهر في الخطوط العادية: نحوّلها لمقابلها القياسي
+const fixQpc = (t) => t.replace(/\u08F0/g, '\u064B').replace(/\u08F1/g, '\u064C').replace(/\u08F2/g, '\u064D').replace(/\u06E1/g, '\u0652').replace(/[\u06DF\u06E0\u06E2-\u06ED]/g, '');
+async function remoteAyah(slug, s, a) {
+  const r = await fetch(`${TAFSIR_CDN}/${slug}/${s}/${a}.json`);
+  if (!r.ok) throw new Error(r.status);
+  return fixQpc(((await r.json()).text || '').trim());
+}
+/** تفسير آية من مصدر خارجي؛ الآيات المفسَّرة مجتمعة نرجع فيها لأول آية في المجموعة */
+async function getRemoteTafsir(slug, s, a) {
+  for (let b = a; b >= Math.max(1, a - 15); b--) {
+    const text = await remoteAyah(slug, s, b);
+    if (text) return { text: text.replace(/\[\[[^\]]*\]\]/g, '').replace(/\n{3,}/g, '\n\n'), groupFrom: b === a ? null : b };
+  }
+  return { text: '' };
+}
+
+/** معاني الكلمات الغريبة في الآية بالعربي: [[الكلمة، المعنى]] */
+const stripAr = (t) => t.replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08D3-\u08FF\u0640\u0600-\u0605]/g, '').replace(/[ٱأإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/[^\u0621-\u064A ]/g, '').trim();
+async function gharibOf(s, a) {
+  const text = await remoteAyah('al-muyassar-fi-al-gharib', s, a).catch(() => '');
+  return [...text.matchAll(/﴿([^﴾]+)﴾\s*:\s*([^\n]+)/g)].map((m) => [m[1].trim(), m[2].trim()]);
 }
 
 // ---- تفسير الشعراوي (حلقات صوتية من أرشيف الإنترنت، مقسّمة بالآيات) ----
@@ -436,7 +476,7 @@ async function shaarawyPanel(n, a) {
 async function tafsirSheet(n, a) {
   const meta = getSurahMeta(n);
   track('tafsir');
-  const all = { ...TAFSIRS, shaarawy: { name: 'الشعراوي' } };
+  const all = { ...TAFSIRS, ...REMOTE_TAFSIRS, shaarawy: { name: 'الشعراوي' } };
   let which = settings.get('tafsir') in all ? settings.get('tafsir') : 'muyassar';
   const body = h('div.tafsir-body', { 'aria-live': 'polite' });
   const draw = async () => {
@@ -444,20 +484,21 @@ async function tafsirSheet(n, a) {
     if (which === 'shaarawy') { const nodes = await shaarawyPanel(n, a); if (which === 'shaarawy') body.replaceChildren(...nodes); return; }
     let t;
     const my = which;
-    try { t = await getTafsir(n, a, which); } catch { if (my === which) body.replaceChildren(h('p.muted', 'التفسير غير متاح بدون إنترنت قبل تحميله.')); return; }
+    try { t = REMOTE_TAFSIRS[which] ? await getRemoteTafsir(REMOTE_TAFSIRS[which].slug, n, a) : await getTafsir(n, a, which); } catch { if (my === which) body.replaceChildren(h('p.muted', 'التفسير غير متاح بدون إنترنت قبل تحميله.')); return; }
     if (my !== which) return; // غيّر المستخدم التبويب أثناء التحميل
     body.replaceChildren(...[
       t.groupFrom ? h('p.muted', `تفسير الآيات من ${ar(t.groupFrom)} مجتمعة:`) : null,
       h('p.tafsir-text', t.text || 'لا يوجد تفسير لهذه الآية.'),
-      h('p.small-note', 'المصدر: ' + TAFSIRS[which].source),
+      h('p.small-note', 'المصدر: ' + (TAFSIRS[which] || REMOTE_TAFSIRS[which]).source),
     ].filter(Boolean));
   };
-  const tabs = h('div.seg', { role: 'tablist', 'aria-label': 'التفسير' }, Object.entries(all).map(([k, v]) => h('button', {
+  const tabs = h('div.seg.tf-seg', { role: 'tablist', 'aria-label': 'التفسير' }, Object.entries(all).map(([k, v]) => h('button', {
     type: 'button', role: 'tab', 'aria-selected': String(k === which),
-    onclick: (e) => { which = k; settings.set('tafsir', k); for (const b of tabs.children) b.setAttribute('aria-selected', String(b === e.currentTarget)); draw(); },
+    onclick: (e) => { which = k; settings.set('tafsir', k); for (const b of tabs.children) b.setAttribute('aria-selected', String(b === e.currentTarget)); e.currentTarget.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); draw(); },
   }, v.name)));
   draw();
   sheet({ title: `التفسير، سورة ${meta.nameAr} ${ar(a)}`, content: () => h('div', tabs, body) });
+  requestAnimationFrame(() => tabs.querySelector('[aria-selected="true"]')?.scrollIntoView({ inline: 'center', block: 'nearest' }));
 }
 
 async function wordsListSheet(n, a) {
@@ -465,13 +506,16 @@ async function wordsListSheet(n, a) {
   let words;
   try { words = (await getWords(n))[a - 1]; } catch { return toast('بيانات الكلمات غير متاحة بدون إنترنت قبل تحميلها'); }
   const text = (await getSurahText(n))[a - 1].split(' ').filter(isWordToken);
+  const gh = await gharibOf(n, a);
   sheet({
     title: `كلمات الآية، سورة ${meta.nameAr} ${ar(a)}`,
-    content: (close) => !words ? h('p.muted', 'لا تتوفر بيانات كلمات لهذه الآية.') : h('ol.words-list', words.map((w, i) => h('li',
+    content: (close) => h('div',
+      gh.length ? h('section.word-gharib', h('strong', 'معاني الكلمات الغريبة'), h('dl.word-dl', gh.flatMap(([w2, m]) => [h('dt', { lang: 'ar' }, w2), h('dd', m)]))) : null,
+      !words ? h('p.muted', 'لا تتوفر بيانات كلمات لهذه الآية.') : h('ol.words-list', words.map((w, i) => h('li',
       h('span.wl-word', { lang: 'ar' }, text[i]),
       h('span.wl-info', h('span', w.pos), w.gloss ? h('small', { lang: 'en', dir: 'ltr' }, w.gloss) : null),
       w.root ? h('button.root-chip', { type: 'button', onclick: () => { close(); navigate('/search?root=' + encodeURIComponent(w.root)); } }, w.root) : null,
-    ))),
+    )))),
   });
 }
 

@@ -749,5 +749,101 @@
   "server": "https://cdn.mp3quran.net/audio/saber-abdulhakam/r5/",
   "untimed": true,
   "featured": false
+ },
+ {
+  "id": "m120",
+  "nameAr": "محمود خليل الحصري",
+  "style": "ورش",
+  "server": "https://cdn.mp3quran.net/audio/mahmoud-husary/r3/",
+  "untimed": true,
+  "featured": false
+ },
+ {
+  "id": "m52",
+  "nameAr": "عبدالباسط عبدالصمد",
+  "style": "ورش",
+  "server": "https://cdn.mp3quran.net/audio/abdulbasit-abdulsamad/r2/",
+  "untimed": true,
+  "featured": false
+ },
+ {
+  "id": "m80",
+  "nameAr": "عمر القزابري",
+  "style": "ورش",
+  "server": "https://cdn.mp3quran.net/audio/omar-kazabri/r1/",
+  "untimed": true,
+  "featured": false
+ },
+ {
+  "id": "m16",
+  "nameAr": "العيون الكوشي",
+  "style": "ورش",
+  "server": "https://cdn.mp3quran.net/audio/laayoun-kouchi/r1/",
+  "untimed": true,
+  "featured": false
+ },
+ {
+  "id": "m14",
+  "nameAr": "ياسين الجزائري",
+  "style": "ورش",
+  "server": "https://cdn.mp3quran.net/audio/yassen-jazairi/r1/",
+  "untimed": true,
+  "featured": false
+ },
+ {
+  "id": "m178",
+  "nameAr": "إبراهيم الدوسري",
+  "style": "ورش",
+  "server": "https://cdn.mp3quran.net/audio/ibrahim-dosari/r1/",
+  "untimed": true,
+  "featured": false
+ },
+ {
+  "id": "m27",
+  "nameAr": "رشيد بلعالية",
+  "style": "ورش",
+  "server": "https://cdn.mp3quran.net/audio/rachid-belalia/r1/",
+  "untimed": true,
+  "featured": false
+ },
+ {
+  "id": "m270",
+  "nameAr": "محمود خليل الحصري",
+  "style": "قالون",
+  "server": "https://cdn.mp3quran.net/audio/mahmoud-husary/r5/",
+  "untimed": true,
+  "featured": false
+ },
+ {
+  "id": "m75",
+  "nameAr": "علي بن عبدالرحمن الحذيفي",
+  "style": "قالون",
+  "server": "https://cdn.mp3quran.net/audio/ali-hudhaifi/r2/",
+  "untimed": true,
+  "featured": false
+ },
+ {
+  "id": "m199",
+  "nameAr": "أحمد الطرابلسي",
+  "style": "قالون",
+  "server": "https://cdn.mp3quran.net/audio/ahmad-tarabulsi/r1/",
+  "untimed": true,
+  "featured": false
+ },
+ {
+  "id": "m208",
+  "nameAr": "الدوكالي محمد العالم",
+  "style": "قالون",
+  "server": "https://cdn.mp3quran.net/audio/dokali-alim/r1/",
+  "untimed": true,
+  "featured": false
+ },
+ {
+  "id": "m287",
+  "nameAr": "مروان العكري",
+  "style": "قالون",
+  "server": "https://cdn.mp3quran.net/audio/marwan-akri/r1/",
+  "untimed": true,
+  "featured": false
  }
 ]
