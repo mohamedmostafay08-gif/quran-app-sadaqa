@@ -327,6 +327,8 @@ function startRadio() {
   clearTimeout(radioTimer);
   // نعيد ضبط الرابط في كل مرة حتى نلحق بالبث الحي بدل ما تم تخزينه قبل الإيقاف
   audio.src = st.radio.url;
+  // الدروس المسجّلة: الاستكمال من آخر موضع
+  if (st.radio.startAt > 5) { const at = st.radio.startAt; st.radio.startAt = 0; audio.addEventListener('loadedmetadata', () => { try { audio.currentTime = at; } catch { /* */ } }, { once: true }); }
   audio.playbackRate = 1;
   audio.volume = sleepFade;
   st.status = 'loading'; st.error = null; emit();
@@ -377,6 +379,8 @@ export const player = {
   /** يُستدعى عند تغيّر الكلمة المقروءة: fn(surah, ayah, wordIndex) */
   onWord(fn) { wordListeners.add(fn); return () => wordListeners.delete(fn); },
   subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
+  /** موضع التشغيل الحالي للحلقات المسجّلة */
+  position() { return { id: st.radio?.id || null, time: audio.currentTime || 0, duration: Number.isFinite(audio.duration) ? audio.duration : 0 }; },
 
   /** يبدأ من آية؛ {only:true} يكرر آية واحدة، {range:{from,to,loop,times}} نطاق محدد */
   playFrom(s, a, opts = {}) {

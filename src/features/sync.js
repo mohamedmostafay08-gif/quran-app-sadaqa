@@ -11,8 +11,8 @@ const STORES = ['bookmarks', 'notes', 'memorize', 'khatma'];
 const LOCAL_ONLY = new Set(['theme', 'fontScale', 'bigUI', 'keepAwake', 'wifiOnly', 'autoDownloadNext', 'adhanInApp', 'deviceToken',
   'onboarded', 'dataNotice', 'lastBackupAt', 'syncCode', 'prayersDefaultV2', 'fastingDefaultV1', 'preAdhanDefaultV1', 'stats', 'appBadge']);
 // سجلات تُدمج مفتاحًا بمفتاح بدل الاستبدال
-const MAPS = new Set(['prayerLog', 'adhkarLog', 'badges', 'kidsStars', 'nawawi', 'rateByReciter', 'dhikrLog', 'fastLog']);
-const STAMPED = new Set(['lastRead', 'lastListen']); // الأحدث (بحقل at) يفوز
+const MAPS = new Set(['prayerLog', 'adhkarLog', 'badges', 'kidsStars', 'nawawi', 'rateByReciter', 'dhikrLog', 'fastLog', 'lessonProgress']);
+const STAMPED = new Set(['lastRead', 'lastListen', 'lastLesson']); // الأحدث (بحقل at) يفوز
 const K = { deleted: 'qa:sync:deleted', changed: 'qa:sync:changed', at: 'qa:sync:at', activity: 'qa:activity' };
 
 const enc = new TextEncoder(), dec = new TextDecoder();
