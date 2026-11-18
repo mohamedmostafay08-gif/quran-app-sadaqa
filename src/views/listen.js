@@ -124,6 +124,7 @@ export function renderMore() {
     h('div.more-group',
       row('#/settings', 'settings', 'الإعدادات', 'العرض والتلاوة والتنبيهات والنسخة الاحتياطية'),
       !isStandalone() ? h('button.more-row', { type: 'button', onclick: () => install() }, h('span.lib-icon', { 'aria-hidden': 'true' }, icon('download')), h('span.lib-text', h('strong', 'تثبيت التطبيق'), h('small', 'يفتح كتطبيق ويعمل بدون إنترنت')), icon('forward')) : null,
+      row('#/whats-new', 'star', 'ما الجديد', 'آخر الإضافات في التطبيق'),
       row('#/help', 'info', 'طريقة الاستخدام', 'شرح سريع لكل أقسام التطبيق'),
       row('#/about', 'heart', 'عن التطبيق', 'التواصل والدعم')),
     h('a.credit-foot', { href: '#/about' },

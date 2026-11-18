@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '63b4e9cc05';
+const VERSION = '9e977ade14';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -46,6 +46,7 @@ const ASSETS = [
   'src/features/stats.js',
   'src/features/sync.js',
   'src/features/weekly.js',
+  'src/features/whatsNew.js',
   'src/lib/arabic.js',
   'src/lib/dom.js',
   'src/main.js',
@@ -113,6 +114,7 @@ const ASSETS = [
   'public/data/selections.json',
   'public/data/shaarawy.json',
   'public/data/surahs.json',
+  'public/data/whats-new.json',
   'public/fonts/amiri-quran.woff2',
   'public/fonts/plex-arabic-400.woff2',
   'public/fonts/plex-arabic-500.woff2',
