@@ -71,7 +71,7 @@ body:has(.mini-player.show) .main { padding-bottom: calc(var(--tabbar-h) + var(-
   transition: transform .3s var(--ease), opacity .2s, visibility 0s .3s;
   overflow: hidden;
 }
-.mini-player > * { max-width: 760px; }
+.mini-player > * { max-width: none; }
 .mini-player.show { transform: none; opacity: 1; visibility: visible; transition: transform .3s var(--ease), opacity .2s; }
 .mp-open { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--sp-3); border: 0; background: none; padding: 0 var(--sp-1); text-align: start; height: 100%; }
 .mp-art { flex: none; width: 42px; height: 42px; border-radius: var(--radius-sm); display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-family: var(--font-quran); font-size: var(--fs-xl); line-height: 1; border: 1px solid var(--gold-line); }

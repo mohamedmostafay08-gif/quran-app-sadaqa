@@ -3,12 +3,12 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = 'd1f167d098';
+const VERSION = 'a878a2740c';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
 // البيانات الإضافية (الكلمات، التفسير، الصفحات، الترجمات…) تُخزَّن عند أول استخدام في كاش مستقل
-const EXTRAS_VERSION = '0694c5c59a';
+const EXTRAS_VERSION = '5b60f76a36';
 const EXTRAS_CACHE = 'extras-' + EXTRAS_VERSION;
 const isExtra = (path) => /\/public\/data\/(words|tafsir|tafsir-saadi|mushaf|trans|library)\//.test(path) || /\/public\/data\/(roots|tajweed|tajweed-qpc)\.json$/.test(path);
 const ASSETS = [
@@ -58,6 +58,7 @@ const ASSETS = [
   'src/views/calendar.js',
   'src/views/car.js',
   'src/views/downloads.js',
+  'src/views/duas.js',
   'src/views/group.js',
   'src/views/help.js',
   'src/views/home.js',
@@ -68,6 +69,7 @@ const ASSETS = [
   'src/views/mushaf.js',
   'src/views/notifyCard.js',
   'src/views/prayer.js',
+  'src/views/quiz.js',
   'src/views/radio.js',
   'src/views/reader.js',
   'src/views/search.js',
@@ -83,6 +85,7 @@ const ASSETS = [
   'public/data/quran-uthmani.json',
   'public/data/radios.json',
   'public/data/reciters.json',
+  'public/data/selections.json',
   'public/data/shaarawy.json',
   'public/data/surahs.json',
   'public/fonts/amiri-quran.woff2',

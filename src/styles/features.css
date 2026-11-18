@@ -516,3 +516,60 @@ body.immersive .pos-pill { transform: translate(-50%, 0); }
 .st-fill { width: 100%; max-width: 28px; min-height: 3px; border-radius: 6px 6px 2px 2px; background: var(--accent); }
 .st-bar small { font-size: 10px; color: var(--text-3); white-space: nowrap; }
 .st-ic { font-family: var(--font-quran); font-size: 28px; color: var(--gold); }
+
+/* ===== آية اليوم ===== */
+.aod { display: grid; gap: var(--sp-2); }
+.aod-text { margin: 0; font-family: var(--font-quran); font-size: calc(1.45rem * var(--quran-scale, 1)); line-height: 2.1; color: var(--text); }
+.aod-ref { justify-self: start; font-size: var(--fs-sm); color: var(--gold); text-decoration: none; font-weight: 600; }
+.aod-tafsir { padding: var(--sp-3); border-radius: var(--radius-sm); background: var(--surface-2); line-height: 1.9; }
+.aod-tafsir p { margin: 0 0 var(--sp-1); }
+.aod-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.aod-actions .btn { display: inline-flex; align-items: center; gap: var(--sp-2); min-height: 44px; }
+
+/* ===== الأدعية ===== */
+.dua-sunnah { margin: var(--sp-4) 0 0; }
+.dua-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-3); }
+.dua-card { display: grid; gap: var(--sp-2); margin: 0; }
+.dua-title { font-size: var(--fs-md); color: var(--accent); }
+.dua-text { margin: 0; font-family: var(--font-quran); font-size: calc(1.35rem * var(--quran-scale, 1)); line-height: 2.1; }
+.dua-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); flex-wrap: wrap; }
+.dua-ref { font-size: var(--fs-sm); color: var(--gold); text-decoration: none; font-weight: 600; }
+.dua-actions { display: inline-flex; gap: var(--sp-1); }
+
+/* ===== أسماء الله الحسنى ===== */
+.asma-today { display: grid; justify-items: center; text-align: center; gap: var(--sp-2); }
+.asma-today p { margin: 0; color: var(--text-2); line-height: 1.8; }
+.asma-big { font-family: var(--font-quran); font-size: 40px; line-height: 1.6; color: var(--accent); font-weight: 400; margin: 0; }
+.asma-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--sp-2); margin-top: var(--sp-4); }
+.asma-card { position: relative; display: grid; align-content: start; gap: 4px; padding: var(--sp-3); min-height: 108px; text-align: center; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; font: inherit; }
+.asma-card.today { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+.asma-num { position: absolute; top: 6px; inset-inline-start: 8px; font-size: 10px; color: var(--text-3); }
+.asma-name { font-family: var(--font-quran); font-size: 24px; font-weight: 400; line-height: 1.6; color: var(--accent); }
+.asma-card small { font-size: var(--fs-xs); color: var(--text-2); line-height: 1.6; }
+.asma-sheet { display: grid; gap: var(--sp-3); text-align: center; }
+.asma-meaning { margin: 0; font-size: var(--fs-md); line-height: 1.9; }
+.asma-note { margin-top: var(--sp-4); }
+
+/* ===== اختبار الحفظ ===== */
+.quiz-scope select { width: 100%; }
+.quiz-head { display: flex; justify-content: space-between; font-size: var(--fs-sm); color: var(--text-2); margin-top: var(--sp-3); }
+.quiz-bar { height: 6px; border-radius: 999px; background: var(--accent-soft); overflow: hidden; margin: var(--sp-2) 0 var(--sp-3); }
+.quiz-bar i { display: block; height: 100%; background: var(--accent); transition: width .3s; }
+.quiz-q { display: grid; gap: var(--sp-2); margin-top: 0; }
+.quiz-q .btn { justify-self: start; display: inline-flex; align-items: center; gap: var(--sp-2); }
+.quiz-prompt { margin: 0; font-weight: 700; color: var(--accent); }
+.quiz-stem { margin: 0; font-family: var(--font-quran); font-size: calc(1.4rem * var(--quran-scale, 1)); line-height: 2.1; }
+.quiz-opts { display: grid; gap: var(--sp-2); }
+.quiz-opt { text-align: start; padding: var(--sp-3) var(--sp-4); min-height: 52px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-family: var(--font-quran); font-size: var(--fs-lg); line-height: 1.9; cursor: pointer; }
+.quiz-opt:not(:disabled):hover { border-color: var(--accent); }
+.quiz-opt.right { border-color: var(--accent); background: var(--accent-soft); }
+.quiz-opt.wrong { border-color: #b3261e; background: color-mix(in srgb, #b3261e 12%, var(--surface)); }
+.quiz-opt:disabled { cursor: default; color: var(--text); }
+.quiz-fb { min-height: 1.6em; margin: var(--sp-3) 0 var(--sp-2); font-weight: 700; text-align: center; }
+.quiz-result { display: grid; justify-items: center; gap: var(--sp-2); text-align: center; }
+.quiz-result strong { font-size: 40px; color: var(--accent); }
+.quiz-result p { margin: 0; color: var(--text-2); }
+.quiz-result .btn { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.quiz-review { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); }
+@media (min-width: 600px) { .quiz-opts { grid-template-columns: 1fr 1fr; } .dua-list { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); } }
+.dua-sunnah { padding: var(--sp-3) var(--sp-4); border-radius: var(--radius); border: 1px solid var(--gold-line); background: var(--surface); }

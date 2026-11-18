@@ -3,7 +3,7 @@
    وشبكات متعددة الأعمدة بدل القوائم الطويلة. يُحمَّل بعد كل الأنماط.
    =================================================================== */
 @media (min-width: 1024px) {
-  :root { --rail: 104px; --maxw: 1180px; --gutter: 40px; --tabbar-h: 0px; }
+  :root { --rail: 104px; --maxw: none; --gutter: clamp(32px, 3vw, 56px); --tabbar-h: 0px; }
 
   /* ===== شريط التنقل الجانبي ===== */
   body { padding-inline-start: var(--rail); }
@@ -60,8 +60,7 @@
   .surah-list .surah-item { height: 100%; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 
   /* ===== القراءة: سطر مريح للعين في المنتصف ===== */
-  .reader .ayahs, .reader .surah-head, .reader .surah-nav { max-width: 920px; margin-inline: auto; }
-  .ayahs { font-size: calc(1.75rem * var(--quran-scale)); }
+  .ayahs { font-size: calc(1.85rem * var(--quran-scale)); }
   .m-page { max-width: 760px; }
   .m-nav { max-width: 760px; }
   /* صفحتان متقابلتان: الحجم يتبع ارتفاع الشاشة حتى تظهر الصفحة كاملة */
@@ -87,8 +86,6 @@
   .bm-list, .dl-list, .mem-list, .past-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-3); }
   .adk-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3); }
   .adk-items { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-3); align-items: start; }
-  .results { max-width: 920px; margin-inline: auto; }
-  .search-page .search-bar { max-width: 920px; margin-inline: auto; }
 
   /* ===== الصلاة: المواقيت بجوار الإعدادات ===== */
   .pr-tabs { max-width: 560px; margin-inline: auto; }
@@ -100,13 +97,53 @@
   /* ===== الترحيب والختمة الجماعية والحفظ ===== */
   .welcome { max-width: 760px; margin-inline: auto; }
   .wl-reciters { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-2); }
-  .khatma, .memorize, .groups { max-width: 920px; margin-inline: auto; }
-  .hd-page, .guide, .sahabi-page { max-width: 920px; margin-inline: auto; }
-  .calendar-page, .stats-page, .tasbih-page, .help-page { max-width: 760px; margin-inline: auto; }
   .lib-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (min-width: 1440px) {
-  :root { --maxw: 1320px; }
-  .surah-list, .radio-list { grid-template-columns: repeat(4, 1fr); }
+  .ayahs { font-size: calc(2.05rem * var(--quran-scale)); }
+  .settings, .about, .downloads { column-count: 3; }
+}
+
+/* ===================================================================
+   ملء الشاشة: التابلت والموبايل بالعرض واللاب — الشبكات تتمدد بعدد أعمدة يناسب العرض
+   =================================================================== */
+@media (min-width: 600px) {
+  :root { --gutter: 24px; }
+  .quick-row, .home .quick-row, .today .quick-row, .quran-home .quick-row { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important; }
+  .quran-home .quick, .today .quick { flex-direction: row !important; align-items: center !important; }
+  .surah-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--sp-3); }
+  .surah-list > li { margin: 0; }
+  .surah-list .surah-item { height: 100%; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+  .ls-surahs, .radio-list, .radio-list.featured, .lib-grid, .adk-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important; gap: var(--sp-3); }
+  .bm-list, .dl-list, .mem-list, .past-list, .hd-list, .results, .occ-list, .ls-radios { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: var(--sp-3); }
+  .more-page .more-group { columns: 2 320px; column-gap: var(--sp-3); }
+  .more-page .more-row { break-inside: avoid; }
+  .help-page { columns: 2 340px; column-gap: var(--sp-4); }
+  .help-page > .topbar { column-span: all; }
+  .help-page > .help-sec { break-inside: avoid; margin-top: 0; }
+  .st-tiles { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+  .tb-pad { width: min(42vh, 340px); }
+}
+
+@media (min-width: 1024px) {
+  /* التقويم والمناسبات جنبًا إلى جنب */
+  .calendar-page { display: grid; grid-template-columns: minmax(0, 3fr) minmax(320px, 2fr); column-gap: var(--sp-5); align-items: start; }
+  .calendar-page > .topbar { grid-column: 1 / -1; }
+  .calendar-page > .cal-card { grid-column: 1; grid-row: 2 / span 3; margin-top: var(--sp-4); }
+  .calendar-page > .lib-h, .calendar-page > .occ-list { grid-column: 2; }
+  .calendar-page .occ-list { grid-template-columns: 1fr; }
+  .cal-day { min-height: 64px; }
+  /* السبحة: الدائرة بجوار الأذكار */
+  .tasbih-page { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--sp-6); align-items: center; justify-items: center; }
+  .tasbih-page > .topbar { grid-column: 1 / -1; justify-self: stretch; }
+  .tasbih-page > .tb-text, .tasbih-page > .tb-pad, .tasbih-page > .tb-actions { grid-column: 1; }
+  .tasbih-page > .lib-h { grid-column: 2; grid-row: 2; align-self: end; }
+  .tasbih-page > .tb-chips { grid-column: 2; grid-row: 3; align-self: center; justify-content: center; }
+  /* الإحصاءات: الرسم أعرض */
+  .st-bars { height: 220px; }
+  .st-fill { max-width: 56px; }
+  /* الصفحات النصية: عمودان */
+  .guide .gd-steps, .khatma .past-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: var(--sp-3); }
+  .welcome { max-width: 960px; }
 }

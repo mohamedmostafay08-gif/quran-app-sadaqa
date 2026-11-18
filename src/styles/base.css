@@ -34,7 +34,7 @@
   --radius-sm: 10px;
   --radius-lg: 18px;   /* الكروت الكبيرة: الاستماع، الصلاة القادمة */
   --gutter: 16px;
-  --maxw: 760px;
+  --maxw: none;          /* المحتوى يملأ عرض الشاشة؛ الهوامش من --gutter */
   --tabbar-h: 64px;
   --player-h: 0px;
   --safe-b: env(safe-area-inset-bottom, 0px);

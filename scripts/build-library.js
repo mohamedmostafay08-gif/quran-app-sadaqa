@@ -26,6 +26,8 @@ const TOPICS = [
   { id: 'sahaba', title: 'فضائل الصحابة', icon: 'star', cats: [101, 276, 631, 103, 275], maxLen: 700 },
   // قصص الصحابة: الروايات الطويلة (قصص كاملة) من فضائلهم والسيرة
   { id: 'qisas', title: 'قصص الصحابة', icon: 'users', cats: [101, 276, 631, 103, 275, 367], minLen: 700 },
+  // أدعية النبي ﷺ المأثورة، وأدعية الشدة، وفضل الدعاء وأسباب إجابته
+  { id: 'dua', title: 'أدعية من السنة', icon: 'heart', cats: [313, 307, 279, 312] },
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

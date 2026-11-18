@@ -35,7 +35,8 @@ export const DEFAULTS = {
   adhanInApp: true,       // تشغيل صوت الأذان عند دخول الوقت والتطبيق مفتوح
   adhanVoice: 'egypt',    // صوت الأذان: egypt | makkah | calm
   notifyKahf: true,       // يوم الجمعة: سورة الكهف وآخر ساعة
-  notifyFasting: false,   // تذكير بصيام الاثنين والخميس والأيام البيض
+  notifyFasting: true,    // تذكير بصيام الاثنين والخميس والأيام البيض
+  fastingDefaultV1: false, // ترقية: تفعيل تذكير الصيام مرة واحدة لمن سبق تثبيته
   tasbih: null,           // آخر ذكر في السبحة { id, count }
   stats: true,            // إحصائيات مجهولة مجمّعة (عدد يومي فقط)
 };
@@ -53,6 +54,7 @@ export async function loadSettings() {
     if (!(state.notifyPrayers || []).length) set('notifyPrayers', [...DEFAULTS.notifyPrayers]);
     set('prayersDefaultV2', true);
   }
+  if (!state.fastingDefaultV1) { set('notifyFasting', true); set('fastingDefaultV1', true); }
   applyVisual();
   return state;
 }

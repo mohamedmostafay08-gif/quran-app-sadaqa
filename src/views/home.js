@@ -45,6 +45,7 @@ export function renderQuran() {
     quick.append(
       wird,
       h('a.quick', { href: '#/memorize' }, icon('repeat'), h('span', h('strong', 'الحفظ والمراجعة'), h('small', due.length ? `${ar(due.length)} آية للمراجعة اليوم` : 'إخفاء تدريجي وتكرار'))),
+      h('a.quick', { href: '#/quiz' }, icon('check'), h('span', h('strong', 'اختبار الحفظ'), h('small', 'أكمل الآية، وفي أي سورة؟'))),
       h('a.quick', { href: '#/group' }, icon('users'), h('span', h('strong', 'ختمة جماعية'), h('small', 'اقرأوا معًا برابط واحد'))),
       h('a.quick', { href: '#/bookmarks' }, icon('bookmark'), h('span', h('strong', 'العلامات'), h('small', 'الآيات المحفوظة والملاحظات'))),
     );

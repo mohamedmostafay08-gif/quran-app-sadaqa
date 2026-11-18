@@ -10,6 +10,7 @@ import { sahabiTile } from './library.js';
 import { pushStatus, askPermission, syncPush } from '../features/push.js';
 import { upcomingOccasions } from './calendar.js';
 import { streak } from '../features/activity.js';
+import { ayahOfDayCard } from './duas.js';
 
 export function renderToday() {
   const loc = P.getLocation();
@@ -33,7 +34,7 @@ export function renderToday() {
   const last = settings.get('lastRead');
   const quick = h('div.quick-row');
   homeWirdCard().then((w) => quick.prepend(w)).catch(() => {});
-  quick.append(adhkarTile(loc), h('a.quick', { href: '#/tasbih' }, icon('repeat'), h('span', h('strong', 'السبحة'), h('small', 'عدّاد التسبيح'))), sahabiTile());
+  quick.append(adhkarTile(loc), h('a.quick', { href: '#/duas' }, icon('heart'), h('span', h('strong', 'الأدعية'), h('small', 'من القرآن والسنة الصحيحة'))), h('a.quick', { href: '#/asma' }, icon('star'), h('span', h('strong', 'أسماء الله الحسنى'), h('small', 'مع معانيها، واسم كل يوم'))), h('a.quick', { href: '#/tasbih' }, icon('repeat'), h('span', h('strong', 'السبحة'), h('small', 'عدّاد التسبيح'))), sahabiTile());
   const occ = upcomingOccasions(new Date(), 1)[0];
   const st = streak();
   quick.append(
@@ -51,6 +52,7 @@ export function renderToday() {
     lc,
     last ? continueCard(last) : null,
     fridayCard(),
+    ayahOfDayCard(),
     quick,
   ));
   return { cleanup() { clearInterval(timer); lc.cleanup(); } };
