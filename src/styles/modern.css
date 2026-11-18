@@ -531,3 +531,4 @@ body.focus-mode .main { padding-top: 0; }
 .ls-n { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); font-weight: 700; font-size: 14px; }
 .ls-video { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; background: #000; margin: var(--sp-2) 0; }
 .ls-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.ls-topics, .ls-sheikhs { -webkit-mask-image: linear-gradient(to left, #000 88%, transparent); mask-image: linear-gradient(to left, #000 88%, transparent); }

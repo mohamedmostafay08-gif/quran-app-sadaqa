@@ -18,18 +18,23 @@ const TOPICS = [['تفسير', 'التفسير'], ['حديث', 'الحديث'], 
 const byKey = Object.fromEntries(Object.entries(SHEIKHS).map(([id, s]) => [s.key, id]));
 const sid = (sheikh) => byKey[sheikh] || Object.entries(SHEIKHS).find(([, s]) => sheikh.includes(s.key))?.[0];
 
+const friendly = (src = '') => (/binbaz/.test(src) ? 'الموقع الرسمي للشيخ ابن باز (binbaz.org.sa)' : /islamhouse/.test(src) ? 'موقع دار الإسلام (islamhouse.com)' : /archive\.org/.test(src) ? 'أرشيف الإنترنت (archive.org)' : src);
+// عناوين الحلقات: بلا ترقيم في أولها (الدوائر ترقّمها)، والرقم الملتصق بآخرها يصير «(٢)»
+const AR = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]);
+const cleanEp = (t) => { let x = String(t).trim().replace(/^[\d٠-٩]+\s*[-_.)]?\s*/, ''); x = x.replace(/([^\s\d])(\d+)$/, (m, a, n) => `${a} (${AR(n)})`); return x || String(t); };
+const cleanTitle = (t) => String(t).replace(/\s*ﷺ/g, ' صلى الله عليه وسلم');
 const series = [];
 const seen = new Set();
 // الصوت أولًا (يعمل بالخلفية ويُستكمل)، ثم الفيديو
 for (const a of read('audio.json')) {
   const sh = sid(a.sheikh); if (!sh || !a.episodes?.length || !TOPICS.some((t) => t[0] === a.topic)) continue;
   const id = `a${series.length + 1}`;
-  series.push({ id, kind: 'audio', sheikh: sh, topic: a.topic, title: a.title, source: a.source, episodes: a.episodes.map((e) => [e.t, e.url]) });
+  series.push({ id, kind: 'audio', sheikh: sh, topic: a.topic, title: cleanTitle(a.title), source: friendly(a.source), episodes: a.episodes.map((e) => [cleanEp(e.t), e.url]) });
 }
 for (const y of read('youtube.json')) {
   const sh = sid(y.sheikh); if (!sh || !y.verified || seen.has(y.playlist) || !TOPICS.some((t) => t[0] === y.topic)) continue;
   seen.add(y.playlist);
-  series.push({ id: `v${series.length + 1}`, kind: 'video', sheikh: sh, topic: y.topic, title: y.title, playlist: y.playlist, count: y.count || 0, source: y.channel });
+  series.push({ id: `v${series.length + 1}`, kind: 'video', sheikh: sh, topic: y.topic, title: cleanTitle(y.title), playlist: y.playlist, count: y.count || 0, source: `يوتيوب — ${y.channel}` });
 }
 const used = new Set(series.map((s) => s.sheikh));
 const sheikhs = Object.fromEntries(Object.entries(SHEIKHS).filter(([id]) => used.has(id)).map(([id, s]) => [id, { name: s.name, short: s.short }]));

@@ -59,7 +59,7 @@ const seriesCard = (data, s) => {
   const heard = s.kind === 'audio' ? s.episodes.filter((_, i) => p[epId(s.id, i)]).length : 0;
   return h('a.card.ls-card', { href: `#/lessons/${s.id}` },
     h('span.ls-kind', { class: `ls-kind ${s.kind}`, 'aria-hidden': 'true' }, icon(s.kind === 'audio' ? 'play' : 'pages')),
-    h('span.ls-t', h('strong', s.title), h('small', `${sh.name}${n ? ` · ${ar(n)} ${s.kind === 'audio' ? 'درسًا' : 'مقطعًا'}` : ''}${s.kind === 'video' ? ' · فيديو' : ''}`),
+    h('span.ls-t', h('strong', s.title), h('small', `${sh.name}${n ? ` · ${ar(n)} ${s.kind === 'audio' ? (n >= 3 && n <= 10 ? 'دروس' : 'درسًا') : (n >= 3 && n <= 10 ? 'مقاطع' : 'مقطعًا')}` : ''}${s.kind === 'video' ? ' · فيديو' : ''}`),
       heard ? h('span.ls-bar', h('span', { style: { width: `${Math.round((heard / n) * 100)}%` } })) : null),
     icon('back'));
 };
@@ -82,7 +82,7 @@ export async function renderLessons(params, query = {}) {
     h('div.ls-topics', { role: 'tablist', 'aria-label': 'الموضوعات' },
       h('a.pb-chip', { href: link(null, sheikh), 'aria-pressed': String(!topic) }, 'الكل'),
       ...data.topics.filter(([id]) => data.series.some((s) => s.topic === id)).map(([id, name]) => h('a.pb-chip', { href: link(id, sheikh), 'aria-pressed': String(topic === id) }, name))),
-    h('div.ls-sheikhs', Object.entries(data.sheikhs).filter(([id]) => data.series.some((s) => s.sheikh === id)).map(([id, sh]) => h('a', { class: `ls-sh${sheikh === id ? ' on' : ''}`, href: link(topic, sheikh === id ? null : id) }, h('span.ls-av', { 'aria-hidden': 'true' }, sh.name.replace(/^(الشيخ|د\.)\s*/, '').trim()[0]), h('small', sh.short || sh.name)))),
+    h('div.ls-sheikhs', Object.entries(data.sheikhs).filter(([id]) => data.series.some((s) => s.sheikh === id)).map(([id, sh]) => h('a', { class: `ls-sh${sheikh === id ? ' on' : ''}`, href: link(topic, sheikh === id ? null : id) }, h('span.ls-av', { 'aria-hidden': 'true' }, (sh.short || sh.name).split(' ').pop().replace(/^ال/, '')[0]), h('small', sh.short || sh.name)))),
     list.length ? h('div.ls-list', list.map((s) => seriesCard(data, s))) : h('p.muted', 'لا توجد دروس بهذا الاختيار بعد.'),
   ));
 }
@@ -109,7 +109,7 @@ function renderSeries(data, id) {
   mount(h('div.lessons-page',
     topbar({ title: s.title, sub: `${sh.name} · ${topicName}`, back: '#/lessons' }),
     h('section.card.ls-head',
-      h('span', `${ar(s.episodes.length)} درسًا صوتيًا`),
+      h('span', `${ar(s.episodes.length)} ${s.episodes.length >= 3 && s.episodes.length <= 10 ? 'دروس صوتية' : 'درسًا صوتيًا'}`),
       nextIdx >= 0 ? h('button.btn', { type: 'button', onclick: () => { playEpisode(data, s, nextIdx); toast('بدأ التشغيل'); rerenderSoon(); } }, icon('play'), nextIdx === 0 && !p[epId(s.id, 0)] ? 'ابدأ السلسلة' : `أكمل: ${s.episodes[nextIdx][0]}`) : h('span.hd-badge.hd-grade', 'أتممت السلسلة ✓')),
     h('ol.ls-eps', s.episodes.map(([t], i) => {
       const pr = p[epId(s.id, i)];
@@ -117,7 +117,7 @@ function renderSeries(data, id) {
       const playing = cur === 'ls:' + epId(s.id, i);
       return h('li', h('button', { type: 'button', class: `ls-ep${playing ? ' on' : ''}${done ? ' done' : ''}`, onclick: () => { playEpisode(data, s, i); rerenderSoon(); } },
         h('span.ls-n', done ? '✓' : ar(i + 1)),
-        h('span.ls-t', h('strong', t), pr && !done && pr[1] ? h('span.ls-bar', h('span', { style: { width: `${Math.min(100, Math.round((pr[0] / pr[1]) * 100))}%` } })) : null, pr && !done && pr[0] > 0 ? h('small', `توقفت عند ${fmt(pr[0])}`) : null),
+        h('span.ls-t', h('strong', t), pr && !done && pr[1] ? h('span.ls-bar', h('span', { style: { width: `${Math.min(100, Math.round((pr[0] / pr[1]) * 100))}%` } })) : null, pr && !done && pr[0] >= 60 ? h('small', `توقفت عند ${fmt(pr[0])}`) : null),
         icon(playing ? 'pause' : 'play')));
     })),
     h('p.small-note', `المصدر: ${s.source || 'أرشيف الإنترنت'}`)));

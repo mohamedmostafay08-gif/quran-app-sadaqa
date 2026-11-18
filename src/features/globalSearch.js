@@ -19,6 +19,7 @@ const PAGES = [
   ['#/group', 'الختمة الجماعية', 'ختمه جماعيه مهداه ميت'],
   ['#/kids', 'وضع الأطفال', 'اطفال جزء عم'],
   ['#/focus', 'وضع التركيز', 'تركيز تشتيت'],
+  ['#/lessons', 'دروس المشايخ', 'دروس محاضرات شيخ مشايخ الشعراوي ابن عثيمين ابن باز عمر عبد الكافي الحويني سمير مصطفى امجد سمير'],
   ['#/radio', 'إذاعة القرآن الكريم', 'اذاعه راديو بث مباشر'],
   ['#/listen', 'الاستماع والقراء', 'قارئ قراء استماع تلاوه'],
   ['#/downloads', 'التنزيلات', 'تنزيل بدون انترنت'],
@@ -45,7 +46,7 @@ let cache = null;
 const clip = (t, n = 90) => { t = t.replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n).replace(/\s+\S*$/, '') + '…' : t; };
 async function load() {
   if (cache) return cache;
-  const [adhkar, libIndex, nawawi, sel] = await Promise.all([json('adhkar.json'), json('library/index.json'), json('library/nawawi.json'), json('selections.json')]);
+  const [adhkar, libIndex, nawawi, sel, lessons] = await Promise.all([json('adhkar.json'), json('library/index.json'), json('library/nawawi.json'), json('selections.json'), json('lessons.json')]);
   const topics = libIndex ? (await Promise.all(libIndex.filter((t) => t.id !== 'sahaba' && t.id !== 'qisas').map((t) => json(`library/${t.id}.json`).then((items) => (items || []).map((x) => ({ t, x })))))).flat() : [];
   const [{ PROPHETS }, { LESSONS }] = await Promise.all([import('../views/prophets.js'), import('../views/tajweed.js')]);
   const n = normalize;
@@ -58,14 +59,15 @@ async function load() {
       ...topics.map(({ t, x }) => ({ key: n(`${x.title} ${x.text}`), href: `#/hadith/${t.id}/${x.id}`, title: clip(x.title.split('\n')[0]), sub: t.title }))],
     duas: (sel?.quranDuas || []).map((d) => ({ key: n(d.t), href: `#/surah/${d.ref.replace(':', '/')}`, title: d.t, sub: 'دعاء من القرآن' })),
     asma: (sel?.asma || []).map((x) => ({ key: n(`${x.n} ${x.m}`), href: '#/asma', title: x.n, sub: x.m.slice(0, 80) })),
-    learn: [...PROPHETS.map(([id, name]) => ({ key: n(name), href: `#/prophets/${id}`, title: name, sub: 'قصص الأنبياء' })),
+    learn: [...(lessons?.series || []).map((x) => ({ key: n(`${x.title} ${lessons.sheikhs[x.sheikh]?.name || ''}`), href: `#/lessons/${x.id}`, title: x.title, sub: `دروس ${lessons.sheikhs[x.sheikh]?.short || ''}` })),
+      ...PROPHETS.map(([id, name]) => ({ key: n(name), href: `#/prophets/${id}`, title: name, sub: 'قصص الأنبياء' })),
       ...LESSONS.flatMap(([id, title, , secs]) => [{ key: n(title), href: `#/tajweed/${id}`, title, sub: 'دروس التجويد' },
         ...secs.map(([name]) => ({ key: n(name), href: `#/tajweed/${id}`, title: name, sub: `دروس التجويد — ${title}` }))])],
   };
   return cache;
 }
 
-export const GROUPS = [['surahs', 'السور'], ['pages', 'في التطبيق'], ['learn', 'القصص والتجويد'], ['adhkar', 'الأذكار'], ['duas', 'أدعية القرآن'], ['hadith', 'الأحاديث'], ['asma', 'أسماء الله الحسنى']];
+export const GROUPS = [['surahs', 'السور'], ['pages', 'في التطبيق'], ['learn', 'الدروس والقصص والتجويد'], ['adhkar', 'الأذكار'], ['duas', 'أدعية القرآن'], ['hadith', 'الأحاديث'], ['asma', 'أسماء الله الحسنى']];
 
 /** نتائج مجمّعة: { group: [{href, title, sub}] } */
 export async function searchAll(q) {
