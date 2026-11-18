@@ -1,6 +1,6 @@
 // شاشة القراءة
 import { h, icon, ar, throttle } from '../lib/dom.js';
-import { getSurahMeta, getSurahText, boundariesAt, pageOf, quarterLabel, positionOf } from '../data.js';
+import { getSurahMeta, getSurahText, boundariesAt, pageOf, quarterLabel, positionOf, sajdaAt } from '../data.js';
 import * as settings from '../state.js';
 import * as bookmarks from '../features/bookmarks.js';
 import * as notes from '../features/notes.js';
@@ -57,7 +57,7 @@ export async function renderReader(params, _q, isStale) {
       const b = boundariesAt(n, a);
       if (a > 1 && b.page) frag.append(h('div.mark-page', { 'aria-label': `بداية الصفحة ${b.page}` }, h('span', `صفحة ${ar(b.page)}`)));
       if (b.juz || b.quarter) {
-        frag.append(h('div.mark-juz', b.juz ? `الجزء ${ar(b.juz)}` : quarterLabel(b.quarter).replace(/\d+/g, ar)));
+        frag.append(h('div', { class: `mark-juz${b.juz ? ' is-juz' : ''}` }, h('span', b.juz ? `الجزء ${ar(b.juz)}` : quarterLabel(b.quarter).replace(/\d+/g, ar))));
       }
     } else if (a > 1 && boundariesAt(n, a).quarter) {
       // علامة الربع داخل النص كالمصحف المطبوع
@@ -73,7 +73,9 @@ export async function renderReader(params, _q, isStale) {
       class: ayahClass(marked.has(a), note),
     },
     // آخر كلمة + رقم الآية في وحدة لا تنكسر (حتى لا يسقط الرقم وحده في سطر)
-    parts, h('span.ayah-end', last, '\u00A0', h('span.ayah-num', { 'aria-hidden': 'true' }, '\u06DD' + ar(a)), h('span.sr-only', ` (الآية ${a})`)));
+    parts, h('span.ayah-end', last, '\u00A0', h('span.ayah-num', { 'aria-hidden': 'true' }, '\u06DD' + ar(a)), h('span.sr-only', ` (الآية ${a})`)),
+    sajdaAt(n, a) ? h('span.sajda-mark', { title: 'موضع سجدة تلاوة' }, '۩ سجدة') : null);
+    if (sajdaAt(n, a)) span.classList.add('is-sajda');
     frag.append(span);
     if (trans) frag.append(h('p.trans', { lang: transInfo?.lang, dir: transInfo?.dir || 'ltr' }, trans[i]));
     if (layout === 'flow') frag.append(' ');

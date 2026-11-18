@@ -1,6 +1,6 @@
 // وضع الصفحات: مصحف المدينة (604 صفحة × 15 سطرًا) بنص مجمع الملك فهد وخطه
 import { h, icon, ar } from '../lib/dom.js';
-import { getSurahMeta, juzOf, pageOf, positionOf } from '../data.js';
+import { getSurahMeta, juzOf, pageOf, positionOf, boundariesAt, sajdaAt, quarterLabel } from '../data.js';
 import * as settings from '../state.js';
 import * as bookmarks from '../features/bookmarks.js';
 import * as notes from '../features/notes.js';
@@ -96,20 +96,41 @@ export async function renderMushaf(params, _q, isStale) {
   };
   const endNode = (text, s, a) => {
     const note = noteOf(s, a);
-    return h('span', { class: 'm-end' + (isMarked(s, a) ? ' bookmarked' : '') + (note?.text ? ' has-note' : ''), dataset: { s, a }, title: isMarked(s, a) ? 'عليها علامة' : null }, text);
+    return h('span', { class: 'm-end' + (isMarked(s, a) ? ' bookmarked' : '') + (note?.text ? ' has-note' : '') + (sajdaEnd(s, a) ? ' sajda' : ''), dataset: { s, a }, title: isMarked(s, a) ? 'عليها علامة' : null }, text);
   };
   const firstAyah = pagesLines[0][0][1][0];
   const juz = juzOf(firstAyah[1], firstAyah[2]);
 
+  // علامات الهامش كالمصحف المطبوع: بداية الجزء والحزب وأرباعه، وموضع السجدة
+  const showSide = settings.get('showPageMarks') !== false;
+  const sideMark = (tokens) => {
+    for (const [, s, a, end, wi] of tokens) {
+      if (end && sajdaAt(s, a)) return h('span.m-side.sajda', { title: 'موضع سجدة تلاوة' }, h('b', '۩'), h('small', 'سجدة'));
+      if (!end && wi === 0 && !(s === 1 && a === 1)) {
+        const b = boundariesAt(s, a);
+        if (b.juz) return h('span.m-side.juz', { title: `بداية الجزء ${b.juz}` }, h('b', ar(b.juz)), h('small', 'الجزء'));
+        if (b.quarter) {
+          const pos = (b.quarter - 1) % 4, hizb = Math.ceil(b.quarter / 4);
+          return h('span.m-side.rub', { title: quarterLabel(b.quarter) }, h('b', '۞'), h('small', pos === 0 ? `الحزب ${ar(hizb)}` : ['', 'ربع', 'نصف', '¾'][pos]));
+        }
+      }
+    }
+    return null;
+  };
+  // آية السجدة: يُلوَّن رقمها
+  const sajdaEnd = (s, a) => !!sajdaAt(s, a);
   const buildPage = (p, lines) => {
-    const page = h('div', { lang: 'ar', class: `m-page${p <= 2 ? ' m-opening' : ''}`, dataset: { page: p } });
+    const page = h('div', { lang: 'ar', class: `m-page${p <= 2 ? ' m-opening' : ''}${showSide ? ' has-side' : ''}`, dataset: { page: p } });
     for (const r of buildLines(lines)) {
       if (r.type === 'header') {
         page.append(h('div.m-line.m-header', h('span', `سورة ${getSurahMeta(r.surah).nameAr}`)));
       } else if (r.type === 'basmala') {
         page.append(h('div.m-line.m-basmala', BASMALA));
       } else {
-        page.append(h('div.m-line', { class: r.tokens.length <= 4 ? 'm-line m-short' : 'm-line' }, r.tokens.map(([text, s, a, end, wi]) => (end ? endNode(text, s, a) : wordNode(text, s, a, wi)))));
+        const line = h('div.m-line', { class: r.tokens.length <= 4 ? 'm-line m-short' : 'm-line' }, r.tokens.map(([text, s, a, end, wi]) => (end ? endNode(text, s, a) : wordNode(text, s, a, wi))));
+        const side = showSide ? sideMark(r.tokens) : null;
+        if (side) line.append(side);
+        page.append(line);
       }
     }
     if (spread) page.append(h('div.m-folio', ar(p)));

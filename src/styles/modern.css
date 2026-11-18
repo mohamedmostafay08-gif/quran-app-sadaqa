@@ -472,3 +472,28 @@ body.focus-mode .main { padding-top: 0; }
 .wn-card-h { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
 .wn-card .wn-item { background: var(--surface-2); }
 .ib-new { color: var(--accent) !important; font-weight: 600; }
+
+/* علامات المصحف الملوّنة: الجزء والحزب والأرباع والسجدة */
+:root { --mk-juz: #b3261e; --mk-rub: #b07a12; --mk-sajda: #7b3fa0; }
+:root[data-theme="dark"], :root[data-variant="navy"] { --mk-juz: #ff8a80; --mk-rub: #e8c063; --mk-sajda: #d1a3f0; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme]) { --mk-juz: #ff8a80; --mk-rub: #e8c063; --mk-sajda: #d1a3f0; } }
+.rub-mark { color: var(--mk-rub); font-weight: 700; font-size: 1.05em; }
+/* وضع الصفحات: هامش على يمين الصفحة كالمصحف المطبوع */
+.m-page.has-side { padding-right: max(var(--sp-4), 9%); }
+.m-line { position: relative; }
+.m-side { position: absolute; right: calc(-1 * min(9.5cqi + 4px, 56px)); top: 50%; transform: translateY(-50%); width: min(9cqi, 50px); display: grid; justify-items: center; line-height: 1.1; font-family: 'IBM Plex Sans Arabic', sans-serif; pointer-events: none; }
+.m-side b { font-family: var(--font-quran); font-size: max(15px, 4cqi); font-weight: 700; line-height: 1.2; }
+.m-side small { font-size: max(9px, 2.1cqi); font-weight: 600; white-space: nowrap; }
+.m-side.juz { color: var(--mk-juz); }
+.m-side.juz b { font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: max(13px, 3.4cqi); width: 1.9em; height: 1.9em; display: grid; place-items: center; border: 2px solid currentColor; border-radius: 50%; margin-bottom: 2px; }
+.m-side.rub { color: var(--mk-rub); }
+.m-side.sajda { color: var(--mk-sajda); }
+.m-end.sajda { color: var(--mk-sajda); font-weight: 700; }
+/* وضع السور */
+.mark-juz { color: var(--mk-rub); }
+.mark-juz::before { color: var(--mk-rub); }
+.mark-juz span { padding: 2px 12px; border-radius: 999px; background: color-mix(in srgb, var(--mk-rub) 14%, transparent); }
+.mark-juz.is-juz, .mark-juz.is-juz::before { color: var(--mk-juz); }
+.mark-juz.is-juz span { background: color-mix(in srgb, var(--mk-juz) 14%, transparent); font-weight: 700; }
+.ayah.is-sajda .ayah-num { color: var(--mk-sajda); }
+.sajda-mark { display: inline-block; margin-inline: .3em; padding: 0 .5em; border-radius: 999px; font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: .5em; font-weight: 700; vertical-align: middle; color: var(--mk-sajda); background: color-mix(in srgb, var(--mk-sajda) 14%, transparent); line-height: 1.8; }
