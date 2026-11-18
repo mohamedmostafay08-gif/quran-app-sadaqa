@@ -27,6 +27,8 @@ import { renderFocus, endFocus, focusActive } from './features/focus.js';
 import { renderZakat } from './views/zakat.js';
 import { renderFasting } from './views/fasting.js';
 import { renderHifz } from './views/hifz.js';
+import { renderTajweed } from './views/tajweed.js';
+import { renderProphets } from './views/prophets.js';
 import { initAppBadge } from './features/appBadge.js';
 import { checkBadges } from './features/badges.js';
 import { initActivity } from './features/activity.js';
@@ -53,7 +55,7 @@ import { initAdhanScheduler, playAdhan } from './features/adhan.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
-const TAB_FOR = { '/': 'today', '/quran': 'quran', '/surah': 'quran', '/page': 'quran', '/search': 'quran', '/bookmarks': 'quran', '/khatma': 'quran', '/memorize': 'quran', '/group': 'quran', '/listen': 'listen', '/radio': 'listen', '/car': 'listen', '/downloads': 'more', '/library': 'more', '/hadith': 'more', '/guide': 'more', '/sahabi': 'more', '/prayer': 'prayer', '/adhkar': 'prayer', '/more': 'more', '/settings': 'more', '/about': 'more', '/help': 'more', '/tasbih': 'today', '/calendar': 'today', '/stats': 'today', '/duas': 'today', '/asma': 'today', '/quiz': 'quran', '/ramadan': 'today', '/kids': 'quran', '/greetings': 'more', '/elder': 'more', '/qada': 'prayer', '/wallpaper': 'more', '/sleep': 'today', '/nawawi': 'more', '/focus': 'quran', '/zakat': 'today', '/fasting': 'today', '/hifz': 'quran' };
+const TAB_FOR = { '/': 'today', '/quran': 'quran', '/surah': 'quran', '/page': 'quran', '/search': 'quran', '/bookmarks': 'quran', '/khatma': 'quran', '/memorize': 'quran', '/group': 'quran', '/listen': 'listen', '/radio': 'listen', '/car': 'listen', '/downloads': 'more', '/library': 'more', '/hadith': 'more', '/guide': 'more', '/sahabi': 'more', '/prayer': 'prayer', '/adhkar': 'prayer', '/more': 'more', '/settings': 'more', '/about': 'more', '/help': 'more', '/tasbih': 'today', '/calendar': 'today', '/stats': 'today', '/duas': 'today', '/asma': 'today', '/quiz': 'quran', '/ramadan': 'today', '/kids': 'quran', '/greetings': 'more', '/elder': 'more', '/qada': 'prayer', '/wallpaper': 'more', '/sleep': 'today', '/nawawi': 'more', '/focus': 'quran', '/zakat': 'today', '/fasting': 'today', '/hifz': 'quran', '/tajweed': 'quran', '/prophets': 'quran' };
 
 async function boot() {
   const status = document.querySelector('.boot p');
@@ -92,6 +94,8 @@ async function boot() {
   route('/zakat', renderZakat);
   route('/fasting', renderFasting);
   route('/hifz', renderHifz);
+  route('/tajweed/:id?', renderTajweed);
+  route('/prophets/:id?', renderProphets);
   route('/surah/:surah/:ayah?', renderReader);
   route('/search', renderSearch);
   route('/bookmarks', renderBookmarks);

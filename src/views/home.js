@@ -45,6 +45,8 @@ export function renderQuran() {
     quick.append(
       wird,
       h('a.quick', { href: '#/memorize' }, icon('repeat'), h('span', h('strong', 'الحفظ والمراجعة'), h('small', due.length ? `${ar(due.length)} آية للمراجعة اليوم` : 'إخفاء تدريجي وتكرار'))),
+      h('a.quick', { href: '#/tajweed' }, icon('pages'), h('span', h('strong', 'دروس التجويد'), h('small', 'الأحكام بأمثلة ملوّنة وصوت الشيخ'))),
+      h('a.quick', { href: '#/prophets' }, icon('users'), h('span', h('strong', 'قصص الأنبياء'), h('small', 'مواضعها في القرآن، قراءة واستماعًا'))),
       h('a.quick', { href: '#/hifz' }, icon('lamp'), h('span', h('strong', 'خطة الحفظ'), h('small', settings.get('hifzPlan') ? 'تابع ورد الحفظ اليوم' : 'جزء أو سورة بعدد آيات يومي'))),
       h('a.quick', { href: '#/focus' }, icon('book'), h('span', h('strong', 'وضع التركيز'), h('small', 'المصحف وحده حتى تُتم وردك'))),
       h('a.quick', { href: '#/quiz' }, icon('check'), h('span', h('strong', 'اختبار الحفظ'), h('small', 'أكمل الآية، وفي أي سورة؟'))),

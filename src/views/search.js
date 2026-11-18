@@ -4,6 +4,7 @@ import { normalize, latinDigits } from '../lib/arabic.js';
 import { getSimpleText, getSurahText, getSurahMeta, getSurahs } from '../data.js';
 import { mount, topbar, empty } from '../ui.js';
 import { getRoots, decodeLoc, isWordToken } from '../features/extra.js';
+import { searchAll, GROUPS } from '../features/globalSearch.js';
 
 const MAX = 200;
 let normCache = null;
@@ -27,11 +28,12 @@ export function renderSearch(_p, query) {
   const exact = h('input', { type: 'checkbox', id: 'exact' });
   const status = h('p.search-status', { role: 'status', 'aria-live': 'polite' });
   const results = h('ol.results');
+  const global = h('div.gs-box');
 
   const run = async () => {
     const q = input.value.trim();
     history.replaceState(null, '', '#/search' + (q ? `?${mode === 'root' ? 'root' : 'q'}=` + encodeURIComponent(q) : ''));
-    results.replaceChildren();
+    results.replaceChildren(); global.replaceChildren();
     if (!q) { status.textContent = ''; return; }
     if (mode === 'root') return runRoot(q, status, results, input);
 
@@ -51,6 +53,7 @@ export function renderSearch(_p, query) {
     const nq = normalize(q);
     if (nq.length < 2) { status.textContent = 'اكتب حرفين على الأقل'; return; }
     status.textContent = 'جارٍ البحث…';
+    searchAll(q).then((res) => { if (input.value.trim() === q) renderGlobal(global, res); }).catch(() => {});
     const idx = await index();
     const re = exact.checked ? new RegExp(`(^| )${nq.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($| )`) : null;
     const hits = [];
@@ -66,10 +69,10 @@ export function renderSearch(_p, query) {
     if (input.value.trim() !== q) return; // تغير النص أثناء البحث
     if (!total) {
       status.textContent = '';
-      results.append(h('li.no-hover', empty('search', 'لا توجد نتائج', 'جرّب كلمة أقصر أو بدون "ال" التعريف.')));
+      results.append(h('li.no-hover', empty('search', 'لا توجد آيات بهذا اللفظ', 'جرّب كلمة أقصر أو بدون "ال" التعريف.')));
       return;
     }
-    status.textContent = total > MAX ? `${ar(total)} نتيجة — يُعرض أول ${ar(MAX)}` : `${ar(total)} نتيجة`;
+    status.textContent = total > MAX ? `في القرآن: ${ar(total)} آية — يُعرض أول ${ar(MAX)}` : `في القرآن: ${ar(total)} ${total >= 3 && total <= 10 ? 'آيات' : 'آية'}`;
     const frag = document.createDocumentFragment();
     for (const [s, a] of hits) {
       const text = (await getSurahText(s))[a - 1];
@@ -83,7 +86,7 @@ export function renderSearch(_p, query) {
 
   const exactLabel = h('label.check', exact, h('span', 'كلمة كاملة فقط'));
   const applyMode = () => {
-    input.placeholder = mode === 'root' ? 'اكتب الجذر، مثل: رحم أو علم' : 'اكتب كلمة أو جزءًا من آية، أو رقم مثل ٢:٢٥٥';
+    input.placeholder = mode === 'root' ? 'اكتب الجذر، مثل: رحم أو علم' : 'ابحث في القرآن والأحاديث والأذكار…';
     exactLabel.hidden = mode === 'root';
   };
   const modeSeg = h('div.seg', { role: 'tablist', 'aria-label': 'نوع البحث' }, [['text', 'في النص'], ['root', 'بالجذر']].map(([m, label]) => h('button', {
@@ -92,16 +95,32 @@ export function renderSearch(_p, query) {
   }, label)));
   applyMode();
   const el = h('div.search-page',
-    topbar({ title: 'البحث', back: '#/quran' }),
+    topbar({ title: 'البحث', back: '#/' }),
     modeSeg,
     h('form.search-bar', { role: 'search', onsubmit: (e) => { e.preventDefault(); run(); } }, icon('search'), input),
     exactLabel,
+    global,
     status,
     results,
   );
   mount(el);
   if (input.value) run();
   else setTimeout(() => input.focus(), 50);
+}
+
+/** نتائج البحث الشامل: كل مجموعة بأول ٤ نتائج وزر لعرض الباقي */
+function renderGlobal(box, res) {
+  const groups = GROUPS.filter(([g]) => res[g]?.length);
+  box.replaceChildren(...groups.map(([g, title]) => {
+    const list = res[g];
+    const ul = h('ul.gs-list');
+    const show = (n) => ul.replaceChildren(...list.slice(0, n).map((x) => h('li', h('a.gs-item', { href: x.href }, h('strong', x.title), x.sub ? h('small', x.sub) : null))));
+    show(4);
+    return h('section.gs-group',
+      h('h2.gs-h', `${title} (${ar(list.length)})`),
+      ul,
+      list.length > 4 ? h('button.btn.ghost.gs-more', { type: 'button', onclick: (e) => { show(60); e.currentTarget.remove(); } }, `عرض ${list.length > 60 ? 'أول ٦٠' : 'الكل'}`) : null);
+  }));
 }
 
 /** أرقام الكلمات المطابقة (لتظليلها في النص العثماني إن تطابق عدد الكلمات) */

@@ -394,3 +394,60 @@ body.focus-mode .main { padding-top: 0; }
 .khatm-dua summary { cursor: pointer; }
 .khatm-dua p { margin: 0; line-height: 1.9; }
 .khatm-dua .hd-badge, .khatm-dua .btn { justify-self: start; }
+
+/* البحث الشامل */
+.gs-box:not(:empty) { display: grid; gap: var(--sp-3); margin: var(--sp-3) 0; }
+.gs-group { display: grid; gap: var(--sp-2); }
+.gs-h { font-size: 14px; color: var(--text-2); margin: 0; }
+.gs-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.gs-item { display: grid; gap: 2px; padding: 10px 14px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border); color: inherit; text-decoration: none; min-height: 44px; }
+.gs-item strong { font-weight: 600; line-height: 1.6; overflow-wrap: anywhere; }
+.gs-item small { color: var(--text-3); }
+.gs-more { justify-self: start; }
+
+/* دروس التجويد وقصص الأنبياء */
+.tw-intro { display: block; font-weight: 400; color: var(--text-2); font-size: 13px; margin-top: 2px; line-height: 1.6; }
+.tw-lead { margin: 0 0 var(--sp-3); line-height: 1.9; }
+.tw-sections { display: grid; gap: var(--sp-3); margin-bottom: var(--sp-4); }
+.tw-sec { display: grid; gap: var(--sp-2); margin: 0; }
+.tw-sec h2 { margin: 0; display: flex; align-items: center; gap: 4px; font-size: 18px; }
+.tw-sec > p { margin: 0; line-height: 2; }
+.tw-ex { border-top: 1px solid var(--border); padding-top: var(--sp-2); display: grid; gap: 4px; }
+.tw-ayah { margin: 0; font-family: var(--font-quran, 'Amiri Quran'), serif; font-size: 22px; line-height: 2.2; }
+.tw-foot { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+.tw-foot a { color: var(--text-2); }
+.pr-passages { display: grid; gap: var(--sp-3); margin-bottom: var(--sp-4); }
+.pr-card { display: grid; gap: var(--sp-2); margin: 0; }
+.pr-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); }
+.pr-head small { color: var(--text-3); }
+.pr-text { margin: 0; font-family: var(--font-quran, 'Amiri Quran'), serif; font-size: 21px; line-height: 2.2; }
+.pr-n { color: var(--accent); font-size: .8em; }
+
+/* سمات الألوان الإضافية */
+.theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: var(--sp-2); }
+.theme-opt { display: grid; justify-items: center; gap: 6px; padding: 10px 6px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-size: 13px; cursor: pointer; }
+.theme-opt[aria-checked="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.th-sw { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(127, 127, 127, .35); display: grid; place-items: center; }
+.th-dot { width: 14px; height: 14px; border-radius: 50%; }
+:root[data-theme][data-variant="green"] {
+  --bg: #e8f1ec; --surface: #f6faf8; --surface-2: #dde9e2; --border: #c9dbd1; --paper: #f3f8f5;
+  --accent: #1f6b4f; --accent-2: #2a8763; --accent-soft: #d3e6dc; --hero-1: #1f6b4f; --hero-2: #2a8763;
+}
+:root[data-theme][data-variant="paper"] {
+  --bg: #efe6d2; --surface: #f8f1e1; --surface-2: #e7dbc0; --border: #d8c7a2; --paper: #faf3e3;
+  --text: #2f2414; --text-2: #5c4a2c; --text-3: #6b5836;
+  --accent: #7a3b12; --accent-2: #94501f; --accent-soft: #ecd9c0; --hero-1: #6b3410; --hero-2: #8c4a1c; --gold: #9a6b1f;
+}
+:root[data-theme][data-variant="navy"] {
+  --bg: #0c1526; --surface: #131f35; --surface-2: #1a2843; --border: #243453; --paper: #111c30;
+  --text: #e6ecf7; --text-2: #a8b6cf; --text-3: #8c9bb6;
+  --accent: #7fb2ff; --accent-2: #9cc4ff; --accent-soft: #1b2d4d; --on-accent: #06122a;
+  --ayah-active: #1a2d4f; --ayah-active-line: #7fb2ff; --hero-1: #1b3566; --hero-2: #24467f; --gold: #d8bd7a;
+}
+:root[data-theme][data-variant="black"] {
+  --bg: #000000; --surface: #0b0b0b; --surface-2: #151515; --border: #232323; --paper: #050505;
+  --text: #f2f2f2; --text-2: #b3b3b3; --text-3: #959595;
+  --accent: #d6b46a; --accent-2: #e5c886; --accent-soft: #2a2414; --on-accent: #1a1404;
+  --ayah-active: #1d1a10; --ayah-active-line: #d6b46a; --hero-1: #1c1a14; --hero-2: #2b2618; --gold: #d6b46a;
+}
+.hh-actions { display: flex; gap: 4px; }

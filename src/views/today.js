@@ -55,7 +55,7 @@ export function renderToday() {
   mount(h('div.home.today',
     h('header.home-head',
       h('div.hh-brand', h('h1', 'رتّل'), h('span', P.hijri()?.text || 'القرآن الكريم')),
-      h('a.icon-btn', { href: '#/help', 'aria-label': 'طريقة الاستخدام' }, icon('info'))),
+      h('span.hh-actions', h('a.icon-btn', { href: '#/search', 'aria-label': 'البحث في التطبيق' }, icon('search')), h('a.icon-btn', { href: '#/help', 'aria-label': 'طريقة الاستخدام' }, icon('info')))),
     prayer,
     adhanCard(loc),
     lc,

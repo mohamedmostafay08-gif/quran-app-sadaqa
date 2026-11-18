@@ -106,10 +106,14 @@ export function setPrayerNight(isNight) { prayerNight = isNight; applyVisual(); 
 
 function applyVisual() {
   const root = document.documentElement;
-  const th = state.theme === 'prayer' ? (prayerNight == null ? 'auto' : prayerNight ? 'dark' : 'light') : state.theme;
+  // سمات إضافية مبنية على الفاتح أو الليلي: { المعرف: [الأساس، السمة] }
+  const VARIANTS = { green: ['light', 'green'], paper: ['sepia', 'paper'], navy: ['dark', 'navy'], black: ['dark', 'black'] };
+  const v = VARIANTS[state.theme];
+  const th = v ? v[0] : state.theme === 'prayer' ? (prayerNight == null ? 'auto' : prayerNight ? 'dark' : 'light') : state.theme;
   if (th === 'auto') delete root.dataset.theme;
   else root.dataset.theme = th;
+  if (v) root.dataset.variant = v[1]; else delete root.dataset.variant;
   root.classList.toggle('big-ui', !!state.bigUI);
   root.style.setProperty('--quran-scale', state.fontScale);
-  try { localStorage.setItem('qa:boot', JSON.stringify({ theme: th === 'auto' ? undefined : th, fontScale: state.fontScale })); } catch (e) { /* خاص/محظور */ }
+  try { localStorage.setItem('qa:boot', JSON.stringify({ theme: th === 'auto' ? undefined : th, variant: v?.[1], fontScale: state.fontScale })); } catch (e) { /* خاص/محظور */ }
 }

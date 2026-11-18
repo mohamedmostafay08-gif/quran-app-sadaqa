@@ -39,7 +39,7 @@ export function renderSettings() {
     topbar({ title: 'الإعدادات', back: '#/more' }),
     h('section.card',
       h('h2', 'العرض'),
-      h('div.field', h('span', 'الثيم'), seg('theme', [['auto', 'تلقائي'], ['prayer', 'حسب المغرب'], ['light', 'فاتح'], ['sepia', 'سيبيا'], ['dark', 'ليلي']])),
+      h('div.field', h('span', 'الثيم'), themeGrid()),
       settings.get('theme') === 'prayer' && !settings.get('prayerLocation') ? h('small.muted', 'حدّد مدينتك من شاشة الصلاة ليعمل «حسب المغرب».') : null,
       h('label.field', h('span', 'حجم خط المصحف'), h('div.range-row', h('span.small', 'أ'), scale, h('span.large', 'أ'))),
       h('p.preview', { lang: 'ar' }, 'ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ'),
@@ -84,6 +84,18 @@ export function renderSettings() {
 }
 
 // المزامنة بين الأجهزة برمز واحد (البيانات مشفّرة على الجهاز)
+// سمات الألوان: معاينة صغيرة لكل سمة
+const THEMES = [['auto', 'تلقائي', ['#f4f6f5', '#0d1110'], '#0b6b53'], ['prayer', 'حسب المغرب', ['#f4f6f5', '#0d1110'], '#0b6b53'], ['light', 'فاتح', ['#ffffff'], '#0b6b53'],
+  ['green', 'أخضر هادئ', ['#e8f1ec'], '#1f6b4f'], ['sepia', 'سيبيا', ['#ead9b4'], '#6f4510'], ['paper', 'ورقي قديم', ['#efe6d2'], '#7a3b12'],
+  ['dark', 'ليلي', ['#0d1110'], '#4fc59d'], ['navy', 'كحلي', ['#0c1526'], '#7fb2ff'], ['black', 'أسود', ['#000000'], '#d6b46a']];
+function themeGrid() {
+  const grid = h('div.theme-grid', { role: 'radiogroup', 'aria-label': 'الثيم' }, THEMES.map(([id, name, bg, ac]) => h('button.theme-opt', {
+    type: 'button', role: 'radio', 'aria-checked': String(settings.get('theme') === id),
+    onclick: (e) => { settings.set('theme', id); for (const b of grid.children) b.setAttribute('aria-checked', String(b === e.currentTarget)); },
+  }, h('span.th-sw', { 'aria-hidden': 'true', style: { background: bg.length > 1 ? `linear-gradient(135deg, ${bg[0]} 50%, ${bg[1]} 50%)` : bg[0] } }, h('span.th-dot', { style: { background: ac } })), h('span', name))));
+  return grid;
+}
+
 function syncCard() {
   const rerender = () => dispatchEvent(new HashChangeEvent('hashchange'));
   const code = settings.get('syncCode');
