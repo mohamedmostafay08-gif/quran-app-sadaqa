@@ -3,7 +3,7 @@
    وشبكات متعددة الأعمدة بدل القوائم الطويلة. يُحمَّل بعد كل الأنماط.
    =================================================================== */
 @media (min-width: 1024px) {
-  :root { --rail: 104px; --maxw: none; --gutter: clamp(32px, 3vw, 56px); --tabbar-h: 0px; }
+  :root { --rail: 248px; --maxw: none; --gutter: clamp(32px, 3vw, 56px); --tabbar-h: 0px; }
 
   /* ===== شريط التنقل الجانبي ===== */
   body { padding-inline-start: var(--rail); }
@@ -11,17 +11,29 @@
     inset: 0 0 0 auto; inset-inline-start: 0; inset-inline-end: auto;
     width: var(--rail); height: 100%; padding: var(--sp-5) var(--sp-3);
     flex-direction: column; justify-content: flex-start; align-items: stretch; gap: var(--sp-2);
-    border: 0; border-inline-end: 3px double var(--gold-line); border-top: 0;
+    border: 0; border-inline-end: 1px solid var(--border); border-top: 0;
     transform: none !important;
   }
   .tabbar::before {
     content: 'رتّل'; display: block; text-align: center; margin: 0 0 var(--sp-4);
     font-family: var(--font-quran); font-size: var(--fs-2xl); line-height: 1.6; color: var(--accent);
   }
-  .tabbar a { flex: none; max-width: none; height: 72px; margin: 0; gap: var(--sp-2); border-radius: var(--radius); font-size: var(--fs-sm); }
-  .tabbar a:hover { background: var(--surface-2); color: var(--text); }
-  .tabbar a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
-  .tabbar a[aria-current="page"]::before { display: none; }
+  /* قائمة جانبية عريضة: أيقونة واسم، وتحت القسم الحالي صفحاته */
+  .tabbar { overflow-y: auto; gap: 2px; padding: var(--sp-5) var(--sp-3); background: var(--surface); }
+  .tabbar::before { text-align: start; padding-inline-start: var(--sp-3); }
+  .tabbar > a { flex: none; max-width: none; height: 44px; margin: 0; padding: 0 var(--sp-3); gap: var(--sp-3);
+    display: flex; flex-direction: row; align-items: center; justify-content: flex-start; border-radius: 12px; font-size: var(--fs-md); color: var(--text-2); }
+  .tabbar > a svg { padding: 0; width: 22px; height: 22px; background: none !important; }
+  .tabbar > a span { font-weight: 600; }
+  .tabbar > a:hover { background: var(--surface-2); color: var(--text); }
+  .tabbar > a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+  .tabbar > a[aria-current="page"]::before { display: none; }
+  .tabbar > a[aria-current="page"] + .tab-sub { display: grid; }
+  .tab-sub { gap: 1px; margin: 2px 0 var(--sp-2); padding-inline-start: 46px; }
+  .tabbar .tab-sub a { flex: none; max-width: none; height: auto; margin: 0; place-items: initial; justify-content: flex-start; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    display: flex; align-items: center; min-height: 36px; padding: 0 var(--sp-3); border-radius: 10px; color: var(--text-2); text-decoration: none; font-size: var(--fs-base); font-weight: 500; }
+  .tab-sub a:hover { background: var(--surface-2); color: var(--text); }
+  .tab-sub a[aria-current="page"] { color: var(--accent); font-weight: 700; background: color-mix(in srgb, var(--accent-soft) 60%, transparent); }
 
   /* ===== المحتوى في المنتصف ===== */
   .main { max-width: var(--maxw); padding-inline: var(--gutter); padding-bottom: 40px; }
@@ -89,10 +101,10 @@
 
   /* ===== الصلاة: المواقيت بجوار الإعدادات ===== */
   .pr-tabs { max-width: 560px; margin-inline: auto; }
-  .pr-panel > div { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); align-items: start; }
-  .pr-panel > div > .pr-hero { align-self: stretch; display: grid; place-content: center; }
-  .pr-panel > div > * { margin: 0; }
-  .pr-panel > div > :first-child { grid-column: 1 / -1; }
+  .pr-panel > .pr-times { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); align-items: start; }
+  .pr-panel > .pr-times > .pr-hero { align-self: stretch; display: grid; place-content: center; }
+  .pr-panel > .pr-times > * { margin: 0; }
+  .pr-panel > .pr-times > :first-child { grid-column: 1 / -1; }
 
   /* ===== الترحيب والختمة الجماعية والحفظ ===== */
   .welcome { max-width: 760px; margin-inline: auto; }

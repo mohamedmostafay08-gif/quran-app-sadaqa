@@ -1,0 +1,127 @@
+/* ===================================================================
+   التصميم العصري — يُحمَّل بعد كل الأنماط ويوحّد شكل التطبيق:
+   خلفية محايدة، كروت بيضاء بظل ناعم، أخضر واحد مميز، أيقونات داخل مربعات ملوّنة،
+   وأزرار وشرائح بزوايا مستديرة. المصحف نفسه يبقى على ورقه الكلاسيكي.
+   =================================================================== */
+
+body { background: var(--bg); font-feature-settings: "ss01"; }
+h1, h2, h3, strong { font-weight: 700; }
+
+/* ===== الشريط العلوي: شفاف ناعم مع حافة رفيعة ===== */
+.topbar {
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px); backdrop-filter: saturate(1.4) blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-title h1 { font-size: var(--fs-lg); font-weight: 700; letter-spacing: -.01em; }
+.topbar-title p { color: var(--text-2); }
+.icon-btn { border-radius: 12px; }
+.icon-btn:hover { background: var(--surface-2); }
+body::before { background: color-mix(in srgb, var(--bg) 92%, transparent); }
+
+/* ===== الكروت ===== */
+.card, .quick, .surah-frame, .lib-card, .more-group, .occ-item, .st-tile, .dua-card, .asma-card, .quiz-opt, .sh-ep, .continue, .td-adhan, .td-friday, .dua-sunnah {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.card { border-radius: var(--radius); padding: var(--sp-4); }
+.card > h2 { font-size: var(--fs-md); font-weight: 700; margin: 0 0 var(--sp-3); color: var(--text); }
+.quick, .lib-card, .occ-item, .st-tile, .asma-card, .quiz-opt, .dua-card, .continue, .td-adhan, .td-friday { border-radius: var(--radius); }
+.quick:hover, .lib-card:hover, .surah-item:hover, .asma-card:hover, .more-row:hover { border-color: color-mix(in srgb, var(--accent) 35%, var(--border)); background: var(--surface); }
+
+/* أكمل القراءة: كارت أبيض بدل الأخضر */
+.continue { color: var(--text); }
+.continue .eyebrow { color: var(--accent); }
+.continue .muted { color: var(--text-2); opacity: 1; }
+.continue-go { background: var(--accent-soft); color: var(--accent); }
+
+/* ===== الأيقونات داخل مربع ملوّن ===== */
+.quick > svg, .lib-icon, .td-ic {
+  box-sizing: border-box; flex: none; width: 42px; height: 42px; padding: 10px;
+  border-radius: 12px; background: var(--accent-soft); color: var(--accent);
+}
+.lib-icon { padding: 0; }
+.lib-icon svg { width: 22px; height: 22px; }
+.quick { gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); min-height: 72px; }
+.quick strong { font-size: var(--fs-md); font-weight: 700; }
+.quick small { color: var(--text-2); font-size: var(--fs-sm); }
+
+/* ===== الأزرار ===== */
+.btn { border-radius: 12px; min-height: 44px; font-weight: 600; box-shadow: none; }
+.btn.ghost { background: var(--surface-2); border-color: transparent; color: var(--accent); }
+.btn.ghost:hover { background: var(--accent-soft); }
+.pb-chip { border-radius: 999px; min-height: 36px; background: var(--surface); border: 1px solid var(--border); font-weight: 600; }
+.pb-chip[aria-pressed="true"], .pb-chip.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.seg { background: var(--surface-2); border: 0; padding: 4px; }
+.seg button[aria-selected="true"], .seg button[aria-checked="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(16, 28, 22, .12); }
+
+/* ===== الحقول ===== */
+.note-input, select, .search-input, .search-bar { border-radius: 12px; }
+.search-bar { background: var(--surface); border: 1px solid var(--border); box-shadow: none; }
+
+/* ===== عناوين الأقسام ===== */
+.lib-h { font-size: var(--fs-md); font-weight: 700; color: var(--text); margin: var(--sp-5) 0 var(--sp-3); }
+.eyebrow, .lc-eyebrow { letter-spacing: 0; }
+
+/* ===== الكروت الملوّنة (الصلاة القادمة، الاستماع): تدرّج أخضر هادئ ===== */
+.td-prayer, .pr-hero, .listen-card, .sahabi-hero, .continue.hero {
+  background: linear-gradient(135deg, var(--hero-1) 0%, var(--hero-2) 100%);
+  color: var(--on-hero); border: 0; box-shadow: var(--shadow-lg);
+}
+.listen-card .lc-play { background: var(--on-hero); color: var(--hero-1); }
+.lc-eyebrow, .sahabi-hero .eyebrow, .sh-more, .td-prayer small, .pr-hero .eyebrow { color: color-mix(in srgb, var(--on-hero) 78%, transparent); }
+.td-prayer .td-ic { background: rgba(255, 255, 255, .16); color: inherit; }
+
+/* ===== السور والقوائم ===== */
+.surah-item { border-radius: var(--radius); }
+.surah-num { background: var(--accent-soft); color: var(--accent); border: 0; font-weight: 700; }
+.surah-num::before, .surah-num::after { display: none; }
+
+/* ===== «المزيد»: كروت بأيقونات في شبكة ===== */
+.more-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--sp-2); background: none; border: 0; box-shadow: none; border-radius: 0; overflow: visible; }
+.more-page .more-group { columns: auto; }
+.more-row { flex-direction: column; align-items: flex-start; gap: var(--sp-2); min-height: 112px; padding: var(--sp-3); border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border) !important; box-shadow: var(--shadow); text-align: start; }
+.more-row .lib-text { display: grid; gap: 2px; }
+.more-row .lib-text strong { font-size: var(--fs-md); }
+.more-row .lib-text small { color: var(--text-2); font-size: var(--fs-sm); line-height: 1.5; }
+.more-row > svg:last-child { display: none; }
+
+/* ===== الأذكار: كروت بأيقونات ===== */
+.adk-featured { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--sp-2); }
+.adk-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--sp-2); margin: var(--sp-3) 0 0; }
+.adk-list > li { display: contents; }
+.adk-ch { display: flex; align-items: center; gap: var(--sp-3); min-height: 64px; padding: var(--sp-3); border: 1px solid var(--border) !important; border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); color: inherit; text-decoration: none; }
+.adk-ch:hover { border-color: color-mix(in srgb, var(--accent) 35%, var(--border)) !important; }
+.adk-ch .lib-icon { width: 38px; height: 38px; }
+.adk-ch .lib-icon svg { width: 20px; height: 20px; }
+.adk-ch > span:nth-child(2) { flex: 1; display: grid; gap: 1px; min-width: 0; }
+.adk-ch strong { font-size: var(--fs-base); font-weight: 600; line-height: 1.5; }
+.adk-ch small { color: var(--text-2); font-size: var(--fs-xs); }
+.adk-search { margin: var(--sp-4) 0 0; }
+
+/* ===== الأوراق السفلية ===== */
+.sheet { border-radius: var(--radius-lg) var(--radius-lg) 0 0; border: 0; box-shadow: var(--shadow-lg); }
+
+/* ===== شريط التبويب السفلي (موبايل) ===== */
+.tabbar { background: color-mix(in srgb, var(--surface) 94%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-top: 1px solid var(--border); }
+.tabbar a { color: var(--text-3); font-weight: 600; gap: 4px; }
+.tabbar a svg { box-sizing: content-box; padding: 4px 16px; border-radius: 999px; transition: background .2s; }
+.tabbar a[aria-current="page"] { color: var(--accent); }
+.tabbar a[aria-current="page"] svg { background: var(--accent-soft); }
+.tabbar a[aria-current="page"]::before { display: none; }
+.tab-sub { display: none; }
+
+/* ===== المشغّل ===== */
+.mini-player { background: color-mix(in srgb, var(--surface) 96%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-top: 1px solid var(--border); }
+
+/* ===== المصحف: يبقى على ورقه الكلاسيكي ===== */
+.m-page { background: var(--paper); border-color: color-mix(in srgb, var(--gold) 30%, var(--border)); }
+.surah-frame { background: var(--paper); }
+
+/* ===== الأذان ===== */
+.adh-card { border: 1px solid var(--border); box-shadow: var(--shadow-lg); }
+
+@media (prefers-reduced-motion: reduce) { .tabbar a svg { transition: none; } }
+.adk-search .note-input { border: 0; background: transparent; padding-inline: 0; min-height: 48px; outline: none; }
+.aod-ref { display: inline-flex; align-items: center; min-height: 36px; }

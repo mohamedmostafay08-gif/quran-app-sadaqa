@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = 'a878a2740c';
+const VERSION = 'd6b5577e17';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -51,6 +51,7 @@ const ASSETS = [
   'src/styles/components.css',
   'src/styles/desktop.css',
   'src/styles/features.css',
+  'src/styles/modern.css',
   'src/styles/themes.css',
   'src/ui.js',
   'src/views/about.js',
@@ -89,8 +90,12 @@ const ASSETS = [
   'public/data/shaarawy.json',
   'public/data/surahs.json',
   'public/fonts/amiri-quran.woff2',
-  'public/fonts/noto-kufi-arabic.woff2',
-  'public/fonts/noto-kufi-latin.woff2',
+  'public/fonts/plex-arabic-400.woff2',
+  'public/fonts/plex-arabic-500.woff2',
+  'public/fonts/plex-arabic-600.woff2',
+  'public/fonts/plex-arabic-700.woff2',
+  'public/fonts/plex-latin-400.woff2',
+  'public/fonts/plex-latin-600.woff2',
   'public/fonts/uthmanic-hafs.woff2',
   'public/icons/badge-96.png',
   'public/icons/icon-192.png',

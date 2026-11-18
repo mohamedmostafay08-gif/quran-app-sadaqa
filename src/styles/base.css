@@ -6,16 +6,44 @@
   unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+FB50-FDFF, U+FE70-FEFC;
 }
 @font-face {
-  font-family: 'Noto Kufi Arabic';
-  src: url('../../public/fonts/noto-kufi-arabic.woff2') format('woff2');
-  font-weight: 400 700;
+  font-family: 'IBM Plex Sans Arabic';
+  src: url('../../public/fonts/plex-arabic-400.woff2') format('woff2');
+  font-weight: 400;
   font-display: swap;
   unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+FB50-FDFF, U+FE70-FEFC;
 }
 @font-face {
-  font-family: 'Noto Kufi Arabic';
-  src: url('../../public/fonts/noto-kufi-latin.woff2') format('woff2');
-  font-weight: 400 700;
+  font-family: 'IBM Plex Sans Arabic';
+  src: url('../../public/fonts/plex-arabic-500.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+FB50-FDFF, U+FE70-FEFC;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  src: url('../../public/fonts/plex-arabic-600.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+FB50-FDFF, U+FE70-FEFC;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  src: url('../../public/fonts/plex-arabic-700.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+FB50-FDFF, U+FE70-FEFC;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  src: url('../../public/fonts/plex-latin-400.woff2') format('woff2');
+  font-weight: 400 500;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+2000-206F;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  src: url('../../public/fonts/plex-latin-600.woff2') format('woff2');
+  font-weight: 600 700;
   font-display: swap;
   unicode-range: U+0000-00FF, U+2000-206F;
 }
@@ -23,16 +51,16 @@
 /* ===== المتغيرات العامة (الألوان في themes.css) ===== */
 :root {
   /* مقياس الخطوط الموحّد */
-  --fs-xs: 11px; --fs-sm: 12px; --fs-base: 13px; --fs-md: 15px; --fs-lg: 17px; --fs-xl: 22px; --fs-2xl: 28px;
+  --fs-xs: 12px; --fs-sm: 13px; --fs-base: 14px; --fs-md: 16px; --fs-lg: 18px; --fs-xl: 22px; --fs-2xl: 28px;
   /* مقياس المسافات */
   --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
-  --font-ui: 'Noto Kufi Arabic', system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
+  --font-ui: 'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
   --font-quran: 'Amiri Quran', 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
   --quran-scale: 1;
   --quran-size: calc(1.6rem * var(--quran-scale));
-  --radius: 14px;
-  --radius-sm: 10px;
-  --radius-lg: 18px;   /* الكروت الكبيرة: الاستماع، الصلاة القادمة */
+  --radius: 16px;
+  --radius-sm: 12px;
+  --radius-lg: 22px;   /* الكروت الكبيرة: الاستماع، الصلاة القادمة */
   --gutter: 16px;
   --maxw: none;          /* المحتوى يملأ عرض الشاشة؛ الهوامش من --gutter */
   --tabbar-h: 64px;

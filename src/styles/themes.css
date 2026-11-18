@@ -1,32 +1,37 @@
 /* ===================================================================
-   ألوان «رتّل» — طابع المصحف المطبوع: ورق دافئ، حبر داكن، أخضر زمردي، وذهبي للزخارف
+   ألوان «رتّل» — تصميم عصري نظيف: خلفية محايدة، كروت بيضاء، وأخضر واحد مميز؛ والذهبي لعلامات المصحف فقط
    الأسماء (--glass-*, --card-bg) باقية للتوافق مع باقي الملفات، لكن قيمها الآن ثابتة بلا شفافية
    =================================================================== */
 :root {
   color-scheme: light;
-  --bg: #f4ecda;            /* ورق المصحف */
-  --surface: #fdf8ec;       /* ورقة أفتح للكروت */
-  --surface-2: #efe5cf;
-  --border: #e2d3ad;
-  --text: #22201a;          /* حبر */
-  --text-2: #5b5547;
-  --text-3: #6b6452;
-  --accent: #0e5a4b;        /* أخضر المصحف */
-  --accent-2: #13705d;
-  --accent-soft: #dfeae2;
-  --on-accent: #fffaf0;
-  --gold: #86641f;          /* ذهبي النصوص والزخارف (تباين ٤٫٦ على الورق) */
-  --gold-soft: #efe0b8;
-  --gold-line: #c9a85c;
-  --ayah-active: #e3eedf;
-  --ayah-active-line: #13705d;
-  --danger: #a3261e;
-  --shadow: 0 1px 2px rgba(60, 45, 15, .08);
-  --scrim: rgba(25, 20, 10, .45);
+  --bg: #f4f6f5;            /* خلفية محايدة هادئة */
+  --surface: #ffffff;       /* الكروت */
+  --surface-2: #eef2f0;     /* حقول وعناصر ثانوية */
+  --border: #e1e7e3;
+  --text: #141917;
+  --text-2: #525b56;
+  --text-3: #66706a;
+  --accent: #0b6b53;        /* الأخضر: اللون المميز الوحيد */
+  --accent-2: #0e8366;
+  --accent-soft: #e1f2eb;
+  --on-accent: #ffffff;
+  --gold: #8a6a1f;          /* أرقام الآيات وعلامات المصحف فقط */
+  --gold-soft: #f4ecd6;
+  --gold-line: #dfe5e1;     /* كانت للحواف الذهبية؛ الآن حافة محايدة */
+  --ayah-active: #e3f3ec;
+  --ayah-active-line: #0e8366;
+  --danger: #b3261e;
+  --shadow: 0 1px 2px rgba(16, 28, 22, .04), 0 6px 18px rgba(16, 28, 22, .05);
+  --shadow-lg: 0 10px 30px rgba(16, 28, 22, .10);
+  --scrim: rgba(10, 16, 13, .45);
   --hl-yellow: #f7e39c;
-  --hl-green: #cfe7cf;
+  --hl-green: #cfe9da;
   --hl-blue: #cde0f2;
   --hl-pink: #f3d2dc;
+  --paper: #fffbf2;         /* ورق صفحات المصحف */
+  --hero-1: #0b6b53;        /* الكروت الملوّنة (الصلاة القادمة، الاستماع) */
+  --hero-2: #0e8366;
+  --on-hero: #ffffff;
   /* أسماء قديمة بقيم ثابتة */
   --glass-bg: var(--surface);
   --glass-bg-strong: var(--surface);
@@ -40,54 +45,64 @@
 /* ليلي: ورق داكن بنفس روح المصحف */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #12130f;
-  --surface: #1b1c17;
-  --surface-2: #24251f;
-  --border: #3a3627;
-  --text: #ece6d6;
-  --text-2: #b7ae98;
-  --text-3: #968d77;
-  --accent: #6cc3a8;
-  --accent-2: #8bd3bc;
-  --accent-soft: #1f3a31;
-  --on-accent: #0b1f19;
-  --gold: #d3ad5c;
-  --gold-soft: #3b3220;
-  --gold-line: #8a7240;
-  --ayah-active: #22362d;
-  --ayah-active-line: #6cc3a8;
-  --danger: #f08a80;
-  --shadow: 0 1px 2px rgba(0, 0, 0, .4);
+  --bg: #0d1110;
+  --surface: #161b19;
+  --surface-2: #1e2522;
+  --border: #28302c;
+  --text: #e8edea;
+  --text-2: #a9b4ae;
+  --text-3: #8e9993;
+  --accent: #4fc59d;
+  --accent-2: #74d4b2;
+  --accent-soft: #15302a;
+  --on-accent: #03140e;
+  --gold: #d2b26c;
+  --gold-soft: #2b2617;
+  --gold-line: #2c3430;
+  --ayah-active: #173229;
+  --ayah-active-line: #4fc59d;
+  --danger: #f2a199;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35);
+  --shadow-lg: 0 12px 30px rgba(0, 0, 0, .45);
   --scrim: rgba(0, 0, 0, .6);
+  --paper: #171c19;
+  --hero-1: #0f4f3f;
+  --hero-2: #146a54;
+  --on-hero: #f1f7f4;
   --hl-yellow: #4a4020;
-  --hl-green: #20452f;
+  --hl-green: #1d4532;
   --hl-blue: #1f3850;
   --hl-pink: #4d2535;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]), :root[data-theme="auto"] {
     color-scheme: dark;
-    --bg: #12130f;
-    --surface: #1b1c17;
-    --surface-2: #24251f;
-    --border: #3a3627;
-    --text: #ece6d6;
-    --text-2: #b7ae98;
-    --text-3: #968d77;
-    --accent: #6cc3a8;
-    --accent-2: #8bd3bc;
-    --accent-soft: #1f3a31;
-    --on-accent: #0b1f19;
-    --gold: #d3ad5c;
-    --gold-soft: #3b3220;
-    --gold-line: #8a7240;
-    --ayah-active: #22362d;
-    --ayah-active-line: #6cc3a8;
-    --danger: #f08a80;
-    --shadow: 0 1px 2px rgba(0, 0, 0, .4);
+    --bg: #0d1110;
+    --surface: #161b19;
+    --surface-2: #1e2522;
+    --border: #28302c;
+    --text: #e8edea;
+    --text-2: #a9b4ae;
+    --text-3: #8e9993;
+    --accent: #4fc59d;
+    --accent-2: #74d4b2;
+    --accent-soft: #15302a;
+    --on-accent: #03140e;
+    --gold: #d2b26c;
+    --gold-soft: #2b2617;
+    --gold-line: #2c3430;
+    --ayah-active: #173229;
+    --ayah-active-line: #4fc59d;
+    --danger: #f2a199;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .35);
+    --shadow-lg: 0 12px 30px rgba(0, 0, 0, .45);
     --scrim: rgba(0, 0, 0, .6);
+    --paper: #171c19;
+    --hero-1: #0f4f3f;
+    --hero-2: #146a54;
+    --on-hero: #f1f7f4;
     --hl-yellow: #4a4020;
-    --hl-green: #20452f;
+    --hl-green: #1d4532;
     --hl-blue: #1f3850;
     --hl-pink: #4d2535;
   }
@@ -96,10 +111,10 @@
 /* أبيض: لمن يفضّل خلفية بيضاء صافية */
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #faf8f3;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f2efe7;
-  --border: #e6dfcd;
+  --surface-2: #f1f4f2;
+  --border: #e3e8e5;
 }
 
 /* سيبيا: ورق أعتق */
@@ -122,4 +137,8 @@
   --ayah-active: #e0c993;
   --ayah-active-line: #6f4510;
   --scrim: rgba(40, 25, 5, .45);
+  --paper: #f3e6c6;
+  --hero-1: #6f4510;
+  --hero-2: #8a5815;
+  --on-hero: #fff8ea;
 }

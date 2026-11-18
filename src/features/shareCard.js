@@ -47,7 +47,7 @@ function wrap(ctx, text, maxW) {
 
 export async function renderCard({ text, ref, theme }) {
   await document.fonts.load('60px "Amiri Quran"', 'بسم').catch(() => {});
-  await document.fonts.load('600 30px "Noto Kufi Arabic"', 'سورة').catch(() => {});
+  await document.fonts.load('600 30px "IBM Plex Sans Arabic"', 'سورة').catch(() => {});
   const c = document.createElement('canvas');
   c.width = W; c.height = H;
   const ctx = c.getContext('2d');
@@ -79,10 +79,10 @@ export async function renderCard({ text, ref, theme }) {
   for (const l of lines) { ctx.fillText(l, W / 2, y); y += lh; }
 
   ctx.fillStyle = theme.accent;
-  ctx.font = '600 34px "Noto Kufi Arabic", sans-serif';
+  ctx.font = '600 34px "IBM Plex Sans Arabic", sans-serif';
   ctx.fillText(ref, W / 2, H - 170);
   ctx.globalAlpha = 0.7;
-  ctx.font = '400 24px "Noto Kufi Arabic", sans-serif';
+  ctx.font = '400 24px "IBM Plex Sans Arabic", sans-serif';
   ctx.fillText('۞ رتّل — القرآن الكريم', W / 2, H - 110);
   ctx.globalAlpha = 1;
   return c;

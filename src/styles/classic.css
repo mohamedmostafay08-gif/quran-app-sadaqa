@@ -14,7 +14,7 @@ body { background: var(--bg); }
 .search-bar { border-radius: var(--radius); box-shadow: none; }
 
 /* زخرفة: خط ذهبي مزدوج (كإطار المصحف) */
-.rule-double, .topbar { border-bottom: 3px double var(--gold-line); }
+.rule-double, .topbar { border-bottom: 1px solid var(--border); }
 
 /* ===== الشريط العلوي ===== */
 .topbar {
@@ -43,7 +43,7 @@ body { background: var(--bg); }
   left: 0; right: 0; bottom: 0; transform: none; width: auto;
   height: calc(var(--tabbar-h) + var(--safe-b));
   padding: 4px max(8px, env(safe-area-inset-right, 0px)) var(--safe-b) max(8px, env(safe-area-inset-left, 0px));
-  border-radius: 0; border: 0; border-top: 3px double var(--gold-line);
+  border-radius: 0; border: 0; border-top: 1px solid var(--border);
   background: var(--surface);
   -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none;
   gap: 0; align-items: stretch;
@@ -125,7 +125,7 @@ body:has(.mini-player.show) .main { padding-bottom: calc(var(--tabbar-h) + var(-
 .fp-reciter { display: flex; align-items: center; justify-content: center; gap: var(--sp-2); border: 1px solid var(--border); background: var(--surface-2); border-radius: 999px; min-height: 44px; padding: 0 var(--sp-4); font-weight: 700; margin: 0 auto; }
 
 /* الأوراق السفلية */
-.sheet { background: var(--surface); border-top: 3px double var(--gold-line); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.sheet { background: var(--surface); border-top: 1px solid var(--border); -webkit-backdrop-filter: none; backdrop-filter: none; }
 
 /* المشغّل القديم */
 .player-bar { display: none !important; }

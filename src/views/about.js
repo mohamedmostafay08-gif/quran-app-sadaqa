@@ -35,7 +35,7 @@ export function renderAbout() {
         ...src('المكتبة', link('https://hadeethenc.com', 'موسوعة الأحاديث النبوية'), '، وسير الصحابة من ', link('https://ar.wikipedia.org', 'ويكيبيديا'), ' (CC BY-SA 4.0).'),
         ...src('الأذكار', '«حصن المسلم» عبر ', link('https://www.hisnmuslim.com', 'hisnmuslim.com'), '.'),
         ...src('مواقيت الصلاة', link('https://github.com/batoulapps/adhan-js', 'Adhan'), ' (MIT).'),
-        ...src('الخطوط', 'Amiri Quran و Noto Kufi Arabic (SIL OFL).'),
+        ...src('الخطوط', 'Amiri Quran و IBM Plex Sans Arabic (SIL OFL).'),
       ),
     ),
   ));

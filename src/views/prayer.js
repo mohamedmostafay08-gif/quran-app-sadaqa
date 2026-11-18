@@ -12,12 +12,13 @@ let tab = 'times';
 
 export function renderPrayer(_p, query) {
   if (query.tab) tab = query.tab;
+  try { sessionStorage.setItem('qa:prTab', tab); } catch { /* */ }
   // فُتح من تنبيه الأذان: نعرض بطاقة الأذان ونحاول تشغيله
   if (query.adhan) { tab = 'times'; history.replaceState(null, '', '#/prayer'); setTimeout(() => playAdhan(query.adhan), 0); }
   const panel = h('div.pr-panel');
   const tabs = h('div.seg.pr-tabs', { role: 'tablist' }, [['times', 'المواقيت'], ['qibla', 'القبلة'], ['adhkar', 'الأذكار']].map(([t, label]) => h('button', {
     type: 'button', role: 'tab', 'aria-selected': String(tab === t),
-    onclick: (e) => { tab = t; history.replaceState(null, '', `#/prayer?tab=${t}`); for (const b of tabs.children) b.setAttribute('aria-selected', String(b === e.currentTarget)); draw(); },
+    onclick: (e) => { tab = t; history.replaceState(null, '', `#/prayer?tab=${t}`); try { sessionStorage.setItem('qa:prTab', t); } catch { /* */ } dispatchEvent(new Event('qa:nav')); for (const b of tabs.children) b.setAttribute('aria-selected', String(b === e.currentTarget)); draw(); },
   }, label)));
   let cleanupPanel = null;
   const draw = () => {
@@ -69,7 +70,7 @@ function timesPanel(redraw) {
     type: 'button', role: 'radio', 'aria-checked': String(cur === v), onclick: () => onPick(v),
   }, label)));
 
-  const el = h('div',
+  const el = h('div.pr-times',
     dateCard,
     h('section.card.pr-hero', nextEl),
     h('section.card', list),
@@ -199,20 +200,28 @@ let adhkarP = null;
 export const getAdhkar = () => (adhkarP ||= fetch(new URL('../../public/data/adhkar.json', import.meta.url)).then((r) => r.json()));
 const FEATURED = [27, 28, 1, 25];
 
+// أيقونة كل باب من أبواب الأذكار حسب موضوعه
+const ADK_ICONS = [[/الصباح|المساء/, 'sun'], [/النوم|الليل|الرؤيا|الفزع|الاستيقاظ/, 'moon'], [/الوضوء|الخلاء|الغسل/, 'drop'],
+  [/المسجد|الأذان|الصلاة|الركوع|السجود|التشهد|الاستفتاح|القنوت|الوتر|السجدتين|الاستخارة/, 'mosque'], [/المنزل|البيت/, 'home'],
+  [/السفر|المسافر|الركوب|الدابة|السوق/, 'pin'], [/الطعام|الأكل|الصائم|الإفطار|الشرب/, 'leaf'], [/المطر|الريح|الرعد|الهلال|السحاب/, 'drop'],
+  [/المريض|الميت|المصيبة|الكرب|الهم|الحزن|العدو|الخوف|الوسوسة|الشيطان|الدين|المحتضر|التعزية|القبور/, 'heart'],
+  [/الثوب|اللباس/, 'user'], [/الحج|العمرة|الصفا|عرفة|المشعر|الجمرات/, 'star'], [/التسبيح|الذكر|الاستغفار|التوبة/, 'repeat']];
+const adkIcon = (title) => (ADK_ICONS.find(([re]) => re.test(title)) || [0, 'note'])[1];
+
 function adhkarPanel() {
   const wrap = h('div', h('p.muted', 'جارٍ التحميل…'));
   getAdhkar().then((data) => {
     const input = h('input.note-input', { type: 'search', placeholder: 'ابحث في الأذكار والأدعية…', 'aria-label': 'ابحث في الأذكار' });
     const list = h('ul.adk-list');
     const featured = h('div.quick-row', FEATURED.map((id) => data.chapters.find((c) => c.id === id)).filter(Boolean).map((c) =>
-      h('a.quick', { href: `#/adhkar/${c.id}` }, icon('note'), h('span', h('strong', c.title), h('small', `${ar(c.items.length)} ذكر`)))));
+      h('a.quick', { href: `#/adhkar/${c.id}` }, icon(adkIcon(c.title)), h('span', h('strong', c.title), h('small', `${ar(c.items.length)} ذكر`)))));
     const draw = () => {
       const q = normalize(input.value);
-      list.replaceChildren(...data.chapters.filter((c) => !q || normalize(c.title).includes(q)).map((c) => h('li', h('a.adk-ch', { href: `#/adhkar/${c.id}` }, h('span', c.title), h('small.muted', ar(c.items.length))))));
+      list.replaceChildren(...data.chapters.filter((c) => !q || normalize(c.title).includes(q)).map((c) => h('li', h('a.adk-ch', { href: `#/adhkar/${c.id}` }, h('span.lib-icon', { 'aria-hidden': 'true' }, icon(adkIcon(c.title))), h('span', h('strong', c.title), h('small', `${ar(c.items.length)} ${c.items.length > 2 && c.items.length < 11 ? 'أذكار' : 'ذكر'}`))))));
     };
     input.addEventListener('input', draw);
     draw();
-    wrap.replaceChildren(featured, h('section.card', input, list));
+    wrap.replaceChildren(h('h2.lib-h', 'الأكثر استخدامًا'), featured, h('h2.lib-h', 'كل الأذكار والأدعية'), h('div.search-bar.adk-search', icon('search'), input), list);
   }).catch(() => wrap.replaceChildren(h('p.muted', 'تعذر تحميل الأذكار.')));
   return wrap;
 }

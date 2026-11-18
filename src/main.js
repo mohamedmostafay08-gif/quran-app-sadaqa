@@ -109,14 +109,28 @@ async function boot() {
     closeAllSheets();
     const base = '/' + (m.path.split('/')[1] || '');
     const tab = TAB_FOR[base] || 'today';
-    for (const a of document.querySelectorAll('.tabbar a')) {
+    for (const a of document.querySelectorAll('.tabbar > a')) {
       if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     }
+    markSubnav();
     document.body.dataset.route = base.slice(1) || 'home';
     if (ROUTE_EVENT[base.slice(1)]) track(ROUTE_EVENT[base.slice(1)]);
   });
 }
+
+/** القائمة الجانبية (الكمبيوتر): تمييز الصفحة الفرعية الحالية */
+function markSubnav() {
+  const hash = location.hash || '#/';
+  const [path, qs] = hash.split('?');
+  const tabQ = new URLSearchParams(qs || '').get('tab');
+  for (const a of document.querySelectorAll('.tab-sub a')) {
+    const [p, q] = a.getAttribute('href').split('?');
+    const on = p === path && (!q || new URLSearchParams(q).get('tab') === (tabQ || (path === '#/prayer' ? sessionStorage.getItem('qa:prTab') || 'times' : null)));
+    if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  }
+}
+addEventListener('qa:nav', markSubnav);
 
 // نسخة جديدة فعّلت نفسها: نعرض زر «حدّث الآن» (لا نعيد التحميل تلقائيًا حتى لا نقطع القراءة أو التلاوة)
 if ('serviceWorker' in navigator) {
