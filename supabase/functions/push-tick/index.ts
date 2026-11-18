@@ -92,6 +92,14 @@ Deno.serve(async (req) => {
         }
       }
     }
+    // أذكار الصباح (بعد الفجر بنصف ساعة) والمساء (بعد العصر بثلث ساعة)
+    if ((s.extras || []).includes('adhkar') && s.lat != null && s.lng != null) {
+      const pt = prayerTimes(s, lp) as any;
+      for (const [key, t, off, title, url] of [['adhkar_sabah', pt.fajr, 30, 'أذكار الصباح', '#/adhkar/27?p=sabah'], ['adhkar_masa', pt.asr, 20, 'أذكار المساء', '#/adhkar/27?p=masa']] as const) {
+        const d4 = now.getTime() - (t.getTime() + off * 60_000);
+        if (d4 >= 0 && d4 < WINDOW_AFTER && s.last_sent?.[key] !== lp.date) due.push({ key, tag: key, ttl: 3600, payload: { title, body: 'حصّن يومك بالذكر؛ دقائق قليلة وأجر عظيم.', url, tag: key } });
+      }
+    }
     if (s.wird_time && s.last_sent?.wird !== lp.date) {
       const [h, m] = s.wird_time.split(':').map(Number);
       const diff = lp.min - (h * 60 + m);

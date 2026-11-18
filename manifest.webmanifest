@@ -38,31 +38,49 @@
   "shortcuts": [
     {
       "name": "أكمل القراءة",
-      "url": "./#/bookmarks",
+      "short_name": "أكمل القراءة",
+      "url": "./#/continue",
       "icons": [
         {
           "src": "public/icons/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "مواقيت الصلاة",
-      "url": "./#/prayer",
-      "icons": [
-        {
-          "src": "public/icons/icon-192.png",
-          "sizes": "192x192"
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     },
     {
       "name": "الأذكار",
+      "short_name": "الأذكار",
       "url": "./#/prayer?tab=adhkar",
       "icons": [
         {
           "src": "public/icons/icon-192.png",
-          "sizes": "192x192"
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "القبلة",
+      "short_name": "القبلة",
+      "url": "./#/prayer?tab=qibla",
+      "icons": [
+        {
+          "src": "public/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "السبحة",
+      "short_name": "السبحة",
+      "url": "./#/tasbih",
+      "icons": [
+        {
+          "src": "public/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     }

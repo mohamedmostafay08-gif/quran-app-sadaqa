@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '9fdd5226d3';
+const VERSION = '7c3769afda';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -23,11 +23,13 @@ const ASSETS = [
   'src/db.js',
   'src/features/activity.js',
   'src/features/adhan.js',
+  'src/features/adhkarLog.js',
   'src/features/backup.js',
   'src/features/badges.js',
   'src/features/bookmarks.js',
   'src/features/extra.js',
   'src/features/group.js',
+  'src/features/imageCard.js',
   'src/features/immersive.js',
   'src/features/install.js',
   'src/features/khatma.js',
@@ -62,6 +64,7 @@ const ASSETS = [
   'src/views/car.js',
   'src/views/downloads.js',
   'src/views/duas.js',
+  'src/views/elder.js',
   'src/views/greetings.js',
   'src/views/group.js',
   'src/views/help.js',
@@ -74,6 +77,7 @@ const ASSETS = [
   'src/views/mushaf.js',
   'src/views/notifyCard.js',
   'src/views/prayer.js',
+  'src/views/qada.js',
   'src/views/quiz.js',
   'src/views/radio.js',
   'src/views/ramadan.js',

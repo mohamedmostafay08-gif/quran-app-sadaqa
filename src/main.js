@@ -1,7 +1,8 @@
 // نقطة البداية: تجهيز البيانات، الإعدادات، الراوتر، والـ Service Worker
 import { initData } from './data.js';
-import { loadSettings, get as getSetting } from './state.js';
-import { route, start } from './router.js';
+import { loadSettings, get as getSetting, setPrayerNight, subscribe as onSetting } from './state.js';
+import { computeTimes } from './features/prayer.js';
+import { route, start, navigate } from './router.js';
 import { loadReciters, player } from './audio/player.js';
 import { mountPlayerBar } from './audio/playerBar.js';
 import { initAutoDownload } from './offline/autoDownload.js';
@@ -16,6 +17,8 @@ import { renderQuiz } from './views/quiz.js';
 import { renderRamadan } from './views/ramadan.js';
 import { renderKids } from './views/kids.js';
 import { renderGreetings } from './views/greetings.js';
+import { renderElder } from './views/elder.js';
+import { renderQada } from './views/qada.js';
 import { checkBadges } from './features/badges.js';
 import { initActivity } from './features/activity.js';
 import { renderReader } from './views/reader.js';
@@ -41,7 +44,7 @@ import { initAdhanScheduler, playAdhan } from './features/adhan.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
-const TAB_FOR = { '/': 'today', '/quran': 'quran', '/surah': 'quran', '/page': 'quran', '/search': 'quran', '/bookmarks': 'quran', '/khatma': 'quran', '/memorize': 'quran', '/group': 'quran', '/listen': 'listen', '/radio': 'listen', '/car': 'listen', '/downloads': 'more', '/library': 'more', '/hadith': 'more', '/guide': 'more', '/sahabi': 'more', '/prayer': 'prayer', '/adhkar': 'prayer', '/more': 'more', '/settings': 'more', '/about': 'more', '/help': 'more', '/tasbih': 'today', '/calendar': 'today', '/stats': 'today', '/duas': 'today', '/asma': 'today', '/quiz': 'quran', '/ramadan': 'today', '/kids': 'quran', '/greetings': 'more' };
+const TAB_FOR = { '/': 'today', '/quran': 'quran', '/surah': 'quran', '/page': 'quran', '/search': 'quran', '/bookmarks': 'quran', '/khatma': 'quran', '/memorize': 'quran', '/group': 'quran', '/listen': 'listen', '/radio': 'listen', '/car': 'listen', '/downloads': 'more', '/library': 'more', '/hadith': 'more', '/guide': 'more', '/sahabi': 'more', '/prayer': 'prayer', '/adhkar': 'prayer', '/more': 'more', '/settings': 'more', '/about': 'more', '/help': 'more', '/tasbih': 'today', '/calendar': 'today', '/stats': 'today', '/duas': 'today', '/asma': 'today', '/quiz': 'quran', '/ramadan': 'today', '/kids': 'quran', '/greetings': 'more', '/elder': 'more', '/qada': 'prayer' };
 
 async function boot() {
   const status = document.querySelector('.boot p');
@@ -67,8 +70,12 @@ async function boot() {
   route('/asma', renderAsma);
   route('/quiz', renderQuiz);
   route('/ramadan', renderRamadan);
+  // اختصار أيقونة التطبيق: أكمل القراءة من آخر موضع
+  route('/continue', () => { const l = getSetting('lastRead'); navigate(l ? `/surah/${l.surah}/${l.ayah}` : '/quran', { replace: true }); });
   route('/kids/:surah?', renderKids);
   route('/greetings', renderGreetings);
+  route('/elder', renderElder);
+  route('/qada', renderQada);
   route('/surah/:surah/:ayah?', renderReader);
   route('/search', renderSearch);
   route('/bookmarks', renderBookmarks);
@@ -105,6 +112,7 @@ async function boot() {
   track(isStandalone() ? 'open_installed' : 'open');
   refreshPush();
   initAdhanScheduler();
+  initPrayerNight();
   initActivity();
   // ضغطة على تنبيه الأذان والتطبيق مفتوح: يصل طلب التشغيل من عامل الخدمة
   navigator.serviceWorker?.addEventListener('message', (e) => { if (e.data?.type === 'adhan') playAdhan(e.data.key); });
@@ -128,6 +136,19 @@ async function boot() {
 }
 
 let badgeTimer = 0;
+
+/** الثيم «حسب المغرب»: ليلي من المغرب حتى الفجر، ويُعاد حسابه كل دقيقة */
+function initPrayerNight() {
+  const update = () => {
+    if (getSetting('theme') !== 'prayer') return;
+    const loc = getSetting('prayerLocation');
+    if (!loc) return setPrayerNight(null);
+    try { const now = new Date(); const t = computeTimes(loc, now); setPrayerNight(now >= t.maghrib || now < t.fajr); } catch { setPrayerNight(null); }
+  };
+  update();
+  setInterval(update, 60000);
+  onSetting((k) => { if (k === 'theme' || k === 'prayerLocation') update(); });
+}
 
 /** القائمة الجانبية (الكمبيوتر): تمييز الصفحة الفرعية الحالية */
 function markSubnav() {

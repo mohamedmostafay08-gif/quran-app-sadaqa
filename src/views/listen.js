@@ -115,6 +115,7 @@ export function renderMore() {
       row('#/car', 'play', 'وضع السيارة', 'أزرار كبيرة وتحكم صوتي'),
       row('#/downloads', 'download', 'التنزيلات والمساحة')),
     h('h2.lib-h', 'التطبيق'),
+    h('div.more-group', row('#/elder', 'user', 'وضع كبار السن', 'أزرار كبيرة وخط كبير')),
     h('div.more-group',
       row('#/settings', 'settings', 'الإعدادات', 'العرض والتلاوة والتنبيهات والنسخة الاحتياطية'),
       !isStandalone() ? h('button.more-row', { type: 'button', onclick: () => install() }, h('span.lib-icon', { 'aria-hidden': 'true' }, icon('download')), h('span.lib-text', h('strong', 'تثبيت التطبيق'), h('small', 'يفتح كتطبيق ويعمل بدون إنترنت')), icon('forward')) : null,

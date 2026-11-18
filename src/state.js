@@ -35,7 +35,13 @@ export const DEFAULTS = {
   adhanInApp: true,       // تشغيل صوت الأذان عند دخول الوقت والتطبيق مفتوح
   adhanVoice: 'egypt',    // صوت الأذان: egypt | makkah | calm
   notifyKahf: true,       // يوم الجمعة: سورة الكهف وآخر ساعة
-  preAdhan: 0,            // تنبيه قبل الأذان بالدقائق: 0 | 10 | 15 | 30
+  preAdhan: 15,           // تنبيه قبل الأذان بالدقائق: 0 | 10 | 15 | 30
+  preAdhanDefaultV1: false,
+  adhkarReminder: true,   // تذكير بأذكار الصباح (بعد الفجر) والمساء (بعد العصر)
+  adhkarLog: {},          // { 'YYYY-MM-DD': { sabah, masa, nawm } }
+  autoNight: false,       // (يُستخدم مع theme = 'prayer')
+  bigUI: false,           // وضع كبار السن: تكبير خط التطبيق كله
+  qada: null,             // حاسبة القضاء { prayers: {fajr: n…}, fasting: n, start: {...} }
   notifyAfter: false,     // إشعار بالأذكار بعد كل صلاة
   prayerLog: {},          // متابعة الصلوات { 'YYYY-MM-DD': { fajr: 'jamaah'|'ontime'|'late', sunnah: [...] } }
   kidsStars: {},          // وضع الأطفال: { surah: stars }
@@ -60,6 +66,7 @@ export async function loadSettings() {
     set('prayersDefaultV2', true);
   }
   if (!state.fastingDefaultV1) { set('notifyFasting', true); set('fastingDefaultV1', true); }
+  if (!state.preAdhanDefaultV1) { if (!state.preAdhan) set('preAdhan', 15); set('preAdhanDefaultV1', true); }
   applyVisual();
   return state;
 }
@@ -70,7 +77,7 @@ export const all = () => ({ ...state });
 export async function set(key, value) {
   if (state[key] === value) return;
   state[key] = value;
-  if (key === 'theme' || key === 'fontScale') applyVisual();
+  if (key === 'theme' || key === 'fontScale' || key === 'bigUI') applyVisual();
   for (const fn of listeners) fn(key, value);
   try { await db.put('settings', { key, value }); } catch (e) { console.warn(e); }
 }
@@ -80,10 +87,16 @@ export function subscribe(fn) {
   return () => listeners.delete(fn);
 }
 
+/** «حسب المغرب»: ليلي من المغرب إلى الفجر حسب مواقيت مدينتك (تحسبه main.js وتمرره هنا) */
+let prayerNight = null;
+export function setPrayerNight(isNight) { prayerNight = isNight; applyVisual(); }
+
 function applyVisual() {
   const root = document.documentElement;
-  if (state.theme === 'auto') delete root.dataset.theme;
-  else root.dataset.theme = state.theme;
+  const th = state.theme === 'prayer' ? (prayerNight == null ? 'auto' : prayerNight ? 'dark' : 'light') : state.theme;
+  if (th === 'auto') delete root.dataset.theme;
+  else root.dataset.theme = th;
+  root.classList.toggle('big-ui', !!state.bigUI);
   root.style.setProperty('--quran-scale', state.fontScale);
-  try { localStorage.setItem('qa:boot', JSON.stringify({ theme: state.theme === 'auto' ? undefined : state.theme, fontScale: state.fontScale })); } catch (e) { /* خاص/محظور */ }
+  try { localStorage.setItem('qa:boot', JSON.stringify({ theme: th === 'auto' ? undefined : th, fontScale: state.fontScale })); } catch (e) { /* خاص/محظور */ }
 }

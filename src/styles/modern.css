@@ -202,3 +202,51 @@ body::before { background: color-mix(in srgb, var(--bg) 92%, transparent); }
 .gr-preview { max-width: 380px; }
 .gr-preview canvas { width: 100%; height: auto; border-radius: var(--radius); box-shadow: var(--shadow-lg); }
 @media (min-width: 900px) { .gr-layout { grid-template-columns: minmax(0, 420px) minmax(0, 1fr); align-items: start; } }
+.hod { display: grid; gap: var(--sp-2); }
+.hod-text { margin: 0; font-size: var(--fs-lg); line-height: 2; }
+
+/* ===== أذكاري اليوم ===== */
+.ak-card { display: grid; gap: var(--sp-3); }
+.ak-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); }
+.ak-head small { color: var(--accent); font-weight: 600; }
+.ak-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); }
+.ak-chip { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 48px; border-radius: 12px; background: var(--surface-2); color: var(--text-2); text-decoration: none; font-weight: 600; }
+.ak-chip svg { width: 18px; height: 18px; }
+.ak-chip.done { background: var(--accent-soft); color: var(--accent); }
+
+/* ===== وضع كبار السن ===== */
+html.big-ui { --fs-xs: 14px; --fs-sm: 15px; --fs-base: 17px; --fs-md: 19px; --fs-lg: 21px; --fs-xl: 26px; --fs-2xl: 32px; }
+html.big-ui .tabbar a span { font-size: 13px; }
+.el-prayer { display: grid; justify-items: center; gap: 2px; text-align: center; }
+.el-prayer strong { font-size: 30px; color: var(--accent); }
+.el-prayer small { color: var(--text-2); font-size: var(--fs-md); }
+.el-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--sp-3); margin: var(--sp-4) 0; }
+.el-btn { display: grid; justify-items: center; align-content: center; gap: var(--sp-2); min-height: 150px; padding: var(--sp-3); border-radius: 20px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow); color: var(--text); text-decoration: none; text-align: center; font: inherit; cursor: pointer; }
+.el-ic { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 18px; background: var(--accent-soft); color: var(--accent); }
+.el-ic svg { width: 34px; height: 34px; }
+.el-t { display: grid; gap: 2px; }
+.el-t strong { font-size: 22px; line-height: 1.4; }
+.el-t small { color: var(--text-2); font-size: 16px; }
+.el-toggle { padding: var(--sp-3) var(--sp-4); border-top: 0; }
+
+/* ===== قضاء الفوائت ===== */
+.qd-days { display: flex; gap: var(--sp-2); }
+.qd-days .note-input { flex: 1; }
+.qd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: var(--sp-3); }
+.qd-field { display: grid; gap: 4px; font-weight: 600; font-size: var(--fs-sm); color: var(--text-2); }
+.qd-hero { display: grid; justify-items: center; gap: var(--sp-2); text-align: center; }
+.qd-hero strong { font-size: 40px; color: var(--accent); line-height: 1.2; }
+.qd-hero .bar { width: 100%; height: 10px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.qd-hero .bar span { display: block; height: 100%; background: var(--accent); border-radius: inherit; }
+.qd-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); }
+.qd-row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); margin: 0; flex-wrap: wrap; }
+.qd-name { display: grid; }
+.qd-name small { color: var(--text-2); }
+.qd-btns { display: flex; align-items: center; gap: var(--sp-2); }
+.qd-btns .btn { display: inline-flex; align-items: center; gap: var(--sp-2); }
+@media (min-width: 600px) { .qd-list { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); } }
+button.bd { font: inherit; color: inherit; cursor: pointer; }
+.bd-share { font-size: var(--fs-xs); font-weight: 700; color: var(--accent); }
+.qd-link { padding: var(--sp-3) var(--sp-4); }
+.past-share { margin-inline-start: auto; min-height: 36px; display: inline-flex; align-items: center; gap: 6px; }
+.past-list li { display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-2); }

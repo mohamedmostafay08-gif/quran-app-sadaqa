@@ -8,6 +8,8 @@ import { navigate } from '../router.js';
 import { notifyCard } from './notifyCard.js';
 import { playAdhan } from '../features/adhan.js';
 import { statusButton, weekCard, sunnahCard } from '../features/prayerLog.js';
+import { currentPeriod, markDone } from '../features/adhkarLog.js';
+import { shareImageCard } from '../features/imageCard.js';
 
 let tab = 'times';
 
@@ -77,9 +79,16 @@ function timesPanel(redraw) {
   const el = h('div.pr-times',
     dateCard,
     h('section.card.pr-hero', nextEl),
-    h('section.card', list),
+    h('section.card', list,
+      h('button.btn.ghost.block', { type: 'button', onclick: () => {
+        const t = P.computeTimes(loc, new Date());
+        const n = P.nextPrayer(loc);
+        shareImageCard({ eyebrow: `مواقيت الصلاة — ${loc.name}`, title: hj ? hj.text : '', body: P.gregorianText(),
+          rows: P.PRAYERS.map((p) => [p.name, P.fmtTime(t[p.key], loc.tz), p.key === n.key]), theme: 'green' }, 'prayer-times.png');
+      } }, icon('share'), 'شارك المواقيت صورة')),
     sunnahCard(() => weekBox.replaceChildren(weekCard())),
     weekBox,
+    h('a.row-btn.card.qd-link', { href: '#/qada' }, h('span', h('strong', 'قضاء الفوائت'), h('small', 'سجّل ما فاتك من صلاة أو صيام وتابع قضاءه')), icon('forward')),
     notifyCard({ wird: false }),
     h('details.card.pr-settings',
       h('summary', 'إعدادات الحساب'),
@@ -233,12 +242,14 @@ function adhkarPanel() {
 }
 
 /** صفحة باب واحد من الأذكار مع عدّاد التكرار */
-export async function renderAdhkarChapter(params, _q, isStale) {
+export async function renderAdhkarChapter(params, query = {}, isStale) {
   const data = await getAdhkar();
   if (isStale()) return;
   const ch = data.chapters.find((c) => c.id === +params.id);
   if (!ch) return navigate('/prayer?tab=adhkar', { replace: true });
-  const key = `qa:adhkar:${ch.id}:${new Date().toDateString()}`;
+  // أذكار الصباح والمساء باب واحد: نعدّ كل فترة على حدة
+  const period = ch.id === 27 ? (query.p === 'sabah' || query.p === 'masa' ? query.p : currentPeriod()) : ch.id === 28 ? 'nawm' : null;
+  const key = `qa:adhkar:${ch.id}:${period ? period + ':' : ''}${new Date().toDateString()}`;
   let counts = {};
   try { counts = JSON.parse(localStorage.getItem(key) || '{}'); } catch { /* */ }
   const save = () => { try { localStorage.setItem(key, JSON.stringify(counts)); } catch { /* */ } };
@@ -257,7 +268,7 @@ export async function renderAdhkarChapter(params, _q, isStale) {
         if (counts[i] >= it.repeat) {
           const next = card.nextElementSibling;
           if (next) setTimeout(() => next.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250);
-          if (doneCount() === ch.items.length) toast('أتممت الأذكار، تقبّل الله');
+          if (doneCount() === ch.items.length) { toast('أتممت الأذكار، تقبّل الله'); if (period) markDone(period); }
         }
       } }, left),
     );
@@ -271,9 +282,10 @@ export async function renderAdhkarChapter(params, _q, isStale) {
     return card;
   });
   mount(h('div.adhkar',
-    topbar({ title: ch.title, back: '#/prayer?tab=adhkar', actions: [h('button.icon-btn', { type: 'button', 'aria-label': 'إعادة العد', onclick: () => { counts = {}; save(); dispatchEvent(new HashChangeEvent('hashchange')); } }, icon('repeat'))] }),
+    topbar({ title: period === 'sabah' ? 'أذكار الصباح' : period === 'masa' ? 'أذكار المساء' : ch.title, back: '#/prayer?tab=adhkar', actions: [h('button.icon-btn', { type: 'button', 'aria-label': 'إعادة العد', onclick: () => { counts = {}; save(); dispatchEvent(new HashChangeEvent('hashchange')); } }, icon('repeat'))] }),
     bar,
     h('ol.adk-items', cards),
+    period ? h('button.btn.ghost.block', { type: 'button', onclick: async () => { await markDone(period); toast('سُجّلت، تقبّل الله'); } }, icon('check'), 'قرأتها كلها') : null,
   ));
   updateBar();
 }

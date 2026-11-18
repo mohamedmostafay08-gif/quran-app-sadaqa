@@ -209,3 +209,26 @@ export function sahabiTile() {
   }).catch(() => {});
   return tile;
 }
+
+/** حديث اليوم (لشاشة «اليوم»): حديث صحيح قصير يتغير يوميًا من موضوعات المكتبة */
+const DAILY_TOPICS = ['akhlaq', 'salah', 'quran', 'sabr', 'dua', 'wudu', 'ilm'];
+export function hadithOfDayCard() {
+  const card = h('section.card.hod', { 'aria-label': 'حديث اليوم' }, h('span.eyebrow', 'حديث اليوم'), h('div.sk', { style: { height: '64px' } }));
+  const topic = DAILY_TOPICS[dayIndex(DAILY_TOPICS.length)];
+  load(topic).then(async (items) => {
+    // الأولوية للمتفق عليه القصير، ثم القصير
+    const short = items.filter((x) => (x.title || '').length <= 260);
+    const agreed = short.filter((x) => x.agreed);
+    const pool = agreed.length >= 5 ? agreed : short.length ? short : items;
+    const x = pool[Math.floor(dayIndex(9973) / DAILY_TOPICS.length) % pool.length];
+    const { shareImageCard } = await import('../features/imageCard.js');
+    card.replaceChildren(
+      h('span.eyebrow', 'حديث اليوم'),
+      h('p.hod-text', `«${x.title.replace(/\n+/g, ' ')}»`),
+      badges(x),
+      h('div.aod-actions',
+        h('a.btn.ghost', { href: `#/hadith/${topic}/${x.id}` }, 'الشرح'),
+        h('button.btn', { type: 'button', onclick: () => shareImageCard({ eyebrow: 'حديث اليوم', body: `«${x.title.replace(/\n+/g, ' ')}»`, footer: `${byLabel(x)} — رتّل`, theme: 'sand' }, 'hadith.png') }, icon('share'), 'شارك')));
+  }).catch(() => card.remove());
+  return card;
+}

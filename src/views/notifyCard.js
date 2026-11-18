@@ -99,7 +99,8 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
       }, dataset: { v } }, label)));
     body.push(h('div.field', h('span', 'تنبيه قبل الأذان'), preSeg), xt('notifyAfter', 'تذكير بالأذكار بعد الصلاة', 'بعد الأذان بعشر دقائق'));
     body.push(xt('notifyKahf', 'تذكير يوم الجمعة', 'سورة الكهف صباحًا، وآخر ساعة قبل المغرب'),
-      xt('notifyFasting', 'تذكير بالصيام', 'ليلة الاثنين والخميس، وقبل الأيام البيض'));
+      xt('notifyFasting', 'تذكير بالصيام', 'ليلة الاثنين والخميس، وقبل الأيام البيض'),
+      xt('adhkarReminder', 'تذكير بأذكار الصباح والمساء', 'بعد الفجر بنصف ساعة، وبعد العصر بثلث ساعة'));
     if (wird) {
       const time = h('input.note-input', { type: 'time', value: settings.get('wirdTime') || '', 'aria-label': 'موعد تذكير الورد' });
       const clear = h('button.btn.ghost', { type: 'button', hidden: !settings.get('wirdTime'), onclick: () => { time.value = ''; time.dispatchEvent(new Event('change')); } }, 'إيقاف');

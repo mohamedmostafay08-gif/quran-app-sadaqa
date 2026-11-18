@@ -67,8 +67,24 @@ export function playAdhan(key, voiceId) {
   audio.play().catch(() => setBtn()); // قد يمنع المتصفح التشغيل قبل أي لمسة من المستخدم
 }
 
-/** فحص كل ٢٠ ثانية: إن دخل وقت صلاة مختارة والتطبيق مفتوح، يُشغَّل الأذان مرة واحدة */
+/** «فتح» عنصر الصوت بأول لمسة من المستخدم: المتصفحات تمنع التشغيل التلقائي لعنصر لم يُشغَّل بلمسة،
+ *  فنشغّله صامتًا لحظة ثم نوقفه، فيُسمح بتشغيله لاحقًا عند دخول الوقت دون لمسة */
+function unlockOnFirstTap() {
+  const unlock = () => {
+    audio ||= new Audio();
+    if (!audio.src) { const v = voice(); audio.src = srcOf(v); audio.dataset.voice = v.id; }
+    const vol = audio.volume;
+    audio.muted = true;
+    audio.play().then(() => { audio.pause(); audio.currentTime = 0; audio.muted = false; audio.volume = vol; }).catch(() => { audio.muted = false; });
+    removeEventListener('pointerdown', unlock, true); removeEventListener('keydown', unlock, true);
+  };
+  addEventListener('pointerdown', unlock, true);
+  addEventListener('keydown', unlock, true);
+}
+
+/** يُشغَّل الأذان عند دخول وقت الصلاة والتطبيق مفتوح: مؤقّت دقيق للصلاة القادمة، وفحص احتياطي كل ٢٠ ثانية */
 export function initAdhanScheduler() {
+  let exact = 0;
   const tick = () => {
     if (settings.get('adhanInApp') === false) return;
     const loc = P.getLocation();
@@ -82,10 +98,16 @@ export function initAdhanScheduler() {
       const t = today[k];
       if (!t) continue;
       const diff = now - t;
-      if (diff >= 0 && diff < 120000 && !wasPlayed(k)) { playAdhan(k); break; }
+      if (diff >= 0 && diff < 180000 && !wasPlayed(k)) { playAdhan(k); break; }
     }
+    // مؤقّت للصلاة القادمة بالثانية (إن كانت خلال الساعة القادمة)
+    clearTimeout(exact);
+    const next = keys.map((k) => today[k]).filter((t) => t && t > now).sort((a, b) => a - b)[0];
+    if (next && next - now < 3600000) exact = setTimeout(tick, next - now + 500);
   };
+  unlockOnFirstTap();
   setInterval(tick, 20000);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') tick(); });
+  settings.subscribe((k) => { if (['notifyPrayers', 'prayerLocation', 'adhanInApp'].includes(k)) tick(); });
   tick();
 }

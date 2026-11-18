@@ -7,7 +7,7 @@ returns void language plpgsql security definer set search_path = public as $$
 declare
   ep text := p_sub->>'endpoint';
   pr text[] := array(select x from jsonb_array_elements_text(coalesce(p_prefs->'prayers', '[]')) x where x in ('fajr','dhuhr','asr','maghrib','isha'));
-  ex text[] := array(select x from jsonb_array_elements_text(coalesce(p_prefs->'extras', '[]')) x where x in ('kahf','fasting','pre10','pre15','pre30','after'));
+  ex text[] := array(select x from jsonb_array_elements_text(coalesce(p_prefs->'extras', '[]')) x where x in ('kahf','fasting','pre10','pre15','pre30','after','adhkar'));
   wt text := nullif(p_prefs->>'wird_time', '');
 begin
   if ep is null or ep !~ '^https://' or length(ep) > 1000 then raise exception 'bad endpoint'; end if;

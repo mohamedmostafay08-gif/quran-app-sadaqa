@@ -6,13 +6,14 @@ import { getSurahMeta, juzOf, pageOf } from '../data.js';
 import { mount, toast } from '../ui.js';
 import { listenCard } from './listen.js';
 import { homeWirdCard } from './khatma.js';
-import { sahabiTile } from './library.js';
+import { sahabiTile, hadithOfDayCard } from './library.js';
 import { pushStatus, askPermission, syncPush } from '../features/push.js';
 import { upcomingOccasions } from './calendar.js';
 import { streak } from '../features/activity.js';
 import { ayahOfDayCard } from './duas.js';
 import { ramadanCard } from './ramadan.js';
 import { doneCount } from '../features/prayerLog.js';
+import { adhkarTodayCard } from '../features/adhkarLog.js';
 
 export function renderToday() {
   const loc = P.getLocation();
@@ -56,7 +57,9 @@ export function renderToday() {
     afterPrayerCard(loc),
     ramadanCard(),
     fridayCard(),
+    adhkarTodayCard(),
     ayahOfDayCard(),
+    hadithOfDayCard(),
     quick,
   ));
   return { cleanup() { clearInterval(timer); lc.cleanup(); } };

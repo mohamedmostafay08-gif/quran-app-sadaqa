@@ -56,6 +56,8 @@ export function badgesGrid() {
   const n = Object.keys(earned).length;
   return h('section.badges',
     h('h2.lib-h', `إنجازاتي (${ar(n)} من ${ar(BADGES.length)})`),
-    h('div.bd-grid', BADGES.map(([id, emoji, name, , desc]) => h('div', { class: earned[id] ? 'bd on' : 'bd', title: desc },
-      h('span.bd-emoji', { 'aria-hidden': 'true' }, emoji), h('strong', name), h('small', earned[id] ? desc : `🔒 ${desc}`)))));
+    h('div.bd-grid', BADGES.map(([id, emoji, name, , desc]) => earned[id]
+      ? h('button.bd.on', { type: 'button', title: 'شارك الإنجاز', onclick: () => import('./imageCard.js').then((m) => m.shareImageCard({ emoji, eyebrow: 'إنجاز جديد في «رتّل»', title: name, body: desc, theme: 'night' }, `badge-${id}.png`)) },
+        h('span.bd-emoji', { 'aria-hidden': 'true' }, emoji), h('strong', name), h('small', desc), h('span.bd-share', 'شارك'))
+      : h('div.bd', { title: desc }, h('span.bd-emoji', { 'aria-hidden': 'true' }, emoji), h('strong', name), h('small', `🔒 ${desc}`)))));
 }

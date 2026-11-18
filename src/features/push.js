@@ -50,7 +50,7 @@ function prefs() {
   };
 }
 const extras = () => [settings.get('notifyKahf') && 'kahf', settings.get('notifyFasting') && 'fasting',
-  settings.get('preAdhan') ? 'pre' + settings.get('preAdhan') : null, settings.get('notifyAfter') && 'after'].filter(Boolean);
+  settings.get('preAdhan') ? 'pre' + settings.get('preAdhan') : null, settings.get('notifyAfter') && 'after', settings.get('adhkarReminder') && 'adhkar'].filter(Boolean);
 const wanted = () => (settings.get('notifyPrayers') || []).length > 0 || !!settings.get('wirdTime') || extras().length > 0;
 
 /** يطلب إذن الإشعارات فورًا (لازم يُستدعى مباشرة داخل ضغطة المستخدم — شرط في iOS) */
@@ -98,6 +98,6 @@ export async function syncPush({ ask = false } = {}) {
 // تحديث الخادم تلقائيًا عند تغيير الموقع أو طريقة الحساب
 let t = 0;
 settings.subscribe((k) => {
-  if (!['prayerLocation', 'notifyKahf', 'notifyFasting', 'preAdhan', 'notifyAfter'].includes(k) || self.Notification?.permission !== 'granted') return;
+  if (!['prayerLocation', 'notifyKahf', 'notifyFasting', 'preAdhan', 'notifyAfter', 'adhkarReminder'].includes(k) || self.Notification?.permission !== 'granted') return;
   clearTimeout(t); t = setTimeout(() => syncPush().catch(() => {}), 1500);
 });
