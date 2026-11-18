@@ -23,6 +23,11 @@ import { renderWallpaper } from './views/wallpaper.js';
 import { renderSleep } from './views/sleep.js';
 import { renderNawawi } from './views/nawawi.js';
 import { initSync } from './features/sync.js';
+import { renderFocus, endFocus, focusActive } from './features/focus.js';
+import { renderZakat } from './views/zakat.js';
+import { renderFasting } from './views/fasting.js';
+import { renderHifz } from './views/hifz.js';
+import { initAppBadge } from './features/appBadge.js';
 import { checkBadges } from './features/badges.js';
 import { initActivity } from './features/activity.js';
 import { renderReader } from './views/reader.js';
@@ -48,7 +53,7 @@ import { initAdhanScheduler, playAdhan } from './features/adhan.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
-const TAB_FOR = { '/': 'today', '/quran': 'quran', '/surah': 'quran', '/page': 'quran', '/search': 'quran', '/bookmarks': 'quran', '/khatma': 'quran', '/memorize': 'quran', '/group': 'quran', '/listen': 'listen', '/radio': 'listen', '/car': 'listen', '/downloads': 'more', '/library': 'more', '/hadith': 'more', '/guide': 'more', '/sahabi': 'more', '/prayer': 'prayer', '/adhkar': 'prayer', '/more': 'more', '/settings': 'more', '/about': 'more', '/help': 'more', '/tasbih': 'today', '/calendar': 'today', '/stats': 'today', '/duas': 'today', '/asma': 'today', '/quiz': 'quran', '/ramadan': 'today', '/kids': 'quran', '/greetings': 'more', '/elder': 'more', '/qada': 'prayer', '/wallpaper': 'more', '/sleep': 'today', '/nawawi': 'more' };
+const TAB_FOR = { '/': 'today', '/quran': 'quran', '/surah': 'quran', '/page': 'quran', '/search': 'quran', '/bookmarks': 'quran', '/khatma': 'quran', '/memorize': 'quran', '/group': 'quran', '/listen': 'listen', '/radio': 'listen', '/car': 'listen', '/downloads': 'more', '/library': 'more', '/hadith': 'more', '/guide': 'more', '/sahabi': 'more', '/prayer': 'prayer', '/adhkar': 'prayer', '/more': 'more', '/settings': 'more', '/about': 'more', '/help': 'more', '/tasbih': 'today', '/calendar': 'today', '/stats': 'today', '/duas': 'today', '/asma': 'today', '/quiz': 'quran', '/ramadan': 'today', '/kids': 'quran', '/greetings': 'more', '/elder': 'more', '/qada': 'prayer', '/wallpaper': 'more', '/sleep': 'today', '/nawawi': 'more', '/focus': 'quran', '/zakat': 'today', '/fasting': 'today', '/hifz': 'quran' };
 
 async function boot() {
   const status = document.querySelector('.boot p');
@@ -83,6 +88,10 @@ async function boot() {
   route('/wallpaper', renderWallpaper);
   route('/sleep', renderSleep);
   route('/nawawi/:n?', renderNawawi);
+  route('/focus', renderFocus);
+  route('/zakat', renderZakat);
+  route('/fasting', renderFasting);
+  route('/hifz', renderHifz);
   route('/surah/:surah/:ayah?', renderReader);
   route('/search', renderSearch);
   route('/bookmarks', renderBookmarks);
@@ -122,6 +131,7 @@ async function boot() {
   initPrayerNight();
   initActivity();
   initSync();
+  initAppBadge();
   // ضغطة على تنبيه الأذان والتطبيق مفتوح: يصل طلب التشغيل من عامل الخدمة
   navigator.serviceWorker?.addEventListener('message', (e) => { if (e.data?.type === 'adhan') playAdhan(e.data.key); });
   player.subscribe((st) => { if (st.status === 'playing') track('listen'); });
@@ -137,6 +147,7 @@ async function boot() {
       else a.removeAttribute('aria-current');
     }
     markSubnav();
+    if (focusActive() && base !== '/page') endFocus();
     clearTimeout(badgeTimer); badgeTimer = setTimeout(() => checkBadges().catch(() => {}), 1500);
     document.body.dataset.route = base.slice(1) || 'home';
     if (ROUTE_EVENT[base.slice(1)]) track(ROUTE_EVENT[base.slice(1)]);

@@ -47,6 +47,13 @@ export const DEFAULTS = {
   notifyQiyam: false,     // تذكير بقيام الليل والوتر (الثلث الأخير)
   nawawi: {},             // الأربعون النووية: { رقم: تاريخ الحفظ }
   syncCode: null,         // رمز المزامنة بين الأجهزة
+  dhikrWird: { istighfar: 100, salat: 100 }, // ورد يومي من الاستغفار والصلاة على النبي ﷺ (٠ = متوقف)
+  dhikrLog: {},           // { 'YYYY-MM-DD': { istighfar, salat } }
+  fastLog: {},            // متابعة الصيام { 'YYYY-MM-DD': 'nafl' | 'qada' | 'fard' }
+  zakat: null,            // آخر أرقام حاسبة الزكاة (على الجهاز)
+  hifzPlan: null,         // خطة الحفظ { from: {s,a}, to: {s,a}, perDay, start, done: {'YYYY-MM-DD': true} }
+  focusGoal: 5,           // وضع التركيز: عدد الصفحات
+  appBadge: true,         // رقم على أيقونة التطبيق: الصلوات الباقية اليوم
   qada: null,             // حاسبة القضاء { prayers: {fajr: n…}, fasting: n, start: {...} }
   notifyAfter: false,     // إشعار بالأذكار بعد كل صلاة
   prayerLog: {},          // متابعة الصلوات { 'YYYY-MM-DD': { fajr: 'jamaah'|'ontime'|'late', sunnah: [...] } }

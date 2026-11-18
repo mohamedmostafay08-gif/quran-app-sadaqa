@@ -29,7 +29,7 @@ export function renderSleep() {
     h('ol.sl-steps',
       h('li.card.sl-step', h('span.sl-num', '١'), h('span.sl-body', h('strong', 'أذكار النوم'), h('small', done ? 'قرأتها الليلة ✓' : 'آية الكرسي، والمعوذات، ودعاء النوم')),
         h('a.btn', { href: '#/adhkar/28' }, done ? 'مراجعة' : 'ابدأ')),
-      h('li.card.sl-step', h('span.sl-num', '٢'), h('span.sl-body', h('strong', 'سورة الملك'), h('small', '«كان النبي ﷺ لا ينام حتى يقرأ الم تنزيل وتبارك الذي بيده الملك» رواه الترمذي')),
+      h('li.card.sl-step', h('span.sl-num', '٢'), h('span.sl-body', h('strong', 'سورة الملك'), h('small', '«كان النبي ﷺ لا ينام حتى يقرأ الم تنزيل وتبارك الذي بيده الملك» رواه الترمذي وأحمد، وصححه الألباني')),
         h('button.btn', { type: 'button', onclick: () => listen(67) }, icon('play'), 'استمع')),
       h('li.card.sl-step', h('span.sl-num', '٣'), h('span.sl-body', h('strong', 'سورة السجدة'), h('small', 'الم تنزيل')),
         h('button.btn.ghost', { type: 'button', onclick: () => listen(32) }, icon('play'), 'استمع'))),

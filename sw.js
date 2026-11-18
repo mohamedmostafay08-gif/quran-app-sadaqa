@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '99d4fd6c4b';
+const VERSION = '24f1005411';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -24,10 +24,12 @@ const ASSETS = [
   'src/features/activity.js',
   'src/features/adhan.js',
   'src/features/adhkarLog.js',
+  'src/features/appBadge.js',
   'src/features/backup.js',
   'src/features/badges.js',
   'src/features/bookmarks.js',
   'src/features/extra.js',
+  'src/features/focus.js',
   'src/features/group.js',
   'src/features/imageCard.js',
   'src/features/immersive.js',
@@ -42,6 +44,7 @@ const ASSETS = [
   'src/features/srs.js',
   'src/features/stats.js',
   'src/features/sync.js',
+  'src/features/weekly.js',
   'src/lib/arabic.js',
   'src/lib/dom.js',
   'src/main.js',
@@ -66,9 +69,11 @@ const ASSETS = [
   'src/views/downloads.js',
   'src/views/duas.js',
   'src/views/elder.js',
+  'src/views/fasting.js',
   'src/views/greetings.js',
   'src/views/group.js',
   'src/views/help.js',
+  'src/views/hifz.js',
   'src/views/home.js',
   'src/views/khatma.js',
   'src/views/kids.js',
@@ -92,7 +97,9 @@ const ASSETS = [
   'src/views/today.js',
   'src/views/wallpaper.js',
   'src/views/welcome.js',
+  'src/views/zakat.js',
   'public/data/adhkar.json',
+  'public/data/asbab.json',
   'public/data/daily-ayahs.json',
   'public/data/extra-notice.json',
   'public/data/quran-meta.json',

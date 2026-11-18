@@ -38,10 +38,12 @@
   <link rel="modulepreload" href="src/features/activity.js">
   <link rel="modulepreload" href="src/features/adhan.js">
   <link rel="modulepreload" href="src/features/adhkarLog.js">
+  <link rel="modulepreload" href="src/features/appBadge.js">
   <link rel="modulepreload" href="src/features/backup.js">
   <link rel="modulepreload" href="src/features/badges.js">
   <link rel="modulepreload" href="src/features/bookmarks.js">
   <link rel="modulepreload" href="src/features/extra.js">
+  <link rel="modulepreload" href="src/features/focus.js">
   <link rel="modulepreload" href="src/features/group.js">
   <link rel="modulepreload" href="src/features/imageCard.js">
   <link rel="modulepreload" href="src/features/immersive.js">
@@ -56,6 +58,7 @@
   <link rel="modulepreload" href="src/features/srs.js">
   <link rel="modulepreload" href="src/features/stats.js">
   <link rel="modulepreload" href="src/features/sync.js">
+  <link rel="modulepreload" href="src/features/weekly.js">
   <link rel="modulepreload" href="src/lib/arabic.js">
   <link rel="modulepreload" href="src/lib/dom.js">
   <link rel="modulepreload" href="src/main.js">
@@ -73,9 +76,11 @@
   <link rel="modulepreload" href="src/views/downloads.js">
   <link rel="modulepreload" href="src/views/duas.js">
   <link rel="modulepreload" href="src/views/elder.js">
+  <link rel="modulepreload" href="src/views/fasting.js">
   <link rel="modulepreload" href="src/views/greetings.js">
   <link rel="modulepreload" href="src/views/group.js">
   <link rel="modulepreload" href="src/views/help.js">
+  <link rel="modulepreload" href="src/views/hifz.js">
   <link rel="modulepreload" href="src/views/home.js">
   <link rel="modulepreload" href="src/views/khatma.js">
   <link rel="modulepreload" href="src/views/kids.js">
@@ -99,6 +104,7 @@
   <link rel="modulepreload" href="src/views/today.js">
   <link rel="modulepreload" href="src/views/wallpaper.js">
   <link rel="modulepreload" href="src/views/welcome.js">
+  <link rel="modulepreload" href="src/views/zakat.js">
   <!-- modulepreload:end -->
   <link rel="stylesheet" href="src/styles/base.css">
   <link rel="stylesheet" href="src/styles/themes.css">
@@ -128,9 +134,9 @@
     <div id="player-slot"></div>
     <nav class="tabbar" aria-label="التنقل الرئيسي">
       <a href="#/" data-tab="today"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg><span>اليوم</span></a>
-      <div class="tab-sub" data-for="today"><a href="#/duas">الأدعية</a><a href="#/asma">أسماء الله الحسنى</a><a href="#/tasbih">السبحة</a><a href="#/calendar">التقويم الهجري</a><a href="#/sleep">روتين النوم</a><a href="#/ramadan">رمضان</a><a href="#/stats">إحصائياتي</a></div>
+      <div class="tab-sub" data-for="today"><a href="#/duas">الأدعية</a><a href="#/asma">أسماء الله الحسنى</a><a href="#/tasbih">السبحة</a><a href="#/calendar">التقويم الهجري</a><a href="#/sleep">روتين النوم</a><a href="#/fasting">متابعة الصيام</a><a href="#/zakat">حاسبة الزكاة</a><a href="#/ramadan">رمضان</a><a href="#/stats">إحصائياتي</a></div>
       <a href="#/quran" data-tab="quran"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg><span>المصحف</span></a>
-      <div class="tab-sub" data-for="quran"><a href="#/quran">الفهرس</a><a href="#/search">البحث</a><a href="#/bookmarks">العلامات</a><a href="#/khatma">الختمة والورد</a><a href="#/memorize">الحفظ والمراجعة</a><a href="#/quiz">اختبار الحفظ</a><a href="#/group">الختمة الجماعية</a><a href="#/kids">وضع الأطفال</a></div>
+      <div class="tab-sub" data-for="quran"><a href="#/quran">الفهرس</a><a href="#/search">البحث</a><a href="#/bookmarks">العلامات</a><a href="#/khatma">الختمة والورد</a><a href="#/memorize">الحفظ والمراجعة</a><a href="#/hifz">خطة الحفظ</a><a href="#/focus">وضع التركيز</a><a href="#/quiz">اختبار الحفظ</a><a href="#/group">الختمة الجماعية</a><a href="#/kids">وضع الأطفال</a></div>
       <a href="#/listen" data-tab="listen"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="7" rx="1.8"/><rect x="16.5" y="14" width="4.5" height="7" rx="1.8"/></svg><span>الاستماع</span></a>
       <div class="tab-sub" data-for="listen"><a href="#/listen">السور</a><a href="#/radio">الإذاعات</a><a href="#/car">وضع السيارة</a><a href="#/downloads">التنزيلات</a></div>
       <a href="#/prayer" data-tab="prayer"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 21V11a8 8 0 0 1 16 0v10M2 21h20M9 21v-4a3 3 0 0 1 6 0v4M12 3V1"/></svg><span>الصلاة</span></a>

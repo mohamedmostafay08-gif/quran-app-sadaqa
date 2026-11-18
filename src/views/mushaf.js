@@ -7,6 +7,7 @@ import * as notes from '../features/notes.js';
 import { player } from '../audio/player.js';
 import { mount, topbar, toast, sheet, posText } from '../ui.js';
 import { recordPage } from '../features/activity.js';
+import { focusPages } from '../features/focus.js';
 import { navigate } from '../router.js';
 import { ayahSheet, tajweedLegend } from './reader.js';
 
@@ -116,6 +117,7 @@ export async function renderMushaf(params, _q, isStale) {
   };
   const pages = nums.map((p, i) => buildPage(p, pagesLines[i]));
   nums.forEach(recordPage);
+  focusPages(nums);
   const wrap = h('div', { class: `m-wrap${spread ? ' m-spread' : ''}` }, pages);
 
   // ---- التفاعل: ضغطة = خيارات الآية، ضغطتان = تشغيل ----

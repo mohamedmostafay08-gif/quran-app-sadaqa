@@ -203,6 +203,23 @@ function togglePlaySurah(n) {
   player.playFrom(n, from);
 }
 
+// أسباب النزول (الصحيح والحسن فقط) — تُحمَّل عند أول فتح لخيارات آية
+let asbabP = null;
+const loadAsbab = () => (asbabP ||= fetch(new URL('../../public/data/asbab.json', import.meta.url).href).then((r) => (r.ok ? r.json() : null)).catch(() => { asbabP = null; return null; }));
+export async function asbabFor(n, a) { const d = await loadAsbab(); return (d?.index[`${n}:${a}`] || []).map((i) => d.items[i]); }
+function asbabSlot(n, a, close) {
+  const slot = h('div.asbab-slot');
+  asbabFor(n, a).then((list) => { if (list.length) slot.replaceWith(actionRow('info', 'سبب النزول', () => { close(); asbabSheet(n, a, list); })); else slot.remove(); }).catch(() => slot.remove());
+  return slot;
+}
+function asbabSheet(n, a, list) {
+  sheet({ title: `سبب نزول ${getSurahMeta(n).nameAr} – ${ar(a)}`, content: () => h('div.asbab-sheet',
+    list.map((x, i) => h('article.asbab-item',
+      list.length > 1 ? h('h3', `الرواية ${ar(i + 1)}`) : null,
+      ...x.t.split(/\n+/).filter((p) => p.trim()).map((p) => h('p', { lang: 'ar' }, p)),
+      h('span.hd-badge.hd-grade', x.by)))) });
+}
+
 export async function ayahSheet(n, a, el) {
   const meta = getSurahMeta(n);
   const text = (await getSurahText(n))[a - 1];
@@ -220,6 +237,7 @@ export async function ayahSheet(n, a, el) {
         actionRow('repeat', 'تكرار هذه الآية', () => { close(); player.playFrom(n, a, { only: true }); }),
         actionRow('compare', 'مقارنة القراء', () => { close(); compareSheet(n, a); }),
         actionRow('book', 'التفسير (الميسر والسعدي)', () => { close(); tafsirSheet(n, a); }),
+        asbabSlot(n, a, close),
         actionRow('info', 'معاني الكلمات وغريبها', () => { close(); wordsListSheet(n, a); }),
         actionRow(isMarked ? 'bookmarkFill' : 'bookmark', isMarked ? 'إزالة العلامة' : 'إضافة علامة', async () => {
           const on = await bookmarks.toggle(n, a);

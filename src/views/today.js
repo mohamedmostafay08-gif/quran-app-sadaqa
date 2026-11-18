@@ -14,6 +14,10 @@ import { ayahOfDayCard } from './duas.js';
 import { ramadanCard } from './ramadan.js';
 import { doneCount } from '../features/prayerLog.js';
 import { adhkarTodayCard } from '../features/adhkarLog.js';
+import { wirdCard } from './tasbih.js';
+import { fastingTodayCard } from './fasting.js';
+import { hifzTodayCard } from './hifz.js';
+import { weeklyCard } from '../features/weekly.js';
 
 export function renderToday() {
   const loc = P.getLocation();
@@ -43,6 +47,8 @@ export function renderToday() {
   quick.append(
     h('a.quick', { href: '#/calendar' }, icon('star'), h('span', h('strong', 'التقويم الهجري'),
       h('small', !occ ? 'المناسبات والأيام البيض' : occ.days === 0 ? `اليوم: ${occ.name}` : `${occ.name} بعد ${daysWord(occ.days)}`))),
+    h('a.quick', { href: '#/fasting' }, icon('moon'), h('span', h('strong', 'متابعة الصيام'), h('small', 'سجّل الأيام التي صمتها'))),
+    h('a.quick', { href: '#/zakat' }, icon('leaf'), h('span', h('strong', 'حاسبة الزكاة'), h('small', 'المال والذهب والفضة'))),
     h('a.quick', { href: '#/stats' }, icon('timer'), h('span', h('strong', 'إحصائياتي'),
       h('small', st ? `${daysWord(st)} متتالية` : 'القراءة والاستماع هذا الأسبوع'))));
 
@@ -57,7 +63,11 @@ export function renderToday() {
     afterPrayerCard(loc),
     ramadanCard(),
     fridayCard(),
+    fastingTodayCard(),
     adhkarTodayCard(),
+    hifzTodayCard(),
+    wirdCard(),
+    weeklyCard(),
     ayahOfDayCard(),
     hadithOfDayCard(),
     quick,

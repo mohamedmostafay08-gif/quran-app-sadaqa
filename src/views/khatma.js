@@ -33,6 +33,12 @@ export async function renderKhatma(_p, _q, isStale) {
       h('button.btn.ghost.past-share', { type: 'button', onclick: () => import('../features/imageCard.js').then((m) => m.shareImageCard({ emoji: '🏆', eyebrow: 'الحمد لله', title: k.type === 'listen' ? 'أتممت ختمة القرآن الكريم استماعًا' : 'أتممت ختمة القرآن الكريم', body: `في ${ar(Math.max(1, Math.round((k.finishedAt - k.startDate) / 86400000)))} يومًا — «اللهم تقبّل منا»`, theme: 'night' }, 'khatma.png')) }, icon('share'), 'شارك'),
     ))));
   }
+  body.append(h('details.card.khatm-dua',
+    h('summary', h('strong', 'عند ختم القرآن')),
+    h('p', '«كان أنس بن مالك رضي الله عنه إذا ختم القرآن جمع أهله وولده فدعا لهم».'),
+    h('span.hd-badge.hd-grade', 'رواه الدارمي وابن أبي داود، وصححه النووي'),
+    h('p.muted', 'لم يثبت عن النبي ﷺ دعاء مخصوص للختم، فادعُ بما شئت من خيري الدنيا والآخرة.'),
+    h('a.btn.ghost', { href: '#/duas' }, 'أدعية من القرآن والسنة')));
   body.append(h('a.quick', { href: '#/group' }, icon('user'), h('span', h('strong', 'ختمة جماعية أو مُهداة'), h('small', 'شارك رابطًا، وكل واحد يختار جزءًا'))));
   mount(h('div.khatma', topbar({ title: 'الختمة والورد', back: '#/quran' }), body));
 

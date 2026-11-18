@@ -3,6 +3,7 @@ import { h, ar } from '../lib/dom.js';
 import { mount, topbar } from '../ui.js';
 import { lastDays, streak } from '../features/activity.js';
 import { badgesGrid } from '../features/badges.js';
+import { weeklySection } from '../features/weekly.js';
 
 const DAY = new Intl.DateTimeFormat('ar-EG', { weekday: 'short' });
 const streakLabel = (n) => (n === 0 ? 'ابدأ اليوم بصفحة واحدة' : n === 1 ? 'يوم مع القرآن' : n === 2 ? 'يومان متتاليان مع القرآن' : n <= 10 ? 'أيام متتالية مع القرآن' : 'يومًا متتاليًا مع القرآن');
@@ -21,6 +22,7 @@ export function renderStats() {
     h('section.card.st-streak',
       s ? h('strong', ar(s)) : h('span.st-ic', '۞'),
       h('span', streakLabel(s))),
+    weeklySection(),
     h('h2.lib-h', 'آخر ٧ أيام'),
     h('div.st-tiles',
       tile(pagesW, 'صفحة قرأتها'),
