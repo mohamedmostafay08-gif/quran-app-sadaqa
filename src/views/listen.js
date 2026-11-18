@@ -83,6 +83,8 @@ export function renderListen() {
     h('h2.lib-h', 'إذاعات مباشرة'),
     featured,
     h('a.row-btn.ls-more', { href: '#/radio' }, h('span', h('strong', 'كل الإذاعات'), h('small', 'القاهرة والسعودية وإذاعة لكل قارئ')), icon('forward')),
+    h('a.card.ls-lessons-entry', { href: '#/lessons' }, h('span.ls-kind.audio', { 'aria-hidden': 'true' }, icon('users')),
+      h('span.ls-t', h('strong', 'دروس المشايخ'), h('small', 'الشعراوي وابن عثيمين وابن باز وعمر عبد الكافي وغيرهم')), icon('forward')),
     h('h2.lib-h', 'استمع إلى سورة'),
     h('div.hd-tools', input),
     list,

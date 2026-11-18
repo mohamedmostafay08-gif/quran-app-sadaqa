@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = 'ad38e2f621';
+const VERSION = '02595a8e1d';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -79,6 +79,7 @@ const ASSETS = [
   'src/views/home.js',
   'src/views/khatma.js',
   'src/views/kids.js',
+  'src/views/lessons.js',
   'src/views/library.js',
   'src/views/listen.js',
   'src/views/memorize.js',
@@ -106,6 +107,7 @@ const ASSETS = [
   'public/data/asbab.json',
   'public/data/daily-ayahs.json',
   'public/data/extra-notice.json',
+  'public/data/lessons.json',
   'public/data/quran-meta.json',
   'public/data/quran-simple.json',
   'public/data/quran-uthmani.json',

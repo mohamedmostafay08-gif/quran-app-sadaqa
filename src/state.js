@@ -53,6 +53,8 @@ export const DEFAULTS = {
   zakat: null,            // آخر أرقام حاسبة الزكاة (على الجهاز)
   hifzPlan: null,         // خطة الحفظ { from: {s,a}, to: {s,a}, perDay, start, done: {'YYYY-MM-DD': true} }
   focusGoal: 5,           // وضع التركيز: عدد الصفحات
+  lessonProgress: {},     // دروس المشايخ: { 'سلسلة:رقم': [ثانية، مدة، وقت] }
+  lastLesson: null,       // آخر درس { series, i, at }
   appBadge: true,         // رقم على أيقونة التطبيق: الصلوات الباقية اليوم
   qada: null,             // حاسبة القضاء { prayers: {fajr: n…}, fasting: n, start: {...} }
   notifyAfter: false,     // إشعار بالأذكار بعد كل صلاة

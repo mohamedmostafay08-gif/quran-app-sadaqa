@@ -497,3 +497,38 @@ body.focus-mode .main { padding-top: 0; }
 .mark-juz.is-juz span { background: color-mix(in srgb, var(--mk-juz) 14%, transparent); font-weight: 700; }
 .ayah.is-sajda .ayah-num { color: var(--mk-sajda); }
 .sajda-mark { display: inline-block; margin-inline: .3em; padding: 0 .5em; border-radius: 999px; font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: .5em; font-weight: 700; vertical-align: middle; color: var(--mk-sajda); background: color-mix(in srgb, var(--mk-sajda) 14%, transparent); line-height: 1.8; }
+
+/* دروس المشايخ */
+.ls-topics { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px 0 6px; margin-top: var(--sp-2); }
+.ls-topics::-webkit-scrollbar { display: none; }
+.ls-topics .pb-chip { flex: none; text-decoration: none; }
+.ls-sheikhs { display: flex; gap: 14px; overflow-x: auto; scrollbar-width: none; padding: var(--sp-2) 2px var(--sp-3); }
+.ls-sheikhs::-webkit-scrollbar { display: none; }
+.ls-sh { flex: none; display: grid; justify-items: center; gap: 6px; width: 76px; text-align: center; color: var(--text-2); text-decoration: none; font-size: 12px; line-height: 1.4; }
+.ls-av { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; font-weight: 700; color: var(--on-hero); background: linear-gradient(135deg, var(--hero-1), var(--hero-2)); border: 2px solid transparent; }
+.ls-sh.on .ls-av { border-color: var(--gold); box-shadow: 0 0 0 3px var(--accent-soft); }
+.ls-sh.on { color: var(--accent); font-weight: 700; }
+.ls-list { display: grid; gap: var(--sp-2); }
+@media (min-width: 900px) { .ls-list { grid-template-columns: 1fr 1fr; } }
+.ls-card, .ls-continue, .ls-lessons-entry { display: flex; align-items: center; gap: var(--sp-3); padding: 12px 14px; margin: 0; color: inherit; text-decoration: none; text-align: start; font: inherit; width: 100%; cursor: pointer; }
+.ls-lessons-entry { margin: var(--sp-3) 0; }
+.ls-continue { margin-bottom: var(--sp-2); border: 1px solid var(--accent); }
+.ls-card > svg:last-child, .ls-lessons-entry > svg:last-child { flex: none; width: 16px; height: 16px; color: var(--text-3); }
+.ls-kind { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.ls-kind.video { background: color-mix(in srgb, #c4302b 14%, transparent); color: #c4302b; }
+.ls-kind svg { width: 22px; height: 22px; }
+.ls-t { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.ls-t strong { line-height: 1.5; }
+.ls-t small { color: var(--text-2); line-height: 1.5; }
+.ls-bar { display: block; height: 4px; border-radius: 999px; background: var(--surface-2); overflow: hidden; margin-top: 2px; }
+.ls-bar span { display: block; height: 100%; background: var(--accent); }
+.ls-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); flex-wrap: wrap; }
+.ls-eps { list-style: none; margin: var(--sp-3) 0; padding: 0; display: grid; gap: 6px; }
+.ls-ep { display: flex; align-items: center; gap: var(--sp-3); width: 100%; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; text-align: start; cursor: pointer; min-height: 52px; }
+.ls-ep.on { border-color: var(--accent); background: var(--accent-soft); }
+.ls-ep.done .ls-n { background: var(--accent); color: var(--on-accent); }
+.ls-ep > svg { flex: none; width: 18px; height: 18px; color: var(--accent); }
+.ls-n { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); font-weight: 700; font-size: 14px; }
+.ls-video { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; background: #000; margin: var(--sp-2) 0; }
+.ls-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.ls-topics, .ls-sheikhs { -webkit-mask-image: linear-gradient(to left, #000 88%, transparent); mask-image: linear-gradient(to left, #000 88%, transparent); }
