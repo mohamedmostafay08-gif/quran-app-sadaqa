@@ -34,6 +34,9 @@ export const DEFAULTS = {
   wirdTime: null,         // تذكير الورد اليومي HH:MM
   adhanInApp: true,       // تشغيل صوت الأذان عند دخول الوقت والتطبيق مفتوح
   adhanVoice: 'egypt',    // صوت الأذان: egypt | makkah | calm
+  notifyKahf: true,       // يوم الجمعة: سورة الكهف وآخر ساعة
+  notifyFasting: false,   // تذكير بصيام الاثنين والخميس والأيام البيض
+  tasbih: null,           // آخر ذكر في السبحة { id, count }
   stats: true,            // إحصائيات مجهولة مجمّعة (عدد يومي فقط)
 };
 

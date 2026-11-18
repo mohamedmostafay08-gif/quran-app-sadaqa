@@ -1,10 +1,11 @@
 // شاشة القراءة
 import { h, icon, ar, throttle } from '../lib/dom.js';
-import { getSurahMeta, getSurahText, boundariesAt, juzOf, pageOf, quarterLabel } from '../data.js';
+import { getSurahMeta, getSurahText, boundariesAt, pageOf, quarterLabel, positionOf } from '../data.js';
 import * as settings from '../state.js';
 import * as bookmarks from '../features/bookmarks.js';
 import * as notes from '../features/notes.js';
-import { mount, topbar, sheet, actionRow, toast } from '../ui.js';
+import { mount, topbar, sheet, actionRow, toast, posText } from '../ui.js';
+import { recordPage } from '../features/activity.js';
 import { player, getReciters } from '../audio/player.js';
 import { getTajweed, getWords, getTafsir, getTranslation, getTranslations, isWordToken, TAJWEED_RULES, TAFSIRS } from '../features/extra.js';
 import { navigate } from '../router.js';
@@ -35,7 +36,8 @@ export async function renderReader(params, _q, isStale) {
   const layout = trans ? 'list' : settings.get('layout');
   const showMarks = settings.get('showPageMarks');
   let currentTop = target || 1;
-  const sub = h('p.reader-sub', `الجزء ${ar(juzOf(n, 1))}، صفحة ${ar(pageOf(n, 1))}`);
+  const sub = h('p.reader-sub', posText(positionOf(n, target || 1)));
+  const pill = h('div.pos-pill', { 'aria-hidden': 'true' }, posText(positionOf(n, target || 1)));
 
   const playBtn = h('button.icon-btn.play-main', { type: 'button', 'aria-label': 'تشغيل السورة', onclick: () => togglePlaySurah(n) }, icon('play'));
   const head = topbar({
@@ -57,6 +59,9 @@ export async function renderReader(params, _q, isStale) {
       if (b.juz || b.quarter) {
         frag.append(h('div.mark-juz', b.juz ? `الجزء ${ar(b.juz)}` : quarterLabel(b.quarter).replace(/\d+/g, ar)));
       }
+    } else if (a > 1 && boundariesAt(n, a).quarter) {
+      // علامة الربع داخل النص كالمصحف المطبوع
+      frag.append(h('span.rub-mark', { title: quarterLabel(boundariesAt(n, a).quarter).replace(/\d+/g, ar) }, '۞'), ' ');
     }
     const note = noted.get(a);
     const parts = ayahNodes(text, tajweed?.ayahs[`${n}:${a}`], tajweed?.rules);
@@ -106,6 +111,7 @@ export async function renderReader(params, _q, isStale) {
 
   const el = h('article.reader',
     head,
+    pill,
     h('section.surah-head',
       h('div.surah-frame',
         h('h2', `سورة ${meta.nameAr}`),
@@ -141,7 +147,8 @@ export async function renderReader(params, _q, isStale) {
     if (!visible.size) return;
     const top = Math.min(...visible);
     currentTop = top;
-    sub.textContent = `الجزء ${ar(juzOf(n, top))}، صفحة ${ar(pageOf(n, top))}`;
+    sub.textContent = pill.textContent = posText(positionOf(n, top));
+    recordPage(pageOf(n, top));
     save(top);
   }, { rootMargin: '-15% 0px -55% 0px' });
   container.querySelectorAll('.ayah').forEach((x) => io.observe(x));
@@ -391,22 +398,61 @@ async function wordSheet(n, a, w, el) {
   });
 }
 
+// ---- تفسير الشعراوي (حلقات صوتية من أرشيف الإنترنت، مقسّمة بالآيات) ----
+let shaarawyP = null;
+const getShaarawy = () => (shaarawyP ||= fetch(new URL('../../public/data/shaarawy.json', import.meta.url)).then((r) => r.json()).catch((e) => { shaarawyP = null; throw e; }));
+function shaarawyProgram(idx, n, i) {
+  const list = idx.surahs[n];
+  const [file, from, to, min] = list[i];
+  const meta = getSurahMeta(n);
+  return {
+    id: 'sh-' + file, ondemand: true,
+    name: `تفسير الشعراوي — سورة ${meta.nameAr}`,
+    sub: from === to ? `الآية ${ar(from)}` : `الآيات ${ar(from)}–${ar(to)}`,
+    info: `خواطر الشيخ محمد متولي الشعراوي، الحلقة ${ar(i + 1)} من ${ar(list.length)} في السورة (${ar(min)} دقيقة)`,
+    href: `#/surah/${n}/${from}`,
+    url: `https://archive.org/download/${idx.item}/${file}.mp3`,
+    next: () => (i + 1 < list.length ? shaarawyProgram(idx, n, i + 1) : idx.surahs[n + 1] ? shaarawyProgram(idx, n + 1, 0) : null),
+  };
+}
+async function shaarawyPanel(n, a) {
+  let idx;
+  try { idx = await getShaarawy(); } catch { return [h('p.muted', 'تفسير الشعراوي يحتاج اتصالًا بالإنترنت.')]; }
+  const list = idx.surahs[n];
+  if (!list) return [h('p.muted', 'لم يُسجَّل للشيخ الشعراوي تفسير لهذه السورة.')];
+  let hits = list.map((e, i) => i).filter((i) => list[i][1] <= a && a <= list[i][2]);
+  if (!hits.length) { const before = list.map((e, i) => i).filter((i) => list[i][1] <= a); hits = [before.length ? before[before.length - 1] : 0]; }
+  return [
+    h('p.muted', 'تفسير صوتي بصوت الشيخ محمد متولي الشعراوي:'),
+    h('div.sh-eps', hits.map((i) => {
+      const [, from, to, min] = list[i];
+      return h('button.row-btn.sh-ep', { type: 'button', onclick: () => { player.playRadio(shaarawyProgram(idx, n, i)); toast('بدأ تشغيل تفسير الشعراوي'); } },
+        h('span', h('strong', from === to ? `الآية ${ar(from)}` : `الآيات ${ar(from)}–${ar(to)}`), h('small', `${ar(min)} دقيقة`)), icon('play'));
+    })),
+    h('p.small-note', 'المصدر: أرشيف الإنترنت (archive.org).'),
+  ];
+}
+
 async function tafsirSheet(n, a) {
   const meta = getSurahMeta(n);
   track('tafsir');
-  let which = settings.get('tafsir') in TAFSIRS ? settings.get('tafsir') : 'muyassar';
+  const all = { ...TAFSIRS, shaarawy: { name: 'الشعراوي' } };
+  let which = settings.get('tafsir') in all ? settings.get('tafsir') : 'muyassar';
   const body = h('div.tafsir-body', { 'aria-live': 'polite' });
   const draw = async () => {
     body.replaceChildren(h('div.spinner', { 'aria-label': 'جارٍ التحميل' }));
+    if (which === 'shaarawy') { const nodes = await shaarawyPanel(n, a); if (which === 'shaarawy') body.replaceChildren(...nodes); return; }
     let t;
-    try { t = await getTafsir(n, a, which); } catch { body.replaceChildren(h('p.muted', 'التفسير غير متاح بدون إنترنت قبل تحميله.')); return; }
+    const my = which;
+    try { t = await getTafsir(n, a, which); } catch { if (my === which) body.replaceChildren(h('p.muted', 'التفسير غير متاح بدون إنترنت قبل تحميله.')); return; }
+    if (my !== which) return; // غيّر المستخدم التبويب أثناء التحميل
     body.replaceChildren(...[
       t.groupFrom ? h('p.muted', `تفسير الآيات من ${ar(t.groupFrom)} مجتمعة:`) : null,
       h('p.tafsir-text', t.text || 'لا يوجد تفسير لهذه الآية.'),
       h('p.small-note', 'المصدر: ' + TAFSIRS[which].source),
     ].filter(Boolean));
   };
-  const tabs = h('div.seg', { role: 'tablist', 'aria-label': 'التفسير' }, Object.entries(TAFSIRS).map(([k, v]) => h('button', {
+  const tabs = h('div.seg', { role: 'tablist', 'aria-label': 'التفسير' }, Object.entries(all).map(([k, v]) => h('button', {
     type: 'button', role: 'tab', 'aria-selected': String(k === which),
     onclick: (e) => { which = k; settings.set('tafsir', k); for (const b of tabs.children) b.setAttribute('aria-selected', String(b === e.currentTarget)); draw(); },
   }, v.name)));

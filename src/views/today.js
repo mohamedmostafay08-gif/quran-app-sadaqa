@@ -8,6 +8,8 @@ import { listenCard } from './listen.js';
 import { homeWirdCard } from './khatma.js';
 import { sahabiTile } from './library.js';
 import { pushStatus, askPermission, syncPush } from '../features/push.js';
+import { upcomingOccasions } from './calendar.js';
+import { streak } from '../features/activity.js';
 
 export function renderToday() {
   const loc = P.getLocation();
@@ -31,7 +33,14 @@ export function renderToday() {
   const last = settings.get('lastRead');
   const quick = h('div.quick-row');
   homeWirdCard().then((w) => quick.prepend(w)).catch(() => {});
-  quick.append(adhkarTile(loc), sahabiTile());
+  quick.append(adhkarTile(loc), h('a.quick', { href: '#/tasbih' }, icon('repeat'), h('span', h('strong', 'السبحة'), h('small', 'عدّاد التسبيح'))), sahabiTile());
+  const occ = upcomingOccasions(new Date(), 1)[0];
+  const st = streak();
+  quick.append(
+    h('a.quick', { href: '#/calendar' }, icon('star'), h('span', h('strong', 'التقويم الهجري'),
+      h('small', !occ ? 'المناسبات والأيام البيض' : occ.days === 0 ? `اليوم: ${occ.name}` : `${occ.name} بعد ${daysWord(occ.days)}`))),
+    h('a.quick', { href: '#/stats' }, icon('timer'), h('span', h('strong', 'إحصائياتي'),
+      h('small', st ? `${daysWord(st)} متتالية` : 'القراءة والاستماع هذا الأسبوع'))));
 
   mount(h('div.home.today',
     h('header.home-head',
@@ -41,6 +50,7 @@ export function renderToday() {
     adhanCard(loc),
     lc,
     last ? continueCard(last) : null,
+    fridayCard(),
     quick,
   ));
   return { cleanup() { clearInterval(timer); lc.cleanup(); } };
@@ -59,6 +69,17 @@ function adhanCard(loc) {
       catch { toast('تعذر التفعيل، حاول مرة أخرى'); }
     } }, 'تفعيل'));
   return card;
+}
+
+const daysWord = (n) => (n === 1 ? 'يوم' : n === 2 ? 'يومين' : n <= 10 ? `${ar(n)} أيام` : `${ar(n)} يومًا`);
+
+/** يوم الجمعة: سورة الكهف */
+function fridayCard() {
+  if (new Date().getDay() !== 5) return null;
+  return h('a.td-friday', { href: '#/surah/18' },
+    h('span.td-ic', icon('book')),
+    h('span.td-pt', h('strong', 'سورة الكهف'), h('small', 'يوم الجمعة: اقرأ سورة الكهف، وأكثر من الصلاة على النبي ﷺ')),
+    icon('forward'));
 }
 
 /** أذكار الوقت: الصباح بعد الفجر، المساء بعد العصر، النوم بعد العشاء */

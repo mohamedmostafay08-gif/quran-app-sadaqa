@@ -32,6 +32,7 @@
   --quran-size: calc(1.6rem * var(--quran-scale));
   --radius: 14px;
   --radius-sm: 10px;
+  --radius-lg: 18px;   /* الكروت الكبيرة: الاستماع، الصلاة القادمة */
   --gutter: 16px;
   --maxw: 760px;
   --tabbar-h: 64px;

@@ -1,5 +1,5 @@
 // مكونات واجهة مشتركة: تركيب الشاشة، الورقة السفلية، التنبيه
-import { h, icon } from './lib/dom.js';
+import { h, icon, ar } from './lib/dom.js';
 
 const main = () => document.getElementById('main');
 
@@ -16,6 +16,9 @@ export function mount(el, { scroll = 'top' } = {}) {
 }
 
 /** رأس الشاشة */
+/** «الجزء ١٥ · الحزب ٢٩ · الربع ٢ · ص ٢٩٤» */
+export const posText = (p) => `الجزء ${ar(p.juz)} · الحزب ${ar(p.hizb)} · الربع ${ar(p.rub)} · ص ${ar(p.page)}`;
+
 export function topbar({ title, sub, back, actions = [] }) {
   return h('header.topbar',
     back ? h('a.icon-btn', { href: back, 'aria-label': 'رجوع' }, icon('back')) : null,

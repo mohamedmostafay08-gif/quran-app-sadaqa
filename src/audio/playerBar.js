@@ -108,11 +108,12 @@ export function mountPlayerBar() {
   function renderRadio(st) {
     const sl = sleepState();
     const live = st.status === 'playing';
-    art.replaceChildren(icon('radio'));
+    const od = !!st.radio.ondemand;
+    art.replaceChildren(icon(od ? 'note' : 'radio'));
     t1.textContent = st.radio.name;
-    t2.textContent = st.error ? st.error : (st.status === 'loading' ? 'جارٍ الاتصال…' : live ? 'بث مباشر' : 'متوقف') + (sl ? `، نوم ${sl}` : '');
+    t2.textContent = st.error ? st.error : (st.status === 'loading' ? 'جارٍ التحميل…' : od ? (st.radio.sub || '') : live ? 'بث مباشر' : 'متوقف') + (sl ? `، نوم ${sl}` : '');
     t2.classList.toggle('err', !!st.error);
-    mpProgress.style.transform = 'scaleX(0)';
+    if (!od) mpProgress.style.transform = 'scaleX(0)';
     const playIcon = () => (st.status === 'loading' ? h('span.spinner', { 'aria-hidden': 'true' }) : icon(live ? 'pause' : 'play'));
     mpPlay.replaceChildren(playIcon());
     mpPlay.setAttribute('aria-label', live ? 'إيقاف مؤقت' : 'تشغيل');
@@ -122,6 +123,13 @@ export function mountPlayerBar() {
     fpTitle.textContent = st.radio.name;
     fpSub.textContent = st.error || st.radio.sub || 'إذاعة';
     sleepBtn.classList.toggle('on', !!sl);
+    if (od) {
+      if (shownAyah === 'od:' + st.radio.id) return;
+      shownAyah = 'od:' + st.radio.id;
+      fpAyah.replaceChildren(h('div.fp-radio', icon('note'), h('p', st.radio.info || ''),
+        st.radio.href ? h('a.btn.ghost', { href: st.radio.href, onclick: () => closeFull() }, 'افتح الآيات في المصحف') : null));
+      return;
+    }
     shownAyah = 'radio:' + st.radio.id + ':' + live;
     fpAyah.replaceChildren(h('div.fp-radio', h('span', { class: `live-badge${live ? ' on' : ''}` }, h('i'), live ? 'بث مباشر' : 'متوقف'), icon('radio'),
       h('a.btn.ghost', { href: '#/radio', onclick: () => closeFull() }, 'كل الإذاعات')));
@@ -151,8 +159,8 @@ export function mountPlayerBar() {
     const st = player.state();
     const visible = !!st.surah || !!st.radio;
     mini.classList.toggle('show', visible);
-    full.classList.toggle('radio', !!st.radio);
-    for (const x of surahOnly) x.hidden = !!st.radio;
+    full.classList.toggle('radio', !!st.radio && !st.radio.ondemand);
+    for (const x of surahOnly) x.hidden = !!st.radio && !(st.radio.ondemand && x === seek.parentElement);
     if (!visible) { closeFull(); return; }
     if (st.radio) return renderRadio(st);
     const m = getSurahMeta(st.surah);

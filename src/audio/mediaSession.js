@@ -23,7 +23,7 @@ export function updateMediaSession(st) {
   const ms = navigator.mediaSession;
   if (st.radio) {
     if (typeof MediaMetadata !== 'undefined' && ms.metadata?.title !== st.radio.name) {
-      ms.metadata = new MediaMetadata({ title: st.radio.name, artist: 'بث مباشر', album: 'رتّل — الإذاعة', artwork: [{ src: ICON, sizes: '512x512', type: 'image/png' }] });
+      ms.metadata = new MediaMetadata({ title: st.radio.name, artist: st.radio.ondemand ? (st.radio.sub || '') : 'بث مباشر', album: st.radio.ondemand ? 'رتّل' : 'رتّل — الإذاعة', artwork: [{ src: ICON, sizes: '512x512', type: 'image/png' }] });
     }
     ms.playbackState = st.status === 'playing' ? 'playing' : 'paused';
     return;

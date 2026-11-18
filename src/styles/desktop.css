@@ -18,7 +18,7 @@
     content: 'رتّل'; display: block; text-align: center; margin: 0 0 var(--sp-4);
     font-family: var(--font-quran); font-size: var(--fs-2xl); line-height: 1.6; color: var(--accent);
   }
-  .tabbar a { flex: none; max-width: none; height: 72px; margin: 0; gap: var(--sp-2); border-radius: 14px; font-size: var(--fs-sm); }
+  .tabbar a { flex: none; max-width: none; height: 72px; margin: 0; gap: var(--sp-2); border-radius: var(--radius); font-size: var(--fs-sm); }
   .tabbar a:hover { background: var(--surface-2); color: var(--text); }
   .tabbar a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
   .tabbar a[aria-current="page"]::before { display: none; }
@@ -34,7 +34,7 @@
     bottom: 18px; left: auto; right: auto;
     inset-inline-start: calc(var(--rail) + max(var(--gutter), (100vw - var(--rail) - var(--maxw)) / 2 + var(--gutter)));
     width: min(calc(var(--maxw) - var(--gutter) * 2), calc(100vw - var(--rail) - var(--gutter) * 2));
-    border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 10px 30px rgba(40, 30, 10, .14); padding: 0 var(--sp-3);
+    border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: 0 10px 30px rgba(40, 30, 10, .14); padding: 0 var(--sp-3);
   }
   .mini-player > * { max-width: none; }
   .mp-progress { inset: 0 16px auto 16px; }
@@ -57,7 +57,7 @@
   .home .quick-row > * { margin: 0; }
   .surah-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3); }
   .surah-list > li { margin: 0; }
-  .surah-list .surah-item { height: 100%; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+  .surah-list .surah-item { height: 100%; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 
   /* ===== القراءة: سطر مريح للعين في المنتصف ===== */
   .reader .ayahs, .reader .surah-head, .reader .surah-nav { max-width: 920px; margin-inline: auto; }
@@ -102,6 +102,7 @@
   .wl-reciters { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-2); }
   .khatma, .memorize, .groups { max-width: 920px; margin-inline: auto; }
   .hd-page, .guide, .sahabi-page { max-width: 920px; margin-inline: auto; }
+  .calendar-page, .stats-page, .tasbih-page, .help-page { max-width: 760px; margin-inline: auto; }
   .lib-grid { grid-template-columns: repeat(3, 1fr); }
 }
 

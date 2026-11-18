@@ -58,8 +58,6 @@ export async function renderLibrary() {
     h('div.lib-grid', fiqh.sections.map((s) => h('a.lib-card', { href: `#/guide/${s.id}` },
       h('span.lib-icon', { 'aria-hidden': 'true' }, icon(SECTIONS_ICON[s.id] || 'book')),
       h('span.lib-text', h('strong', s.title), h('small', (s.id === 'wudu' || s.id === 'salah' ? countWord(s.steps.length, 'خطوات', 'خطوة') : countWord(s.steps.length, 'نقاط', 'نقطة')) + ' بالدليل'))))),
-    h('p.small-note.lib-src', 'الأحاديث ونصوصها وشروحها وتخريجها من ', h('a', { href: 'https://hadeethenc.com', target: '_blank', rel: 'noopener' }, 'موسوعة الأحاديث النبوية (HadeethEnc)'),
-      '، ولا نعرض إلا ما حُكم عليه بالصحة. وسير الصحابة من ويكيبيديا العربية.'),
   ));
 }
 
@@ -192,7 +190,7 @@ export async function renderSahabi(params) {
     topbar({ title: k === today ? 'صحابي اليوم' : 'سيرة صحابي', back: '#/library', actions: [h('a.icon-btn', { href: '#/sahabi/list', 'aria-label': 'كل الصحابة' }, icon('users'))] }),
     h('header.sh-head', h('span.eyebrow', k === today ? 'صحابي اليوم' : 'من سِيَر الصحابة'), h('h1', s.name), h('p.muted', 'رضي الله عنه وأرضاه')),
     h('section.card.sh-bio', ...s.bio.split(/\n\n+/).map((p) => h('p', p)),
-      h('p.small-note', 'المصدر: ', h('a', { href: s.url, target: '_blank', rel: 'noopener' }, 'ويكيبيديا العربية'), ' (CC BY-SA)، بعد مقابلتها بكتب التراجم (سير أعلام النبلاء، والإصابة، وتهذيب الكمال، وأسد الغابة) وتصحيح ما خالفها وحذف ما لا يثبت.')),
+      h('p.small-note', 'المصدر: ', h('a', { href: s.url, target: '_blank', rel: 'noopener' }, 'ويكيبيديا العربية'), ' (CC BY-SA)، مراجَعة على كتب التراجم.')),
     related.length ? h('section.sh-related', h('h2.lib-h', 'أحاديث صحيحة ورد فيها ذكره'),
       h('ol.hd-list', related.map(([topic, x]) => h('li', h('a.hd-item', { href: `#/hadith/${topic}/${x.id}` }, h('p.hd-title', x.title), badges(x)))))) : null,
     h('nav.surah-nav', { 'aria-label': 'صحابة آخرون' },

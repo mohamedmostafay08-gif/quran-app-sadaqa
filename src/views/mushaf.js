@@ -1,11 +1,12 @@
 // وضع الصفحات: مصحف المدينة (604 صفحة × 15 سطرًا) بنص مجمع الملك فهد وخطه
 import { h, icon, ar } from '../lib/dom.js';
-import { getSurahMeta, juzOf, pageOf } from '../data.js';
+import { getSurahMeta, juzOf, pageOf, positionOf } from '../data.js';
 import * as settings from '../state.js';
 import * as bookmarks from '../features/bookmarks.js';
 import * as notes from '../features/notes.js';
 import { player } from '../audio/player.js';
-import { mount, topbar, toast, sheet } from '../ui.js';
+import { mount, topbar, toast, sheet, posText } from '../ui.js';
+import { recordPage } from '../features/activity.js';
 import { navigate } from '../router.js';
 import { ayahSheet, tajweedLegend } from './reader.js';
 
@@ -75,15 +76,17 @@ export async function renderMushaf(params, _q, isStale) {
   if (isStale()) return;
   const isMarked = (s, a) => marks[surahIds.indexOf(s)]?.has(a);
   const noteOf = (s, a) => noteMaps[surahIds.indexOf(s)]?.get(a);
+  // علامة الربع «۞» في نص المصحف: نلوّنها بالذهبي كالمصحف المطبوع
+  const rubify = (str) => (str.startsWith('۞') ? [h('span.rub-mark', '۞'), str.slice(1)] : str);
   const wordNode = (text, s, a, wi) => {
     const note = noteOf(s, a);
     const cls = 'm-w' + (note?.color ? ` hl-${note.color}` : '');
     const ranges = tj?.ayahs[`${s}:${a}`]?.filter((x) => x[0] === wi);
-    if (!ranges?.length) return h('span', { class: cls, dataset: { s, a } }, text);
+    if (!ranges?.length) return h('span', { class: cls, dataset: { s, a } }, rubify(text));
     const parts = [];
     let cur = 0;
     for (const [, st, en, rule] of ranges) {
-      if (st > cur) parts.push(text.slice(cur, st));
+      if (st > cur) parts.push(cur === 0 ? rubify(text.slice(0, st)) : text.slice(cur, st));
       parts.push(h('span', { class: `tj tj-${tj.rules[rule]}` }, text.slice(st, en)));
       cur = en;
     }
@@ -112,6 +115,7 @@ export async function renderMushaf(params, _q, isStale) {
     return page;
   };
   const pages = nums.map((p, i) => buildPage(p, pagesLines[i]));
+  nums.forEach(recordPage);
   const wrap = h('div', { class: `m-wrap${spread ? ' m-spread' : ''}` }, pages);
 
   // ---- التفاعل: ضغطة = خيارات الآية، ضغطتان = تشغيل ----
@@ -151,7 +155,7 @@ export async function renderMushaf(params, _q, isStale) {
   mount(h('article.mushaf',
     topbar({
       title: surahIds.map((s) => getSurahMeta(s).nameAr).join('، '),
-      sub: `الجزء ${ar(juz)}${spread ? `، الصفحتان ${ar(nums[0])}–${ar(last)}` : ''}`,
+      sub: spread ? `الجزء ${ar(juz)}، الصفحتان ${ar(nums[0])}–${ar(last)}` : posText(positionOf(firstAyah[1], firstAyah[2])),
       back: '#/quran',
       actions: [
         h('button.icon-btn', { type: 'button', 'aria-label': 'العرض المتصل', title: 'العرض المتصل', onclick: () => { settings.set('readMode', 'scroll'); navigate(`/surah/${firstAyah[1]}/${firstAyah[2]}`); } }, icon('scroll')),

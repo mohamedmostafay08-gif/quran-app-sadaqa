@@ -80,7 +80,7 @@ function timesPanel(redraw) {
         h('label.field', h('span', 'طريقة الحساب'), methodSel),
         h('div.field', h('span', 'وقت العصر'), seg([['shafi', 'الجمهور (شافعي)'], ['hanafi', 'حنفي']], loc.madhab || 'shafi', (v) => { settings.set('prayerLocation', { ...loc, madhab: v }); redraw(); })),
         h('div.field', h('span', 'تعديل التاريخ الهجري'), seg([[-1, '−١ يوم'], [0, 'بدون'], [1, '+١ يوم']], settings.get('hijriAdjust') || 0, (v) => { settings.set('hijriAdjust', v); redraw(); })),
-        h('p.small-note', `الإحداثيات: ${ar(loc.lat.toFixed(3))}، ${ar(loc.lng.toFixed(3))}. المواقيت تقريبية وقد تختلف دقيقة أو دقيقتين عن تقويم مسجدك.`),
+        h('p.small-note', 'قد تختلف المواقيت دقيقة أو دقيقتين عن تقويم مسجدك.'),
       ),
     ),
   );
@@ -158,8 +158,8 @@ function qiblaPanel() {
       h('p.muted', `${loc.name}، المسافة إلى الكعبة ≈ ${ar(Math.round(dist).toLocaleString('en'))} كم`),
       status,
       h('button.btn', { type: 'button', onclick: start }, icon('compass'), 'تشغيل البوصلة'),
+      h('p.small-note', 'أبعِد الهاتف عن المعادن والمغناطيس لدقة أفضل.'),
     ),
-    h('p.small-note', 'دقة البوصلة تتأثر بالمعادن والمغناطيس القريب. للتأكد، قارن بالشمس أو بمحراب مسجد قريب.'),
   );
   return { el, cleanup: () => { if (started) { removeEventListener('deviceorientationabsolute', onOrient); removeEventListener('deviceorientation', onOrient); } } };
 }
@@ -212,7 +212,7 @@ function adhkarPanel() {
     };
     input.addEventListener('input', draw);
     draw();
-    wrap.replaceChildren(featured, h('section.card', input, list), h('p.small-note', `المصدر: ${data.source}`));
+    wrap.replaceChildren(featured, h('section.card', input, list));
   }).catch(() => wrap.replaceChildren(h('p.muted', 'تعذر تحميل الأذكار.')));
   return wrap;
 }
@@ -259,7 +259,6 @@ export async function renderAdhkarChapter(params, _q, isStale) {
     topbar({ title: ch.title, back: '#/prayer?tab=adhkar', actions: [h('button.icon-btn', { type: 'button', 'aria-label': 'إعادة العد', onclick: () => { counts = {}; save(); dispatchEvent(new HashChangeEvent('hashchange')); } }, icon('repeat'))] }),
     bar,
     h('ol.adk-items', cards),
-    h('p.small-note', `المصدر: ${data.source}`),
   ));
   updateBar();
 }

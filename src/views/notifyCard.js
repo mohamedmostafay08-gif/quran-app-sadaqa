@@ -26,7 +26,7 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
     try {
       if ((await perm) === 'denied') { rollback(); note.textContent = STATUS_MSG.denied; return; }
       const ok = await syncPush({ ask: true });
-      if (!ok) { rollback(); note.textContent = Notification?.permission === 'denied' ? STATUS_MSG.denied : 'لم يتم السماح بالإشعارات.'; return; }
+      if (!ok) { rollback(); note.textContent = self.Notification?.permission === 'denied' ? STATUS_MSG.denied : 'لم يتم السماح بالإشعارات.'; return; }
       note.textContent = '';
       testBtn.hidden = !((settings.get('notifyPrayers') || []).length || settings.get('wirdTime'));
       toast('تم حفظ التنبيهات');
@@ -76,6 +76,19 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
       h('button.btn.ghost.block', { type: 'button', onclick: () => playAdhan('test') }, 'استمع إلى الأذان'));
   }
   if (pushOk) {
+    // تذكيرات الجمعة والصيام
+    const xt = (key, label, hint) => {
+      const inp = h('input', { type: 'checkbox', role: 'switch', checked: !!settings.get(key) });
+      inp.addEventListener('change', async () => {
+        const perm = askPermission();
+        const before = settings.get(key);
+        await settings.set(key, inp.checked);
+        save(async () => { await settings.set(key, before); inp.checked = !!before; }, perm);
+      });
+      return h('label.toggle', h('span', h('strong', label), h('small', hint)), inp);
+    };
+    body.push(xt('notifyKahf', 'تذكير يوم الجمعة', 'سورة الكهف صباحًا، وآخر ساعة قبل المغرب'),
+      xt('notifyFasting', 'تذكير بالصيام', 'ليلة الاثنين والخميس، وقبل الأيام البيض'));
     if (wird) {
       const time = h('input.note-input', { type: 'time', value: settings.get('wirdTime') || '', 'aria-label': 'موعد تذكير الورد' });
       const clear = h('button.btn.ghost', { type: 'button', hidden: !settings.get('wirdTime'), onclick: () => { time.value = ''; time.dispatchEvent(new Event('change')); } }, 'إيقاف');

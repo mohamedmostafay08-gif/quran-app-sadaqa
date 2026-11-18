@@ -8,10 +8,10 @@ body { background: var(--bg); }
 
 /* ===== الكروت والأسطح ===== */
 .card, .quick, .search-bar, .surah-frame { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
-.card { border-radius: 14px; }
-.quick { border-radius: 14px; }
+.card { border-radius: var(--radius); }
+.quick { border-radius: var(--radius); }
 .quick:hover, .surah-item:hover, .result:hover { background: var(--surface-2); }
-.search-bar { border-radius: 14px; box-shadow: none; }
+.search-bar { border-radius: var(--radius); box-shadow: none; }
 
 /* زخرفة: خط ذهبي مزدوج (كإطار المصحف) */
 .rule-double, .topbar { border-bottom: 3px double var(--gold-line); }
@@ -30,7 +30,7 @@ body { background: var(--bg); }
 .hero-frame {
   display: grid; justify-items: center; gap: 2px;
   margin: 0 auto; padding: var(--sp-4) var(--sp-5) var(--sp-4); max-width: 420px;
-  border: 1px solid var(--gold-line); border-radius: 18px;
+  border: 1px solid var(--gold-line); border-radius: var(--radius-lg);
   box-shadow: inset 0 0 0 4px var(--surface), inset 0 0 0 5px var(--gold-soft);
   background: var(--surface);
 }
@@ -49,7 +49,7 @@ body { background: var(--bg); }
   gap: 0; align-items: stretch;
   transition: transform .3s var(--ease);
 }
-.tabbar a { position: relative; border-radius: 12px; margin: var(--sp-1) 2px; max-width: 120px; color: var(--text-3); }
+.tabbar a { position: relative; border-radius: var(--radius-sm); margin: var(--sp-1) 2px; max-width: 120px; color: var(--text-3); }
 .tabbar a[aria-current="page"] { color: var(--accent); background: transparent; }
 .tabbar a[aria-current="page"]::before {
   content: ''; position: absolute; top: -7px; left: 50%; width: 28px; height: 3px; margin-left: -14px;
@@ -74,7 +74,7 @@ body:has(.mini-player.show) .main { padding-bottom: calc(var(--tabbar-h) + var(-
 .mini-player > * { max-width: 760px; }
 .mini-player.show { transform: none; opacity: 1; visibility: visible; transition: transform .3s var(--ease), opacity .2s; }
 .mp-open { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--sp-3); border: 0; background: none; padding: 0 var(--sp-1); text-align: start; height: 100%; }
-.mp-art { flex: none; width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-family: var(--font-quran); font-size: var(--fs-xl); line-height: 1; border: 1px solid var(--gold-line); }
+.mp-art { flex: none; width: 42px; height: 42px; border-radius: var(--radius-sm); display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-family: var(--font-quran); font-size: var(--fs-xl); line-height: 1; border: 1px solid var(--gold-line); }
 .mp-text { min-width: 0; display: grid; }
 .mp-text strong { font-size: var(--fs-md); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mp-text small { font-size: var(--fs-sm); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -107,7 +107,7 @@ body:has(.mini-player.show) .main { padding-bottom: calc(var(--tabbar-h) + var(-
 .fp-ayah {
   flex: 1; min-height: 0; overflow: auto; display: grid; place-items: center;
   font-family: var(--font-quran); font-size: calc(1.55rem * var(--quran-scale)); line-height: 2.2; text-align: center;
-  padding: var(--sp-3) var(--sp-4); border-radius: 16px; background: var(--bg);
+  padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-lg); background: var(--bg);
   border: 1px solid var(--gold-line); box-shadow: inset 0 0 0 4px var(--bg), inset 0 0 0 5px var(--gold-soft);
 }
 .fp-ayah p { margin: 0; }
@@ -145,12 +145,12 @@ body.car-mode .mini-player { display: none; }
   position: fixed; z-index: 45; left: 50%; bottom: calc(var(--tabbar-h) + var(--safe-b) + 12px);
   width: min(calc(100% - 24px), 520px); transform: translate(-50%, 30px); opacity: 0;
   display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-2);
-  background: var(--surface); border: 1px solid var(--gold-line); border-radius: 16px;
+  background: var(--surface); border: 1px solid var(--gold-line); border-radius: var(--radius-lg);
   box-shadow: 0 10px 30px rgba(40, 30, 10, .18); transition: transform .3s var(--ease), opacity .3s;
 }
 body:has(.mini-player.show) .install-banner { bottom: calc(var(--tabbar-h) + var(--mini-h) + var(--safe-b) + 12px); }
 .install-banner.show { transform: translate(-50%, 0); opacity: 1; }
-.install-banner img { border-radius: 10px; flex: none; }
+.install-banner img { border-radius: var(--radius-sm); flex: none; }
 .ib-text { flex: 1; min-width: 0; display: grid; }
 .ib-text strong { font-size: var(--fs-md); }
 .ib-text small { font-size: var(--fs-sm); color: var(--text-2); }

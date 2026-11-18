@@ -109,7 +109,7 @@ const st = {
   range: null,         // { from:{surah,ayah}, to:{surah,ayah}, loop, times } نطاق (ورد / حفظ)
   completed: null,     // آخر نطاق اكتمل تشغيله (لتسجيل الورد)
   loops: 0,
-  radio: null,         // { id, name, sub, url } أثناء الاستماع لإذاعة مباشرة
+  radio: null,         // { id, name, sub, url, ondemand?, next? } إذاعة مباشرة أو حلقة مسجّلة
 };
 const listeners = new Set();
 const emit = () => { for (const fn of listeners) fn(st); updateMediaSession(st); };
@@ -261,11 +261,14 @@ audio.addEventListener('pause', () => { cancelAnimationFrame(rafId); if (st.stat
 audio.addEventListener('waiting', () => { if (st.status !== 'idle') { st.status = 'loading'; emit(); } });
 audio.addEventListener('error', () => {
   if (!audio.getAttribute('src')) return;
+  if (st.radio?.ondemand) { fail(navigator.onLine ? 'تعذر تشغيل الحلقة' : 'الحلقة تحتاج اتصالًا بالإنترنت'); return; }
   if (st.radio) { radioRetry(); return; }
   loadedKey = null;
   fail(navigator.onLine ? 'تعذر تحميل ملف الصوت' : null);
 });
 audio.addEventListener('ended', () => {
+  // حلقة مسجّلة (مثل تفسير الشعراوي): ننتقل للحلقة التالية إن وُجدت
+  if (st.radio?.ondemand) { const nx = st.radio.next?.(); if (nx) player.playRadio(nx); else { st.status = 'paused'; emit(); } return; }
   if (st.radio) { radioRetry(); return; }
   if (!st.surah || switching) return;
   const last = getSurahMeta(st.surah).ayahCount;
@@ -379,6 +382,7 @@ export const player = {
   },
   pause() { audio.pause(); },
   resume() {
+    if (st.radio?.ondemand && audio.getAttribute('src')) { audio.play().catch(() => fail()); return; }
     if (st.radio) { radioTries = 0; startRadio(); return; }
     if (!st.surah) return;
     if (!audio.getAttribute('src')) { st.reciter = st.reciter || settings.get('reciter'); st.repeatLeft = settings.get('repeat'); load(st.surah, st.ayah || 0); return; }

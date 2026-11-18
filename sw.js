@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '50ff244ba4';
+const VERSION = 'd1f167d098';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -21,6 +21,7 @@ const ASSETS = [
   'src/audio/sleepTimer.js',
   'src/data.js',
   'src/db.js',
+  'src/features/activity.js',
   'src/features/adhan.js',
   'src/features/backup.js',
   'src/features/bookmarks.js',
@@ -54,6 +55,7 @@ const ASSETS = [
   'src/ui.js',
   'src/views/about.js',
   'src/views/bookmarks.js',
+  'src/views/calendar.js',
   'src/views/car.js',
   'src/views/downloads.js',
   'src/views/group.js',
@@ -70,6 +72,8 @@ const ASSETS = [
   'src/views/reader.js',
   'src/views/search.js',
   'src/views/settings.js',
+  'src/views/stats.js',
+  'src/views/tasbih.js',
   'src/views/today.js',
   'src/views/welcome.js',
   'public/data/adhkar.json',
@@ -79,6 +83,7 @@ const ASSETS = [
   'public/data/quran-uthmani.json',
   'public/data/radios.json',
   'public/data/reciters.json',
+  'public/data/shaarawy.json',
   'public/data/surahs.json',
   'public/fonts/amiri-quran.woff2',
   'public/fonts/noto-kufi-arabic.woff2',

@@ -22,7 +22,7 @@ export function listenCard() {
     const playing = st.status === 'playing' || st.status === 'loading';
     let title, sub, action;
     if (st.radio) {
-      title = st.radio.name; sub = playing ? 'بث مباشر الآن' : 'متوقف';
+      title = st.radio.name; sub = st.radio.ondemand ? (st.radio.sub || '') : playing ? 'بث مباشر الآن' : 'متوقف';
       action = () => player.toggle();
     } else if (st.surah) {
       const m = getSurahMeta(st.surah);
@@ -40,7 +40,7 @@ export function listenCard() {
     card.replaceChildren(
       h('div.lc-top',
         h('span.lc-eyebrow', 'الاستماع'),
-        h('button.lc-reciter', { type: 'button', onclick: () => reciterSheet(), 'aria-label': 'تغيير القارئ' }, icon('user'), h('span', st.radio ? 'إذاعة' : (getReciter(st.reciter || rec?.id)?.nameAr || rec?.nameAr || '')))),
+        h('button.lc-reciter', { type: 'button', onclick: () => reciterSheet(), 'aria-label': 'تغيير القارئ' }, icon('user'), h('span', st.radio ? (st.radio.ondemand ? 'تفسير' : 'إذاعة') : (getReciter(st.reciter || rec?.id)?.nameAr || rec?.nameAr || '')))),
       h('div.lc-main',
         h('button.lc-play', { type: 'button', onclick: action, 'aria-label': playing ? 'إيقاف مؤقت' : 'تشغيل' }, st.status === 'loading' ? h('span.spinner', { 'aria-hidden': 'true' }) : icon(playing ? 'pause' : 'play')),
         h('div.lc-text', h('strong', title), h('small', sub))),
@@ -100,6 +100,11 @@ export function renderMore() {
     h('div.more-group',
       row('#/library', 'library', 'المكتبة', 'أحاديث صحيحة، وسير الصحابة، ودليل الوضوء والصلاة'),
       row('#/sahabi', 'star', 'صحابي اليوم')),
+    h('h2.lib-h', 'العبادة'),
+    h('div.more-group',
+      row('#/tasbih', 'repeat', 'السبحة', 'عدّاد التسبيح بأذكار جاهزة'),
+      row('#/calendar', 'star', 'التقويم الهجري', 'المناسبات والأيام البيض'),
+      row('#/stats', 'timer', 'إحصائياتي', 'القراءة والاستماع والأيام المتتالية')),
     h('h2.lib-h', 'الاستماع'),
     h('div.more-group',
       row('#/car', 'play', 'وضع السيارة', 'أزرار كبيرة وتحكم صوتي'),

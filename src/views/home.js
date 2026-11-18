@@ -61,7 +61,6 @@ export function renderQuran() {
     h('form.search-bar', { role: 'search', onsubmit: (e) => e.preventDefault() }, icon('search'), input),
     tabs,
     listWrap,
-    h('p.home-foot', h('a', { href: 'sura/' }, 'السور مكتوبة كاملة (صفحات للقراءة والمشاركة)')),
   );
   renderList();
   mount(el);

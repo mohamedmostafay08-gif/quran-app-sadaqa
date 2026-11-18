@@ -46,9 +46,11 @@ function prefs() {
     lat: loc?.lat ?? null, lng: loc?.lng ?? null,
     tz: loc?.tz || Intl.DateTimeFormat().resolvedOptions().timeZone,
     method: loc?.method || 'Egyptian', madhab: loc?.madhab || 'shafi',
+    extras: extras(),
   };
 }
-const wanted = () => (settings.get('notifyPrayers') || []).length > 0 || !!settings.get('wirdTime');
+const extras = () => [settings.get('notifyKahf') && 'kahf', settings.get('notifyFasting') && 'fasting'].filter(Boolean);
+const wanted = () => (settings.get('notifyPrayers') || []).length > 0 || !!settings.get('wirdTime') || extras().length > 0;
 
 /** يطلب إذن الإشعارات فورًا (لازم يُستدعى مباشرة داخل ضغطة المستخدم — شرط في iOS) */
 export function askPermission() {
@@ -95,6 +97,6 @@ export async function syncPush({ ask = false } = {}) {
 // تحديث الخادم تلقائيًا عند تغيير الموقع أو طريقة الحساب
 let t = 0;
 settings.subscribe((k) => {
-  if (k !== 'prayerLocation' || !wanted()) return;
+  if (!['prayerLocation', 'notifyKahf', 'notifyFasting'].includes(k) || self.Notification?.permission !== 'granted') return;
   clearTimeout(t); t = setTimeout(() => syncPush().catch(() => {}), 1500);
 });

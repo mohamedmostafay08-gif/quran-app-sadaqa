@@ -117,5 +117,11 @@ export function quarterLabel(q) {
   return [`الحزب ${hizb}`, `ربع الحزب ${hizb}`, `نصف الحزب ${hizb}`, `ثلاثة أرباع الحزب ${hizb}`][pos];
 }
 
+/** موضع الآية في المصحف: الجزء والحزب والربع والصفحة */
+export function positionOf(s, a) {
+  const q = quarterOf(s, a);
+  return { juz: juzOf(s, a), hizb: Math.ceil(q / 4), rub: ((q - 1) % 4) + 1, page: pageOf(s, a) };
+}
+
 /** اسم السورة مع البادئة */
 export const surahTitle = (n) => `سورة ${surahs[n - 1].nameAr}`;

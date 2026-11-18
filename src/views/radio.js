@@ -47,7 +47,6 @@ export async function renderRadio() {
     h('h2.radio-h', 'الإذاعات'), featured,
     h('h2.radio-h', `إذاعات القراء (${ar(data.reciters.length)})`), list,
     h('h2.radio-h', 'برامج'), programs,
-    h('p.small-note', 'البث من إذاعة القرآن الكريم ومن mp3quran.net، ويحتاج اتصالًا بالإنترنت.'),
   ));
   return { cleanup: unsub };
 }

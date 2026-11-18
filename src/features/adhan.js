@@ -36,6 +36,8 @@ export function stopAdhan() {
 
 /** يعرض بطاقة الأذان ويحاول تشغيله؛ إن منع المتصفح التشغيل التلقائي يظهر زر «تشغيل الأذان» */
 export function playAdhan(key, voiceId) {
+  // فتح التنبيه في نفس لحظة تشغيل المجدول: لا نعيد الأذان من أوله
+  if (box?.dataset.key === String(key) && key !== 'test' && audio && !audio.paused) return;
   if (key && key !== 'test') markPlayed(key);
   if (player.state().status === 'playing') player.pause();
   const v = voice(voiceId), src = srcOf(v);
@@ -50,7 +52,7 @@ export function playAdhan(key, voiceId) {
   audio.onplay = audio.onpause = setBtn;
   audio.onended = () => { setBtn(); setTimeout(() => { if (audio.paused) stopAdhan(); }, 4000); };
   box?.remove();
-  box = h('div.adhan-box', { role: 'alertdialog', 'aria-label': title },
+  box = h('div.adhan-box', { role: 'alertdialog', 'aria-label': title, dataset: { key: String(key) } },
     h('div.adh-card',
       h('span.adh-mark', { 'aria-hidden': 'true' }, '۞'),
       h('strong', title),
