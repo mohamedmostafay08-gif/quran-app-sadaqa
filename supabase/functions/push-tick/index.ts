@@ -1,6 +1,6 @@
 // push-tick: تُستدعى كل دقيقة من pg_cron. تحسب مواقيت الصلاة لكل مشترك بمدينته وطريقته،
 // وترسل إشعار الأذان عند دخول الوقت، وتذكير الورد في الموعد الذي اختاره،
-// وتذكيرات الجمعة (الكهف وآخر ساعة) والصيام (الاثنين والخميس والأيام البيض) لمن فعّلها.
+// وتذكيرات الجمعة والصيام، والتنبيه قبل الأذان، وأذكار ما بعد الصلاة لمن فعّلها.
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 import { sendPush } from './webpush.js';
 import { Coordinates, CalculationMethod, PrayerTimes, Madhab, HighLatitudeRule } from 'npm:adhan@4.4.3';
@@ -15,6 +15,7 @@ type Sub = { endpoint: string; p256dh: string; auth: string; lat: number; lng: n
 function hijriDay(d: Date, tz: string) {
   try { return +new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { timeZone: tz, day: 'numeric' }).format(d); } catch { return 0; }
 }
+const arNum = (n: string | number) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[+d]);
 const weekday = (d: Date, tz: string) => new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short' }).format(d);
 
 /** أجزاء التاريخ والوقت المحلي في منطقة زمنية */
@@ -73,6 +74,21 @@ Deno.serve(async (req) => {
         const diff = now.getTime() - t.getTime();
         if (diff >= -WINDOW_BEFORE && diff < WINDOW_AFTER && s.last_sent?.[k] !== lp.date) {
           due.push({ key: k, tag: 'prayer-' + k, ttl: 600, payload: { title: `حان الآن موعد صلاة ${NAMES[k]}`, body: '«حيّ على الصلاة، حيّ على الفلاح» — اضغط لسماع الأذان', url: `#/prayer?adhan=${k}`, tag: 'prayer', adhan: true } });
+        }
+        // تنبيه قبل الأذان بعدد الدقائق المختار
+        const pre = (s.extras || []).map((x) => /^pre(\d+)$/.exec(x)?.[1]).find(Boolean);
+        if (pre) {
+          const d2 = now.getTime() - (t.getTime() - +pre * 60_000);
+          if (d2 >= -WINDOW_BEFORE && d2 < WINDOW_AFTER && s.last_sent?.['pre_' + k] !== lp.date) {
+            due.push({ key: 'pre_' + k, tag: 'pre-' + k, ttl: 600, payload: { title: `باقي ${arNum(pre)} دقيقة على صلاة ${NAMES[k]}`, body: 'استعد للصلاة، وتوضأ إن لم تكن على وضوء.', url: '#/prayer', tag: 'pre' } });
+          }
+        }
+        // أذكار ما بعد الصلاة (بعد الأذان بعشر دقائق تقريبًا)
+        if ((s.extras || []).includes('after')) {
+          const d3 = now.getTime() - (t.getTime() + 10 * 60_000);
+          if (d3 >= 0 && d3 < WINDOW_AFTER && s.last_sent?.['after_' + k] !== lp.date) {
+            due.push({ key: 'after_' + k, tag: 'after-' + k, ttl: 1800, payload: { title: 'الأذكار بعد الصلاة', body: `بعد صلاة ${NAMES[k]}: أستغفر الله ثلاثًا، وسبحان الله والحمد لله والله أكبر.`, url: '#/adhkar/25', tag: 'after' } });
+          }
         }
       }
     }

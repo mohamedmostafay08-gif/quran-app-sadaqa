@@ -11,6 +11,8 @@ import { pushStatus, askPermission, syncPush } from '../features/push.js';
 import { upcomingOccasions } from './calendar.js';
 import { streak } from '../features/activity.js';
 import { ayahOfDayCard } from './duas.js';
+import { ramadanCard } from './ramadan.js';
+import { doneCount } from '../features/prayerLog.js';
 
 export function renderToday() {
   const loc = P.getLocation();
@@ -34,7 +36,7 @@ export function renderToday() {
   const last = settings.get('lastRead');
   const quick = h('div.quick-row');
   homeWirdCard().then((w) => quick.prepend(w)).catch(() => {});
-  quick.append(adhkarTile(loc), h('a.quick', { href: '#/duas' }, icon('heart'), h('span', h('strong', 'الأدعية'), h('small', 'من القرآن والسنة الصحيحة'))), h('a.quick', { href: '#/asma' }, icon('star'), h('span', h('strong', 'أسماء الله الحسنى'), h('small', 'مع معانيها، واسم كل يوم'))), h('a.quick', { href: '#/tasbih' }, icon('repeat'), h('span', h('strong', 'السبحة'), h('small', 'عدّاد التسبيح'))), sahabiTile());
+  quick.append(h('a.quick', { href: '#/prayer' }, icon('check'), h('span', h('strong', 'صلواتي اليوم'), h('small', `${ar(doneCount())} من ${ar(5)} — سجّلها من المواقيت`))), adhkarTile(loc), h('a.quick', { href: '#/duas' }, icon('heart'), h('span', h('strong', 'الأدعية'), h('small', 'من القرآن والسنة الصحيحة'))), h('a.quick', { href: '#/asma' }, icon('star'), h('span', h('strong', 'أسماء الله الحسنى'), h('small', 'مع معانيها، واسم كل يوم'))), h('a.quick', { href: '#/tasbih' }, icon('repeat'), h('span', h('strong', 'السبحة'), h('small', 'عدّاد التسبيح'))), sahabiTile());
   const occ = upcomingOccasions(new Date(), 1)[0];
   const st = streak();
   quick.append(
@@ -51,6 +53,8 @@ export function renderToday() {
     adhanCard(loc),
     lc,
     last ? continueCard(last) : null,
+    afterPrayerCard(loc),
+    ramadanCard(),
     fridayCard(),
     ayahOfDayCard(),
     quick,
@@ -74,6 +78,21 @@ function adhanCard(loc) {
 }
 
 const daysWord = (n) => (n === 1 ? 'يوم' : n === 2 ? 'يومين' : n <= 10 ? `${ar(n)} أيام` : `${ar(n)} يومًا`);
+
+/** بعد كل صلاة (من ٥ دقائق إلى ٤٥ دقيقة بعد الأذان): كارت الأذكار بعد السلام */
+function afterPrayerCard(loc) {
+  if (!loc) return null;
+  try {
+    const t = P.computeTimes(loc, new Date());
+    const now = new Date();
+    const hit = [['fajr', 'الفجر'], ['dhuhr', 'الظهر'], ['asr', 'العصر'], ['maghrib', 'المغرب'], ['isha', 'العشاء']].find(([k]) => { const m = (now - t[k]) / 60000; return m >= 5 && m <= 45; });
+    if (!hit) return null;
+    return h('a.td-friday', { href: '#/adhkar/25' },
+      h('span.td-ic', icon('mosque')),
+      h('span.td-pt', h('strong', `الأذكار بعد صلاة ${hit[1]}`), h('small', 'أستغفر الله ثلاثًا، ثم التسبيح والتحميد والتكبير')),
+      icon('forward'));
+  } catch { return null; }
+}
 
 /** يوم الجمعة: سورة الكهف */
 function fridayCard() {

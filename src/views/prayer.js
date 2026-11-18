@@ -7,6 +7,7 @@ import { mount, topbar, sheet, toast, empty } from '../ui.js';
 import { navigate } from '../router.js';
 import { notifyCard } from './notifyCard.js';
 import { playAdhan } from '../features/adhan.js';
+import { statusButton, weekCard, sunnahCard } from '../features/prayerLog.js';
 
 let tab = 'times';
 
@@ -57,9 +58,12 @@ function timesPanel(redraw) {
       h('span.pr-next-time', P.fmtTime(n.time, loc.tz)),
       h('span.pr-left', `بعد ${P.countdown(n.time - now)}`),
     );
+    const passed = (k) => n.today[k] <= now;
     list.replaceChildren(...P.PRAYERS.map((p) => h('li', { class: (p.key === cur ? 'cur ' : '') + (p.key === n.key ? 'next' : '') },
-      h('span', p.name), h('strong', { class: 'num' }, P.fmtTime(n.today[p.key], loc.tz)))));
+      h('span', p.name), h('strong', { class: 'num' }, P.fmtTime(n.today[p.key], loc.tz)),
+      p.key !== 'sunrise' && passed(p.key) ? statusButton(p.key, p.name, () => { paint(); weekBox.replaceChildren(weekCard()); }) : h('span.pl-gap'))));
   };
+  const weekBox = h('div.pl-week-wrap', weekCard());
   paint();
   const timer = setInterval(paint, 30000);
 
@@ -74,6 +78,8 @@ function timesPanel(redraw) {
     dateCard,
     h('section.card.pr-hero', nextEl),
     h('section.card', list),
+    sunnahCard(() => weekBox.replaceChildren(weekCard())),
+    weekBox,
     notifyCard({ wird: false }),
     h('details.card.pr-settings',
       h('summary', 'إعدادات الحساب'),

@@ -115,6 +115,7 @@ export async function renderQuiz() {
         opts, fb, nextBtn);
     };
     const finish = () => {
+      try { if (score > (+localStorage.getItem('qa:quizBest') || 0)) localStorage.setItem('qa:quizBest', String(score)); } catch { /* */ }
       const pct = Math.round((score / COUNT) * 100);
       body.replaceChildren(
         h('section.card.quiz-result',

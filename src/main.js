@@ -13,6 +13,10 @@ import { renderCalendar } from './views/calendar.js';
 import { renderStats } from './views/stats.js';
 import { renderDuas, renderAsma } from './views/duas.js';
 import { renderQuiz } from './views/quiz.js';
+import { renderRamadan } from './views/ramadan.js';
+import { renderKids } from './views/kids.js';
+import { renderGreetings } from './views/greetings.js';
+import { checkBadges } from './features/badges.js';
 import { initActivity } from './features/activity.js';
 import { renderReader } from './views/reader.js';
 import { renderSearch } from './views/search.js';
@@ -37,7 +41,7 @@ import { initAdhanScheduler, playAdhan } from './features/adhan.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
-const TAB_FOR = { '/': 'today', '/quran': 'quran', '/surah': 'quran', '/page': 'quran', '/search': 'quran', '/bookmarks': 'quran', '/khatma': 'quran', '/memorize': 'quran', '/group': 'quran', '/listen': 'listen', '/radio': 'listen', '/car': 'listen', '/downloads': 'more', '/library': 'more', '/hadith': 'more', '/guide': 'more', '/sahabi': 'more', '/prayer': 'prayer', '/adhkar': 'prayer', '/more': 'more', '/settings': 'more', '/about': 'more', '/help': 'more', '/tasbih': 'today', '/calendar': 'today', '/stats': 'today', '/duas': 'today', '/asma': 'today', '/quiz': 'quran' };
+const TAB_FOR = { '/': 'today', '/quran': 'quran', '/surah': 'quran', '/page': 'quran', '/search': 'quran', '/bookmarks': 'quran', '/khatma': 'quran', '/memorize': 'quran', '/group': 'quran', '/listen': 'listen', '/radio': 'listen', '/car': 'listen', '/downloads': 'more', '/library': 'more', '/hadith': 'more', '/guide': 'more', '/sahabi': 'more', '/prayer': 'prayer', '/adhkar': 'prayer', '/more': 'more', '/settings': 'more', '/about': 'more', '/help': 'more', '/tasbih': 'today', '/calendar': 'today', '/stats': 'today', '/duas': 'today', '/asma': 'today', '/quiz': 'quran', '/ramadan': 'today', '/kids': 'quran', '/greetings': 'more' };
 
 async function boot() {
   const status = document.querySelector('.boot p');
@@ -62,6 +66,9 @@ async function boot() {
   route('/duas', renderDuas);
   route('/asma', renderAsma);
   route('/quiz', renderQuiz);
+  route('/ramadan', renderRamadan);
+  route('/kids/:surah?', renderKids);
+  route('/greetings', renderGreetings);
   route('/surah/:surah/:ayah?', renderReader);
   route('/search', renderSearch);
   route('/bookmarks', renderBookmarks);
@@ -114,10 +121,13 @@ async function boot() {
       else a.removeAttribute('aria-current');
     }
     markSubnav();
+    clearTimeout(badgeTimer); badgeTimer = setTimeout(() => checkBadges().catch(() => {}), 1500);
     document.body.dataset.route = base.slice(1) || 'home';
     if (ROUTE_EVENT[base.slice(1)]) track(ROUTE_EVENT[base.slice(1)]);
   });
 }
+
+let badgeTimer = 0;
 
 /** القائمة الجانبية (الكمبيوتر): تمييز الصفحة الفرعية الحالية */
 function markSubnav() {

@@ -87,6 +87,17 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
       });
       return h('label.toggle', h('span', h('strong', label), h('small', hint)), inp);
     };
+    // تنبيه قبل الأذان
+    const preSeg = h('div.seg', { role: 'radiogroup', 'aria-label': 'تنبيه قبل الأذان' }, [[0, 'بدون'], [10, '١٠ د'], [15, '١٥ د'], [30, '٣٠ د']].map(([v, label]) => h('button', {
+      type: 'button', role: 'radio', 'aria-checked': String((settings.get('preAdhan') || 0) === v),
+      onclick: async (e) => {
+        const perm = v ? askPermission() : null;
+        const before = settings.get('preAdhan') || 0;
+        await settings.set('preAdhan', v);
+        for (const b of preSeg.children) b.setAttribute('aria-checked', String(b === e.currentTarget));
+        save(async () => { await settings.set('preAdhan', before); for (const b of preSeg.children) b.setAttribute('aria-checked', String(b.dataset.v === String(before))); }, perm);
+      }, dataset: { v } }, label)));
+    body.push(h('div.field', h('span', 'تنبيه قبل الأذان'), preSeg), xt('notifyAfter', 'تذكير بالأذكار بعد الصلاة', 'بعد الأذان بعشر دقائق'));
     body.push(xt('notifyKahf', 'تذكير يوم الجمعة', 'سورة الكهف صباحًا، وآخر ساعة قبل المغرب'),
       xt('notifyFasting', 'تذكير بالصيام', 'ليلة الاثنين والخميس، وقبل الأيام البيض'));
     if (wird) {

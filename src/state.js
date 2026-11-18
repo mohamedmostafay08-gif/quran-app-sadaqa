@@ -35,6 +35,11 @@ export const DEFAULTS = {
   adhanInApp: true,       // تشغيل صوت الأذان عند دخول الوقت والتطبيق مفتوح
   adhanVoice: 'egypt',    // صوت الأذان: egypt | makkah | calm
   notifyKahf: true,       // يوم الجمعة: سورة الكهف وآخر ساعة
+  preAdhan: 0,            // تنبيه قبل الأذان بالدقائق: 0 | 10 | 15 | 30
+  notifyAfter: false,     // إشعار بالأذكار بعد كل صلاة
+  prayerLog: {},          // متابعة الصلوات { 'YYYY-MM-DD': { fajr: 'jamaah'|'ontime'|'late', sunnah: [...] } }
+  kidsStars: {},          // وضع الأطفال: { surah: stars }
+  badges: {},             // الشارات المكتسبة { id: تاريخ }
   notifyFasting: true,    // تذكير بصيام الاثنين والخميس والأيام البيض
   fastingDefaultV1: false, // ترقية: تفعيل تذكير الصيام مرة واحدة لمن سبق تثبيته
   tasbih: null,           // آخر ذكر في السبحة { id, count }

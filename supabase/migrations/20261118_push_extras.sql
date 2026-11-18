@@ -1,4 +1,5 @@
--- تذكيرات إضافية: سورة الكهف يوم الجمعة وساعة الإجابة، وصيام الاثنين والخميس والأيام البيض
+-- تذكيرات إضافية: سورة الكهف يوم الجمعة وساعة الإجابة، وصيام الاثنين والخميس والأيام البيض،
+-- والتنبيه قبل الأذان (pre10/pre15/pre30)، وأذكار ما بعد الصلاة (after)
 alter table public.push_subs add column if not exists extras text[] not null default '{}';
 
 create or replace function public.push_save(p_sub jsonb, p_prefs jsonb)
@@ -6,7 +7,7 @@ returns void language plpgsql security definer set search_path = public as $$
 declare
   ep text := p_sub->>'endpoint';
   pr text[] := array(select x from jsonb_array_elements_text(coalesce(p_prefs->'prayers', '[]')) x where x in ('fajr','dhuhr','asr','maghrib','isha'));
-  ex text[] := array(select x from jsonb_array_elements_text(coalesce(p_prefs->'extras', '[]')) x where x in ('kahf','fasting'));
+  ex text[] := array(select x from jsonb_array_elements_text(coalesce(p_prefs->'extras', '[]')) x where x in ('kahf','fasting','pre10','pre15','pre30','after'));
   wt text := nullif(p_prefs->>'wird_time', '');
 begin
   if ep is null or ep !~ '^https://' or length(ep) > 1000 then raise exception 'bad endpoint'; end if;
