@@ -505,6 +505,7 @@ body.focus-mode .main { padding-top: 0; }
 .ls-sheikhs { display: flex; gap: 14px; overflow-x: auto; scrollbar-width: none; padding: var(--sp-2) 2px var(--sp-3); }
 .ls-sheikhs::-webkit-scrollbar { display: none; }
 .ls-sh { flex: none; display: grid; justify-items: center; gap: 6px; width: 80px; text-align: center; color: var(--text-2); text-decoration: none; font-size: 13px; line-height: 1.4; }
+.ls-sh small { font-size: 12px; }
 .ls-av { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; font-weight: 700; color: var(--on-hero); background: linear-gradient(135deg, var(--hero-1), var(--hero-2)); border: 2px solid transparent; }
 .ls-sh.on .ls-av { border-color: var(--gold); box-shadow: 0 0 0 3px var(--accent-soft); }
 .ls-sh.on { color: var(--accent); font-weight: 700; }

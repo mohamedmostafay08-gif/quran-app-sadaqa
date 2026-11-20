@@ -195,9 +195,9 @@ export async function stopSync({ wipe = false } = {}) {
 export async function refreshAfterSync() {
   const mods = await Promise.all([import('./bookmarks.js'), import('./notes.js'), import('./activity.js')]).catch(() => []);
   for (const m of mods) m.resetCache?.();
-  // لا نقاطع القارئ أثناء القراءة أو الاستماع: نعيد رسم الشاشات الخفيفة فقط
+  // لا نقاطع القارئ أثناء القراءة أو الاستماع، ولا نعيد رسم شاشة اليوم فور الفتح
   const r = location.hash.split('/')[1] || '';
-  if (!['surah', 'page', 'focus'].includes(r)) dispatchEvent(new HashChangeEvent('hashchange'));
+  if (!['surah', 'page', 'focus', ''].includes(r)) dispatchEvent(new HashChangeEvent('hashchange'));
 }
 
 /** مزامنة تلقائية: عند الفتح، وبعد التعديل بدقيقة، وعند الخروج من التطبيق */

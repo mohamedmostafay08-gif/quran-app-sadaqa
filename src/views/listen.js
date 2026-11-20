@@ -58,9 +58,13 @@ export function listenCard() {
 export function renderListen() {
   const input = h('input.note-input', { type: 'search', placeholder: 'ابحث عن سورة…', 'aria-label': 'ابحث عن سورة للاستماع' });
   const list = h('ul.ls-surahs');
+  let _prevKey = '';
   const draw = () => {
     const q = normalize(input.value.trim());
     const st = player.state();
+    const key = `${q}|${st.radio ? '' : st.surah}|${st.status}`;
+    if (key === _prevKey) return;
+    _prevKey = key;
     list.replaceChildren(...getSurahs().filter((s) => !q || normalize(s.nameAr).includes(q) || String(s.id) === q).map((s) => {
       const on = st.surah === s.id && !st.radio;
       return h('li', h('button.ls-item', { type: 'button', class: on ? 'ls-item on' : 'ls-item', onclick: () => (on ? player.toggle() : player.playFrom(s.id, 1)) },
@@ -70,7 +74,7 @@ export function renderListen() {
         icon(on && st.status === 'playing' ? 'pause' : 'play')));
     }));
   };
-  input.addEventListener('input', draw);
+  input.addEventListener('input', () => { _prevKey = ''; draw(); });
   const unsub = player.subscribe(draw);
   draw();
   const lc = listenCard();

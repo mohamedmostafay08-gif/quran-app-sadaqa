@@ -49,12 +49,17 @@ export const shareUrl = (id) => `${location.origin}${location.pathname}#/group/$
 /** ختمات هذا الجهاز (أنشأها أو شارك فيها) */
 export const myGroups = () => settings.get('myGroups') || [];
 function remember(g) {
-  const list = myGroups().filter((x) => x.id !== g.id);
-  const old = myGroups().find((x) => x.id === g.id) || {};
-  list.unshift({ ...old, ...g, at: Date.now() });
-  settings.set('myGroups', list.slice(0, 30));
+  const list = myGroups();
+  const old = list.find((x) => x.id === g.id);
+  // تجنب الكتابة إذا لم يتغير شيء
+  if (old && old.title === g.title && old.kind === g.kind && old.admin === g.admin) return;
+  const filtered = list.filter((x) => x.id !== g.id);
+  filtered.unshift({ ...(old || {}), ...g, at: Date.now() });
+  settings.set('myGroups', filtered.slice(0, 30));
 }
 export function forget(id) { settings.set('myGroups', myGroups().filter((x) => x.id !== id)); }
+/** يُحفظ بعد مشاركة المستخدم في الختمة (أخذ جزء أو إنشاء) */
+export function rememberGroup(id, title, kind) { remember({ id, title, kind }); }
 
 export async function createGroup({ title, dedication, kind }) {
   const r = await rpc('khatma_create', { p_title: title, p_dedication: dedication || null, p_kind: kind });
@@ -64,7 +69,8 @@ export async function createGroup({ title, dedication, kind }) {
 export async function getGroup(id) {
   const g = await rpc('khatma_get', { p_id: id, p_device: deviceToken() });
   if (!g) throw new Error(ERRORS['not found']);
-  remember({ id: g.id, title: g.title, kind: g.kind });
+  // تحديث البيانات المحلية فقط إذا كانت الختمة موجودة بالفعل (أنشأها أو شارك فيها)
+  if (myGroups().some((x) => x.id === id)) remember({ id: g.id, title: g.title, kind: g.kind });
   return g;
 }
 export const takePart = (id, n, name) => rpc('khatma_take', { p_id: id, p_part: n, p_name: name || null, p_device: deviceToken() });

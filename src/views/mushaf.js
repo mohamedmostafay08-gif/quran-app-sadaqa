@@ -235,7 +235,7 @@ function optionsSheet() {
     content: () => h('div.form',
       h('div.field', h('span', 'ألوان التجويد'), seg('tajweed', [[false, 'بدون'], [true, 'ملوّن']])),
       settings.get('tajweed') ? tajweedLegend() : null,
-      h('div.field', h('span', 'الثيم'), seg('theme', [['auto', 'تلقائي'], ['light', 'أبيض'], ['sepia', 'سيبيا'], ['dark', 'ليلي']])),
+      h('div.field', h('span', 'الثيم'), seg('theme', [['auto', 'تلقائي'], ['prayer', 'حسب المغرب'], ['light', 'فاتح'], ['green', 'أخضر'], ['sepia', 'سيبيا'], ['paper', 'ورقي'], ['dark', 'ليلي'], ['navy', 'كحلي'], ['black', 'أسود']])),
     ),
   });
 }

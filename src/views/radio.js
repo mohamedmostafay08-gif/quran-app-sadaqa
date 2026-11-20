@@ -30,15 +30,20 @@ export async function renderRadio() {
   const list = h('ul.radio-list');
   const programs = h('ul.radio-list');
   const input = h('input.note-input', { type: 'search', placeholder: 'ابحث عن قارئ أو برنامج…', 'aria-label': 'ابحث في الإذاعات' });
+  let _prevKey = '';
   const draw = () => {
+    const st = player.state();
     const q = normalize(input.value);
+    const key = `${q}|${st.radio?.id}|${st.status}`;
+    if (key === _prevKey) return;
+    _prevKey = key;
     const match = (r) => !q || normalize(r.name + ' ' + (r.sub || '')).includes(q);
     featured.replaceChildren(...data.featured.filter(match).map((r) => row(r, true)));
     list.replaceChildren(...data.reciters.filter(match).map((r) => row(r)));
     programs.replaceChildren(...data.programs.filter(match).map((r) => row(r)));
     for (const ul of [featured, list, programs]) ul.previousElementSibling && (ul.previousElementSibling.hidden = !ul.children.length);
   };
-  input.addEventListener('input', draw);
+  input.addEventListener('input', () => { _prevKey = ''; draw(); });
   const unsub = player.subscribe(() => draw());
   draw();
   mount(h('div.radio-page',

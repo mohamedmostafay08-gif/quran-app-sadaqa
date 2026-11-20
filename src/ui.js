@@ -42,11 +42,26 @@ export function closeAllSheets() {
   for (const s of [...openSheets]) s.close(true);
 }
 
+let _ignorePopstate = 0;
+let _sheetPopstateReady = false;
+function initSheetPopstate() {
+  if (_sheetPopstateReady) return;
+  _sheetPopstateReady = true;
+  // زر الرجوع في أندرويد: إذا كانت هناك ورقة مفتوحة، أغلقها بدل التنقل
+  addEventListener('popstate', () => {
+    if (_ignorePopstate > 0) { _ignorePopstate--; return; }
+    const top = [...openSheets].at(-1);
+    if (top) { top._fromBack = true; top.close(); }
+  });
+}
+
 /** ورقة سفلية (Bottom sheet) قابلة للوصول */
 export function sheet({ title, content, onClose }) {
+  initSheetPopstate();
   const root = document.getElementById('sheet-root');
   const prevFocus = document.activeElement;
   let closed = false;
+  let _hasPushed = false;
   const close = (immediate) => {
     if (closed) return;
     closed = true;
@@ -54,11 +69,17 @@ export function sheet({ title, content, onClose }) {
     panel.classList.remove('open');
     scrim.classList.remove('open');
     document.removeEventListener('keydown', onKey);
+    // إذا فتحنا إدخالًا في السجل وأُغلقت الورقة بغير زر الرجوع، أزل الإدخال بصمت
+    if (_hasPushed && !api._fromBack && immediate !== true) {
+      _hasPushed = false;
+      _ignorePopstate++;
+      history.back();
+    }
     if (immediate === true) wrap.remove();
     else setTimeout(() => { wrap.remove(); prevFocus?.focus?.({ preventScroll: true }); }, 200);
     onClose?.();
   };
-  const api = { close };
+  const api = { close, _fromBack: false };
   const onKey = (e) => {
     if (e.key === 'Escape') close();
     if (e.key === 'Tab') {
@@ -81,6 +102,9 @@ export function sheet({ title, content, onClose }) {
   requestAnimationFrame(() => {
     scrim.classList.add('open');
     panel.classList.add('open');
+    // أضف إدخالًا للسجل حتى يُغلق زر الرجوع في أندرويد الورقة بدل التنقل للخلف
+    history.pushState({ _qaSheet: true }, '', location.href);
+    _hasPushed = true;
     (panel.querySelector('.sheet-body button, .sheet-body input, .sheet-body a') || panel).focus?.({ preventScroll: true });
   });
   openSheets.add(api);

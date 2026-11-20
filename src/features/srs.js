@@ -20,8 +20,8 @@ export async function addRange(surah, from, to) {
   const items = [];
   for (let a = from; a <= to; a++) {
     if (existing.has(id(surah, a))) continue;
-    // أول مراجعة غدًا
-    items.push({ id: id(surah, a), surah, ayah: a, ease: 2.5, interval: 0, reps: 0, lapses: 0, due: now + DAY / 2, addedAt: now, lastReview: null, updatedAt: now });
+    // أول مراجعة غدًا (بداية اليوم التالي)
+    items.push({ id: id(surah, a), surah, ayah: a, ease: 2.5, interval: 0, reps: 0, lapses: 0, due: endOfToday() + 1, addedAt: now, lastReview: null, updatedAt: now });
   }
   if (items.length) await db.putMany('memorize', items);
   return items.length;

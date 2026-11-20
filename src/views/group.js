@@ -120,7 +120,7 @@ export async function renderGroup(params, query, isStale) {
         h('p', 'خذ هذا الجزء لتقرأه، وعلّمه «تم» بعد الانتهاء.'),
         name,
         h('div.btn-row',
-          h('button.btn', { type: 'button', onclick: () => { settings.set('groupName', name.value.trim()); close(); run(() => G.takePart(id, n, name.value.trim())).then((ok) => ok && toast(`الجزء ${ar(n)} معك الآن`)); } }, icon('check'), 'خذ الجزء'),
+          h('button.btn', { type: 'button', onclick: () => { settings.set('groupName', name.value.trim()); close(); run(() => G.takePart(id, n, name.value.trim())).then((ok) => { if (ok) { G.rememberGroup(id, g.title, g.kind); toast(`الجزء ${ar(n)} معك الآن`); } }); } }, icon('check'), 'خذ الجزء'),
           readLink),
       ) });
     }
