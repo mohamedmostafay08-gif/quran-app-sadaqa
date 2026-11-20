@@ -49,7 +49,7 @@ import { renderWelcome } from './views/welcome.js';
 import { renderPrayer, renderAdhkarChapter } from './views/prayer.js';
 import { renderGroups, renderGroup } from './views/group.js';
 import { renderRadio } from './views/radio.js';
-import { renderListen, renderMore } from './views/listen.js';
+import { renderListen, renderMore, renderAdhkar } from './views/listen.js';
 import { renderLibrary, renderTopic, renderHadith, renderGuide, renderSahabi } from './views/library.js';
 import { initInstall, isStandalone } from './features/install.js';
 import { track } from './features/stats.js';
@@ -58,7 +58,7 @@ import { initAdhanScheduler, playAdhan } from './features/adhan.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
-const TAB_FOR = { '/': 'today', '/quran': 'quran', '/surah': 'quran', '/page': 'quran', '/search': 'quran', '/bookmarks': 'quran', '/khatma': 'quran', '/memorize': 'quran', '/group': 'quran', '/listen': 'listen', '/radio': 'listen', '/car': 'listen', '/downloads': 'more', '/library': 'more', '/hadith': 'more', '/guide': 'more', '/sahabi': 'more', '/prayer': 'prayer', '/adhkar': 'prayer', '/more': 'more', '/settings': 'more', '/about': 'more', '/help': 'more', '/tasbih': 'today', '/calendar': 'today', '/stats': 'today', '/duas': 'today', '/asma': 'today', '/quiz': 'quran', '/ramadan': 'today', '/kids': 'quran', '/greetings': 'more', '/elder': 'more', '/qada': 'prayer', '/wallpaper': 'more', '/sleep': 'today', '/nawawi': 'more', '/focus': 'quran', '/zakat': 'today', '/fasting': 'today', '/hifz': 'quran', '/tajweed': 'quran', '/prophets': 'quran', '/whats-new': 'more', '/lessons': 'listen', '/miracles': 'quran' };
+const TAB_FOR = { '/': 'today', '/quran': 'quran', '/surah': 'quran', '/page': 'quran', '/search': 'quran', '/bookmarks': 'quran', '/khatma': 'quran', '/memorize': 'quran', '/group': 'quran', '/focus': 'quran', '/quiz': 'quran', '/kids': 'quran', '/tajweed': 'quran', '/hifz': 'quran', '/listen': 'tilawat', '/radio': 'tilawat', '/car': 'tilawat', '/downloads': 'tilawat', '/prayer': 'prayer', '/qada': 'prayer', '/adhkar': 'adhkar', '/dhikr': 'adhkar', '/tasbih': 'adhkar', '/duas': 'adhkar', '/asma': 'adhkar', '/more': 'more', '/settings': 'more', '/about': 'more', '/help': 'more', '/library': 'more', '/hadith': 'more', '/guide': 'more', '/sahabi': 'more', '/nawawi': 'more', '/greetings': 'more', '/elder': 'more', '/wallpaper': 'more', '/whats-new': 'more', '/lessons': 'more', '/prophets': 'more', '/miracles': 'more', '/calendar': 'today', '/stats': 'today', '/ramadan': 'today', '/sleep': 'today', '/zakat': 'today', '/fasting': 'today' };
 
 async function boot() {
   const status = document.querySelector('.boot p');
@@ -119,6 +119,7 @@ async function boot() {
   route('/group', renderGroups);
   route('/group/:id', renderGroup);
   route('/radio', renderRadio);
+  route('/dhikr', renderAdhkar);
   route('/listen', renderListen);
   route('/more', renderMore);
   route('/library', renderLibrary);
