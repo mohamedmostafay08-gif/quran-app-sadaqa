@@ -212,7 +212,7 @@ function compassSvg(bearing) {
 
 // ---------------- الأذكار ----------------
 let adhkarP = null;
-export const getAdhkar = () => (adhkarP ||= fetch(new URL('../../public/data/adhkar.json', import.meta.url)).then((r) => r.json()));
+export const getAdhkar = () => (adhkarP ||= fetch(new URL('../../public/data/adhkar.json', import.meta.url)).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).catch((e) => { adhkarP = null; throw e; }));
 const FEATURED = [27, 28, 1, 25];
 
 // أيقونة كل باب من أبواب الأذكار حسب موضوعه

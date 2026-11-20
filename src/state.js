@@ -117,7 +117,8 @@ function applyVisual() {
   if (v) root.dataset.variant = v[1]; else delete root.dataset.variant;
   root.classList.toggle('big-ui', !!state.bigUI);
   // لون شريط الحالة يتبع خلفية الثيم المختار
-  requestAnimationFrame(() => { const bg = getComputedStyle(document.body || root).backgroundColor; if (bg) for (const m of document.querySelectorAll('meta[name="theme-color"]')) m.setAttribute('content', bg); });
+  // rAF مزدوج: يضمن أن المتصفح طبّق متغيرات CSS قبل القراءة
+  requestAnimationFrame(() => requestAnimationFrame(() => { const bg = getComputedStyle(document.body || root).backgroundColor; if (bg) for (const m of document.querySelectorAll('meta[name="theme-color"]')) m.setAttribute('content', bg); }));
   root.style.setProperty('--quran-scale', state.fontScale);
   try { localStorage.setItem('qa:boot', JSON.stringify({ theme: th === 'auto' ? undefined : th, variant: v?.[1], fontScale: state.fontScale })); } catch (e) { /* خاص/محظور */ }
 }
