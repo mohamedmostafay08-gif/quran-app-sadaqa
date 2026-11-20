@@ -5,6 +5,7 @@ import { getSurahMeta, getSurahText } from '../data.js';
 import { player } from '../audio/player.js';
 import { navigate } from '../router.js';
 import { loadStories, storyNodes, readLabel } from '../features/story.js';
+import { loadMiracles, miracleCard } from './miracles.js';
 
 // [المعرّف، الاسم، المواضع: [سورة، من، إلى]]
 export const PROPHETS = [
@@ -37,8 +38,10 @@ const ayatWord = (n) => (n === 1 ? 'آية' : n === 2 ? 'آيتان' : n <= 10 ?
 
 export async function renderProphets(params) {
   if (!params.id) {
+    const mir = await loadMiracles().catch(() => []);
     return mount(h('div.prophets-page',
       topbar({ title: 'قصص الأنبياء', sub: 'كما جاءت في القرآن الكريم', back: '#/quran' }),
+      mir.length ? h('a.card.mr-banner', { href: '#/miracles' }, h('img', { src: new URL('../../public/img/miracles/musa-sea.svg', import.meta.url).href, alt: '' }), h('span', h('strong', 'معجزات الأنبياء'), h('small', `${ar(mir.length)} معجزة بصور تخيلية للمشهد`)), icon('back')) : null,
       h('ol.nw-list', PROPHETS.map(([id, name, list], i) => h('li', h('a.card.nw-item', { href: `#/prophets/${id}` },
         h('span.nw-num', ar(i + 1)), h('span.nw-title', name, h('small.tw-intro', `${ar(list.length)} ${list.length > 2 && list.length < 11 ? 'مواضع' : 'موضع'}، ${ayatWord(count(list))}`))))))));
   }
@@ -54,6 +57,7 @@ export async function renderProphets(params) {
     topbar({ title: name, sub: story ? readLabel(story) : `${ar(list.length)} ${list.length > 2 && list.length < 11 ? 'مواضع' : 'موضع'} في القرآن`, back: '#/prophets' }),
     story ? h('header.sh-head', h('span.eyebrow', 'من قصص الأنبياء'), h('h1', name), h('p.muted', story.title)) : null,
     story ? h('article.card.st-body', ...storyBody) : null,
+    ...(await (async () => { const mir = (await loadMiracles().catch(() => [])).filter((x) => x.prophet === params.id); return mir.length ? [h('h2.lib-h', 'من معجزاته'), h('div.mr-grid', mir.map(miracleCard))] : []; })()),
     story ? h('h2.lib-h', 'مواضع القصة في القرآن، قراءةً واستماعًا') : null,
     box,
     next ? h('a.btn.block', { href: `#/prophets/${next[0]}` }, next[1], icon('back')) : null));

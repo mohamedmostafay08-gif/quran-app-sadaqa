@@ -30,6 +30,7 @@ import { renderHifz } from './views/hifz.js';
 import { renderTajweed } from './views/tajweed.js';
 import { renderProphets } from './views/prophets.js';
 import { renderLessons } from './views/lessons.js';
+import { renderMiracles } from './views/miracles.js';
 import { renderWhatsNew, checkWhatsNew, bannerSummary } from './features/whatsNew.js';
 import { initAppBadge } from './features/appBadge.js';
 import { checkBadges } from './features/badges.js';
@@ -57,7 +58,7 @@ import { initAdhanScheduler, playAdhan } from './features/adhan.js';
 import { h } from './lib/dom.js';
 import { toast, closeAllSheets } from './ui.js';
 
-const TAB_FOR = { '/': 'today', '/quran': 'quran', '/surah': 'quran', '/page': 'quran', '/search': 'quran', '/bookmarks': 'quran', '/khatma': 'quran', '/memorize': 'quran', '/group': 'quran', '/listen': 'listen', '/radio': 'listen', '/car': 'listen', '/downloads': 'more', '/library': 'more', '/hadith': 'more', '/guide': 'more', '/sahabi': 'more', '/prayer': 'prayer', '/adhkar': 'prayer', '/more': 'more', '/settings': 'more', '/about': 'more', '/help': 'more', '/tasbih': 'today', '/calendar': 'today', '/stats': 'today', '/duas': 'today', '/asma': 'today', '/quiz': 'quran', '/ramadan': 'today', '/kids': 'quran', '/greetings': 'more', '/elder': 'more', '/qada': 'prayer', '/wallpaper': 'more', '/sleep': 'today', '/nawawi': 'more', '/focus': 'quran', '/zakat': 'today', '/fasting': 'today', '/hifz': 'quran', '/tajweed': 'quran', '/prophets': 'quran', '/whats-new': 'more', '/lessons': 'listen' };
+const TAB_FOR = { '/': 'today', '/quran': 'quran', '/surah': 'quran', '/page': 'quran', '/search': 'quran', '/bookmarks': 'quran', '/khatma': 'quran', '/memorize': 'quran', '/group': 'quran', '/listen': 'listen', '/radio': 'listen', '/car': 'listen', '/downloads': 'more', '/library': 'more', '/hadith': 'more', '/guide': 'more', '/sahabi': 'more', '/prayer': 'prayer', '/adhkar': 'prayer', '/more': 'more', '/settings': 'more', '/about': 'more', '/help': 'more', '/tasbih': 'today', '/calendar': 'today', '/stats': 'today', '/duas': 'today', '/asma': 'today', '/quiz': 'quran', '/ramadan': 'today', '/kids': 'quran', '/greetings': 'more', '/elder': 'more', '/qada': 'prayer', '/wallpaper': 'more', '/sleep': 'today', '/nawawi': 'more', '/focus': 'quran', '/zakat': 'today', '/fasting': 'today', '/hifz': 'quran', '/tajweed': 'quran', '/prophets': 'quran', '/whats-new': 'more', '/lessons': 'listen', '/miracles': 'quran' };
 
 async function boot() {
   const status = document.querySelector('.boot p');
@@ -101,6 +102,7 @@ async function boot() {
   route('/prophets/:id?', renderProphets);
   route('/whats-new', renderWhatsNew);
   route('/lessons/:id?', renderLessons);
+  route('/miracles/:id?', renderMiracles);
   route('/surah/:surah/:ayah?', renderReader);
   route('/search', renderSearch);
   route('/bookmarks', renderBookmarks);
