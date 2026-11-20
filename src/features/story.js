@@ -31,7 +31,7 @@ export async function storyNodes(story) {
     if (b.t === 'p') out.push(h('p.st-p', b.text));
     else if (b.t === 'h') out.push(h('h2.st-h', b.text));
     else if (b.t === 'ayah') { try { out.push(await ayahBlock(b.ref)); } catch { /* مرجع غير صالح */ } }
-    else if (b.t === 'hadith') out.push(h('figure.st-hadith', h('span.st-q', { 'aria-hidden': 'true' }, 'من السنة'), h('blockquote', { lang: 'ar' }, b.text), h('figcaption', h('span.hd-badge', b.by), b.grade ? h('span.hd-badge.hd-grade', b.grade) : null)));
+    else if (b.t === 'hadith') out.push(h('figure.st-hadith', h('span.st-q', { 'aria-hidden': 'true' }, 'من السنة والأثر'), h('blockquote', { lang: 'ar' }, b.text), h('figcaption', h('span.hd-badge', b.by), b.grade ? h('span.hd-badge.hd-grade', b.grade) : null)));
   }
   if (story.lessons?.length) out.push(h('section.st-lessons', h('h2.st-h', 'من دروس القصة'), h('ul', story.lessons.map((x) => h('li', x)))));
   return out;
