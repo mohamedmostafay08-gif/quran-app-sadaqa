@@ -1,11 +1,14 @@
 // تنزيل سور/قراء كاملة للأوفلاين مع طابور وتقدم وإلغاء
+// يدعم Background Fetch API (التنزيل يستمر حتى عند إغلاق التطبيق)
 import { db } from '../db.js';
 import { surahUrl, timingUrl, surahUrlFor, timingUrlFor, variantOf, pinVariant } from '../audio/player.js';
+import { getSurahMeta } from '../data.js';
 import { AUDIO_CACHE, requestPersist, deleteSurah as removeFiles } from './storage.js';
 
 const CONCURRENCY = 2;
 const queue = [];          // [{ reciter, surah }]
 let active = null;         // { reciter, surah, done, total, bytes, abort }
+const bgfetchIds = new Set(); // `${reciter}:${surah}` handled by Background Fetch
 const listeners = new Set();
 const emit = () => { for (const fn of listeners) fn(status()); };
 
@@ -16,6 +19,7 @@ const emitSoon = () => { if (!soon) soon = setTimeout(() => { soon = 0; emit(); 
 export const status = () => ({
   active: active && { reciter: active.reciter, surah: active.surah, done: active.done + (active.fraction || 0), total: active.total },
   queued: queue.map((q) => ({ ...q })),
+  bgfetching: [...bgfetchIds].map((id) => { const [r, s] = id.split(':'); return { reciter: r, surah: +s }; }),
 });
 
 /** ملفات السورة: الصوت الكامل + توقيت الآيات (التوقيت صغير ويبقى عند الحذف) */
@@ -46,26 +50,99 @@ export async function initPins() {
 }
 
 export function isQueued(reciter, s) {
-  return (active && active.reciter === reciter && active.surah === s) || queue.some((q) => q.reciter === reciter && q.surah === s);
+  return bgfetchIds.has(`${reciter}:${s}`) ||
+    (active && active.reciter === reciter && active.surah === s) ||
+    queue.some((q) => q.reciter === reciter && q.surah === s);
 }
 
 export function enqueue(reciter, surahs) {
   requestPersist();
-  for (const s of [].concat(surahs)) if (!isQueued(reciter, s)) queue.push({ reciter, surah: s });
+  const toAdd = [];
+  for (const s of [].concat(surahs)) {
+    if (!isQueued(reciter, s)) { queue.push({ reciter, surah: s }); toAdd.push(s); }
+  }
   emit();
+  if (toAdd.length) _tryBgFetch(reciter, toAdd);
   pump();
 }
 
-export function cancel(reciter, s) {
+export async function cancel(reciter, s) {
+  // إلغاء Background Fetch إن وُجد
+  if (bgfetchIds.has(`${reciter}:${s}`)) {
+    try {
+      const reg = await navigator.serviceWorker?.ready;
+      const bgf = await reg?.backgroundFetch?.get(`dl_${reciter}_${s}_${variantOf(reciter)}`);
+      bgf?.abort().catch(() => {});
+    } catch {}
+    bgfetchIds.delete(`${reciter}:${s}`);
+  }
   const i = queue.findIndex((q) => q.reciter === reciter && q.surah === s);
   if (i >= 0) queue.splice(i, 1);
   if (active && active.reciter === reciter && active.surah === s) active.abort.abort();
   emit();
 }
 export function cancelAll() {
+  // إلغاء كل Background Fetches
+  for (const id of bgfetchIds) {
+    const [rec, sur] = id.split(':');
+    navigator.serviceWorker?.ready.then((reg) =>
+      reg?.backgroundFetch?.get(`dl_${rec}_${sur}_${variantOf(rec)}`)?.then((bgf) => bgf?.abort())
+    ).catch(() => {});
+  }
+  bgfetchIds.clear();
   queue.length = 0;
   active?.abort.abort();
   emit();
+}
+
+/** يحاول تسجيل Background Fetch لكل سورة — يُزيل من الطابور العادي إن نجح */
+async function _tryBgFetch(reciter, surahs) {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    if (!reg.backgroundFetch) return; // غير مدعوم
+    for (const s of surahs) {
+      const variant = variantOf(reciter);
+      const urls = surahUrls(reciter, s, { variant });
+      const id = `dl_${reciter}_${s}_${variant}`;
+      try {
+        // إذا كان هناك تنزيل قائم بنفس الـ id أُلغي سابقًا، نتجاوزه
+        const existing = await reg.backgroundFetch.get(id).catch(() => null);
+        if (existing) continue;
+        const meta = getSurahMeta(s);
+        await reg.backgroundFetch.fetch(id, urls, {
+          title: `سورة ${meta?.nameAr || s} — رتّل`,
+          icons: [{ sizes: '192x192', src: 'public/icons/icon-192.png', type: 'image/png' }],
+        });
+        // نجح التسجيل: نُزيل من الطابور العادي وندير عبر bgfetchIds
+        const qi = queue.findIndex((q) => q.reciter === reciter && q.surah === s);
+        if (qi >= 0) queue.splice(qi, 1);
+        bgfetchIds.add(`${reciter}:${s}`);
+        emit();
+      } catch {
+        // هذه السورة ستُنزَّل بالطريقة العادية
+      }
+    }
+  } catch {}
+}
+
+/** يستقبل رسائل الـ SW عند اكتمال Background Fetch */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', async (e) => {
+    if (e.data?.type !== 'bgfetch-done') return;
+    const { reciter, surah, variant, done, failed, bytes, total } = e.data;
+    bgfetchIds.delete(`${reciter}:${surah}`);
+    // نُثبّت نسخة الملف في الذاكرة
+    if (done > 0 && typeof pinVariant === 'function') pinVariant(reciter, surah, variant);
+    // نكتب حالة التنزيل في IndexedDB
+    const complete = failed === 0 && done > 0;
+    db.put('downloads', {
+      id: `${reciter}:${surah}`, reciter, surah,
+      status: complete ? 'done' : 'partial', variant: variant || 'qdc',
+      files: done, total: total || 2, bytes: bytes || 0, updatedAt: Date.now(),
+    }).catch(() => {});
+    emit();
+  });
 }
 
 export async function deleteSurah(reciter, s) {

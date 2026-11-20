@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '75bba40543';
+const VERSION = 'b0e0376489';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -163,6 +163,45 @@ self.addEventListener('activate', (event) => {
     await Promise.all(keys.filter((k) => (k.startsWith('app-') && k !== APP_CACHE) || (k.startsWith('extras-') && k !== EXTRAS_CACHE)).map((k) => caches.delete(k)));
     await self.clients.claim();
   })());
+});
+
+// ===== Background Fetch (التنزيل في الخلفية) =====
+// id format: "dl_{reciter}_{surah}_{variant}"
+self.addEventListener('backgroundfetchsuccess', (event) => {
+  const bgf = event.registration;
+  event.waitUntil((async () => {
+    const cache = await caches.open(AUDIO_CACHE);
+    const records = await bgf.matchAll();
+    let done = 0, bytes = 0;
+    for (const r of records) {
+      const res = await r.responseReady.catch(() => null);
+      if (res?.ok) {
+        const blob = await res.clone().blob().catch(() => null);
+        if (blob) bytes += blob.size;
+        await cache.put(r.request, res);
+        done++;
+      }
+    }
+    await bgf.updateUI({ title: 'تم التنزيل' }).catch(() => {});
+    const parts = bgf.id.split('_'); // ['dl', reciter, surah, variant]
+    const msg = { type: 'bgfetch-done', reciter: parts[1], surah: +parts[2], variant: parts[3], done, failed: records.length - done, bytes, total: records.length };
+    const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of clients) c.postMessage(msg);
+  })());
+});
+self.addEventListener('backgroundfetchfail', (event) => {
+  const bgf = event.registration;
+  event.waitUntil((async () => {
+    await bgf.updateUI({ title: 'فشل التنزيل' }).catch(() => {});
+    const parts = bgf.id.split('_');
+    const msg = { type: 'bgfetch-done', reciter: parts[1], surah: +parts[2], variant: parts[3], done: 0, failed: 1, bytes: 0, total: 1 };
+    const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of clients) c.postMessage(msg);
+  })());
+});
+self.addEventListener('backgroundfetchabort', () => {});
+self.addEventListener('backgroundfetchclick', (event) => {
+  event.waitUntil(self.clients.openWindow(self.registration.scope));
 });
 
 // ===== الإشعارات =====

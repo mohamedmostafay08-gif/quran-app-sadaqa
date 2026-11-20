@@ -76,6 +76,8 @@ export async function renderDownloads(_p, _q, isStale) {
         row.prog.firstChild.style.width = `${pct * 100}%`;
         label = `جارٍ التنزيل ${ar(Math.round(pct * 100))}٪`;
         iconName = 'close'; aria = 'إلغاء التنزيل'; action = () => dl.cancel(reciter, s);
+      } else if (st.bgfetching?.some((b) => b.reciter === reciter && b.surah === s)) {
+        label = 'تنزيل في الخلفية ☁'; iconName = 'close'; aria = 'إلغاء'; action = () => dl.cancel(reciter, s);
       } else if (queued) {
         label = 'في الانتظار'; iconName = 'close'; aria = 'إلغاء'; action = () => dl.cancel(reciter, s);
       } else if (d?.status === 'done') {
@@ -137,7 +139,7 @@ export async function renderDownloads(_p, _q, isStale) {
   );
 
   mount(h('div.downloads',
-    topbar({ title: 'التنزيلات', back: '#/more' }),
+    topbar({ title: 'التنزيلات', back: '#/listen' }),
     extrasCard,
     h('section.card',
       h('button.row-btn', { type: 'button', onclick: () => reciterSheet() },

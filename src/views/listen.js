@@ -87,8 +87,6 @@ export function renderListen() {
     h('h2.lib-h', 'إذاعات مباشرة'),
     featured,
     h('a.row-btn.ls-more', { href: '#/radio' }, h('span', h('strong', 'كل الإذاعات'), h('small', 'القاهرة والسعودية وإذاعة لكل قارئ')), icon('forward')),
-    h('a.card.ls-lessons-entry', { href: '#/lessons' }, h('span.ls-kind.audio', { 'aria-hidden': 'true' }, icon('users')),
-      h('span.ls-t', h('strong', 'دروس المشايخ'), h('small', 'الشعراوي وابن عثيمين وابن باز وعمر عبد الكافي وغيرهم')), icon('forward')),
     h('h2.lib-h', 'استمع إلى سورة'),
     h('div.hd-tools', input),
     list,
@@ -114,7 +112,7 @@ export function renderAdhkar() {
       row('#/asma', 'star', 'أسماء الله الحسنى', 'التسعة والتسعون مع معانيها'),
       row('#/tasbih', 'repeat', 'السبحة', 'عدّاد التسبيح بأذكار جاهزة')),
     h('h2.lib-h', 'كل الأذكار'),
-    h('a.row-btn', { href: '#/prayer?tab=adhkar' }, h('span', h('strong', 'مكتبة الأذكار الكاملة'), h('small', 'حصن المسلم مرتّب بالمواقف')), icon('forward')),
+    h('a.row-btn.ls-more', { href: '#/prayer?tab=adhkar' }, h('span', h('strong', 'مكتبة الأذكار الكاملة'), h('small', 'حصن المسلم مرتّب بالمواقف')), icon('forward')),
   ));
 }
 

@@ -236,7 +236,7 @@ kbd { font-family: inherit; background: var(--surface-2); border: 1px solid var(
 .bar.thin { height: 4px; margin-top: var(--sp-2); }
 .small-note { font-size: var(--fs-sm); color: var(--text-2); margin: var(--sp-2) 0 0; }
 .dl-list { list-style: none; margin: 0; padding: 0; }
-.dl-item { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-1); border-bottom: 1px solid var(--border); }
+.dl-item { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-2); border-bottom: 1px solid var(--border); }
 .dl-main { flex: 1; min-width: 0; display: grid; }
 .dl-state { font-size: var(--fs-sm); }
 .dl-item.is-done .dl-state { color: var(--accent); }
@@ -292,6 +292,7 @@ body:has(.player-bar.show) .main { padding-bottom: calc(var(--tabbar-h) + 100px 
 .tabbar a svg { width: 22px; height: 22px; }
 .tabbar a[aria-current="page"] { color: var(--accent); }
 .tabbar a[aria-current="page"] svg { stroke-width: 2.2; }
+@media (max-width: 390px) { .tabbar a { font-size: 10px; } }
 
 /* ===== التنبيه ===== */
 .toast {
