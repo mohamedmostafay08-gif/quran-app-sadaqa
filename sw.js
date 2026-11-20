@@ -3,12 +3,12 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = 'e44f9d3f99';
+const VERSION = 'd93e8ff3d9';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
 // البيانات الإضافية (الكلمات، التفسير، الصفحات، الترجمات…) تُخزَّن عند أول استخدام في كاش مستقل
-const EXTRAS_VERSION = 'e9e0c5a425';
+const EXTRAS_VERSION = '858fde3794';
 const EXTRAS_CACHE = 'extras-' + EXTRAS_VERSION;
 const isExtra = (path) => /\/public\/data\/(words|tafsir|tafsir-saadi|mushaf|trans|library)\//.test(path) || /\/public\/data\/(roots|tajweed|tajweed-qpc)\.json$/.test(path);
 const ASSETS = [
