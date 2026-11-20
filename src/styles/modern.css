@@ -1,23 +1,22 @@
 /* ===================================================================
-   التصميم العصري — يُحمَّل بعد كل الأنماط ويوحّد شكل التطبيق:
-   خلفية محايدة، كروت بيضاء بظل ناعم، أخضر واحد مميز، أيقونات داخل مربعات ملوّنة،
-   وأزرار وشرائح بزوايا مستديرة. المصحف نفسه يبقى على ورقه الكلاسيكي.
+   هوية «رتّل» الإسلامية الراقية — أخضر عميق دافئ، كريمي أصيل، ذهب مصحفي
    =================================================================== */
 
 body { background: var(--bg); font-feature-settings: "ss01"; }
 h1, h2, h3, strong { font-weight: 700; }
 
-/* ===== الشريط العلوي: شفاف ناعم مع حافة رفيعة ===== */
+/* ===== الشريط العلوي: خلفية راقية مع خط أخضر رفيع أسفله ===== */
 .topbar {
-  background: color-mix(in srgb, var(--bg) 86%, transparent);
-  -webkit-backdrop-filter: saturate(1.4) blur(14px); backdrop-filter: saturate(1.4) blur(14px);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  -webkit-backdrop-filter: saturate(1.6) blur(16px); backdrop-filter: saturate(1.6) blur(16px);
   border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 12%, transparent);
 }
 .topbar-title h1 { font-size: var(--fs-lg); font-weight: 700; letter-spacing: -.01em; }
 .topbar-title p { color: var(--text-2); }
 .icon-btn { border-radius: 12px; }
 .icon-btn:hover { background: var(--surface-2); }
-body::before { background: color-mix(in srgb, var(--bg) 92%, transparent); }
+body::before { background: color-mix(in srgb, var(--surface) 92%, transparent); }
 
 /* ===== الكروت ===== */
 .card, .quick, .surah-frame, .lib-card, .more-group, .occ-item, .st-tile, .dua-card, .asma-card, .quiz-opt, .sh-ep, .continue, .td-adhan, .td-friday, .dua-sunnah {
@@ -48,30 +47,50 @@ body::before { background: color-mix(in srgb, var(--bg) 92%, transparent); }
 .quick small { color: var(--text-2); font-size: var(--fs-sm); }
 
 /* ===== الأزرار ===== */
-.btn { border-radius: 12px; min-height: 44px; font-weight: 600; box-shadow: none; }
+.btn { border-radius: 12px; min-height: 44px; font-weight: 700; box-shadow: none; letter-spacing: .01em; }
+.btn:not(.ghost):not([disabled]) { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.btn:not(.ghost):not([disabled]):hover { background: var(--accent-2); border-color: var(--accent-2); }
 .btn.ghost { background: var(--surface-2); border-color: transparent; color: var(--accent); }
 .btn.ghost:hover { background: var(--accent-soft); }
 .pb-chip { border-radius: 999px; min-height: 36px; background: var(--surface); border: 1px solid var(--border); font-weight: 600; }
 .pb-chip[aria-pressed="true"], .pb-chip.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-.seg { background: var(--surface-2); border: 0; padding: 4px; }
-.seg button[aria-selected="true"], .seg button[aria-checked="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(16, 28, 22, .12); }
+.seg { background: var(--surface-2); border: 0; padding: 4px; border-radius: 14px; }
+.seg button[aria-selected="true"], .seg button[aria-checked="true"] { background: var(--surface); color: var(--accent); box-shadow: 0 1px 4px rgba(10, 24, 16, .14); font-weight: 700; }
 
 /* ===== الحقول ===== */
 .note-input, select, .search-input, .search-bar { border-radius: 12px; }
 .search-bar { background: var(--surface); border: 1px solid var(--border); box-shadow: none; }
 
 /* ===== عناوين الأقسام ===== */
-.lib-h { font-size: var(--fs-md); font-weight: 700; color: var(--text); margin: var(--sp-5) 0 var(--sp-3); }
+.lib-h {
+  font-size: var(--fs-md); font-weight: 700; color: var(--text);
+  margin: var(--sp-5) 0 var(--sp-3);
+  display: flex; align-items: center; gap: var(--sp-2);
+}
+.lib-h::before {
+  content: ''; display: block; width: 3px; height: 1.1em;
+  background: var(--accent); border-radius: 999px; flex: none;
+}
 .eyebrow, .lc-eyebrow { letter-spacing: 0; }
 
 /* ===== الكروت الملوّنة (الصلاة القادمة، الاستماع): تدرّج أخضر هادئ ===== */
 .td-prayer, .pr-hero, .listen-card, .sahabi-hero, .continue.hero {
-  background: linear-gradient(135deg, var(--hero-1) 0%, var(--hero-2) 100%);
+  background: linear-gradient(145deg, var(--hero-1) 0%, var(--hero-2) 60%, color-mix(in srgb, var(--hero-2) 80%, #1a7a55) 100%);
   color: var(--on-hero); border: 0; box-shadow: var(--shadow-lg);
 }
-.listen-card .lc-play { background: var(--on-hero); color: var(--hero-1); }
-.lc-eyebrow, .sahabi-hero .eyebrow, .sh-more, .td-prayer small, .pr-hero .eyebrow { color: color-mix(in srgb, var(--on-hero) 78%, transparent); }
-.td-prayer .td-ic { background: rgba(255, 255, 255, .16); color: inherit; }
+/* نقشة هندسية إسلامية خفية على كروت Hero */
+.listen-card, .td-prayer {
+  position: relative; overflow: hidden;
+}
+.listen-card::after, .td-prayer::after {
+  content: ''; position: absolute; inset-inline-end: -24px; top: -24px;
+  width: 140px; height: 140px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.listen-card .lc-play { background: var(--on-hero); color: var(--hero-1); box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+.lc-eyebrow, .sahabi-hero .eyebrow, .sh-more, .td-prayer small, .pr-hero .eyebrow { color: color-mix(in srgb, var(--on-hero) 70%, transparent); }
+.td-prayer .td-ic { background: rgba(255, 255, 255, .18); color: inherit; border-radius: 14px; }
 
 /* ===== السور والقوائم ===== */
 .surah-item { border-radius: var(--radius); }
@@ -104,7 +123,12 @@ body::before { background: color-mix(in srgb, var(--bg) 92%, transparent); }
 .sheet { border-radius: var(--radius-lg) var(--radius-lg) 0 0; border: 0; box-shadow: var(--shadow-lg); }
 
 /* ===== شريط التبويب السفلي (موبايل) ===== */
-.tabbar { background: color-mix(in srgb, var(--surface) 94%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-top: 1px solid var(--border); }
+.tabbar {
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  -webkit-backdrop-filter: saturate(1.5) blur(16px); backdrop-filter: saturate(1.5) blur(16px);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -1px 0 color-mix(in srgb, var(--accent) 8%, transparent);
+}
 .tabbar a { color: var(--text-3); font-weight: 600; gap: 4px; }
 .tabbar a svg { box-sizing: content-box; padding: 4px 16px; border-radius: 999px; transition: background .2s; }
 .tabbar a[aria-current="page"] { color: var(--accent); }
