@@ -64,6 +64,7 @@ async function boot() {
   try {
     await loadSettings();
     await Promise.all([initData((msg) => { if (status) status.textContent = msg; }), loadReciters()]);
+    await import('./offline/downloader.js').then((m) => m.initPins()).catch(() => {});
   } catch (e) {
     console.error(e);
     document.getElementById('main').replaceChildren(h('div.boot',

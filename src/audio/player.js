@@ -42,19 +42,30 @@ const WORD_QDC = {
 };
 const serverKey = (url) => (url.match(/audio\/(.+?)\/?$/) || [])[1];
 /** المصدر الفعلي للقارئ: نسخة Quran.com بتوقيت الكلمات إن كانت متاحة ومفعّلة (وبوجود إنترنت) */
-export function effectiveReciter(reciterId) {
+export function effectiveReciter(reciterId, variant) {
   const r = getReciter(reciterId);
-  const w = settings.get('wordHighlight') !== false && navigator.onLine && r.source !== 'qdc' && !r.untimed && WORD_QDC[serverKey(r.server || '')];
-  return w ? { ...r, source: 'qdc', qdc: w[0], server: w[1], pad: w[2], words: true } : r;
+  const map = r.source !== 'qdc' && !r.untimed && WORD_QDC[serverKey(r.server || '')];
+  const w = map && (variant ? variant === 'qdc' : settings.get('wordHighlight') !== false);
+  return w ? { ...r, source: 'qdc', qdc: map[0], server: map[1], pad: map[2], words: true } : r;
 }
 export const hasWordTiming = (reciterId) => !!effectiveReciter(reciterId).words;
 
+// السور المنزّلة تُشغَّل دائمًا من النسخة نفسها التي نُزّلت (بإنترنت أو بدونه)،
+// حتى لا يبحث المشغّل عن ملف آخر غير المحفوظ على الجهاز
+const pinned = new Map(); // 'القارئ:السورة' → 'qdc' | 'base'
+export const variantOf = (reciterId) => (effectiveReciter(reciterId).words ? 'qdc' : 'base');
+export function pinVariant(reciterId, s, v) { if (v) pinned.set(`${reciterId}:${s}`, v); else pinned.delete(`${reciterId}:${s}`); }
+const sourceFor = (reciterId, s) => effectiveReciter(reciterId, pinned.get(`${reciterId}:${s}`));
+const urlOf = (r, s) => `${r.server}${r.source === 'qdc' && !r.pad ? s : pad(s)}.mp3`;
+/** رابط السورة لنسخة محددة (للتنزيل والتحقق من الملفات القديمة) */
+export const surahUrlFor = (reciterId, s, variant) => urlOf(substituteFor(reciterId, s) || effectiveReciter(reciterId, variant), s);
+export const timingUrlFor = (reciterId, s, variant) => { const r = effectiveReciter(reciterId, variant); return r.source === 'qdc' ? `${QDC_API}/${r.qdc}/${s}?segments=true` : `${TIMING_API}?surah=${s}&read=${reciterId}`; };
+
 export function surahUrl(reciterId, s) {
-  const r = substituteFor(reciterId, s) || effectiveReciter(reciterId);
-  return `${r.server}${r.source === 'qdc' && !r.pad ? s : pad(s)}.mp3`;
+  return urlOf(substituteFor(reciterId, s) || sourceFor(reciterId, s), s);
 }
 export function timingUrl(reciterId, s) {
-  const r = effectiveReciter(reciterId);
+  const r = sourceFor(reciterId, s);
   return r.source === 'qdc' ? `${QDC_API}/${r.qdc}/${s}?segments=true` : `${TIMING_API}?surah=${s}&read=${reciterId}`;
 }
 
@@ -62,7 +73,7 @@ export function timingUrl(reciterId, s) {
 const timingCache = new Map();
 /** يرجع مصفوفة [start, end] بالثواني؛ الفهرس 0 = البسملة/الاستعاذة قبل الآية الأولى */
 export async function getTimings(reciterId, s) {
-  const eff = effectiveReciter(reciterId);
+  const eff = sourceFor(reciterId, s);
   const key = `${reciterId}:${s}:${eff.words ? 'w' : ''}`;
   if (timingCache.has(key)) return timingCache.get(key);
   const res = await fetch(timingUrl(reciterId, s));

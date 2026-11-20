@@ -1,6 +1,6 @@
 // تنزيل سور/قراء كاملة للأوفلاين مع طابور وتقدم وإلغاء
 import { db } from '../db.js';
-import { surahUrl, timingUrl } from '../audio/player.js';
+import { surahUrl, timingUrl, surahUrlFor, timingUrlFor, variantOf, pinVariant } from '../audio/player.js';
 import { AUDIO_CACHE, requestPersist, deleteSurah as removeFiles } from './storage.js';
 
 const CONCURRENCY = 2;
@@ -19,8 +19,30 @@ export const status = () => ({
 });
 
 /** ملفات السورة: الصوت الكامل + توقيت الآيات (التوقيت صغير ويبقى عند الحذف) */
-export function surahUrls(reciter, s, { forDelete = false } = {}) {
-  return forDelete ? [surahUrl(reciter, s)] : [surahUrl(reciter, s), timingUrl(reciter, s)];
+export function surahUrls(reciter, s, { forDelete = false, variant } = {}) {
+  const a = variant ? surahUrlFor(reciter, s, variant) : surahUrl(reciter, s);
+  const t = variant ? timingUrlFor(reciter, s, variant) : timingUrl(reciter, s);
+  return forDelete ? [a] : [a, t];
+}
+
+/** عند فتح التطبيق: نثبّت كل سورة منزّلة على النسخة المحفوظة فعلًا على الجهاز */
+export async function initPins() {
+  let rows = [];
+  try { rows = await db.all('downloads'); } catch { return; }
+  const cache = await caches.open(AUDIO_CACHE).catch(() => null);
+  for (const r of rows) {
+    if (r.status !== 'done') continue;
+    if (r.variant) { pinVariant(r.reciter, r.surah, r.variant); continue; }
+    // تنزيلات قديمة لم تُسجَّل نسختها: نبحث عن الملف المحفوظ بين النسختين
+    if (!cache) continue;
+    for (const v of ['qdc', 'base']) {
+      if (await cache.match(surahUrlFor(r.reciter, r.surah, v))) {
+        pinVariant(r.reciter, r.surah, v);
+        db.put('downloads', { ...r, variant: v }).catch(() => {});
+        break;
+      }
+    }
+  }
 }
 
 export function isQueued(reciter, s) {
@@ -48,7 +70,9 @@ export function cancelAll() {
 
 export async function deleteSurah(reciter, s) {
   cancel(reciter, s);
-  await removeFiles(reciter, s, surahUrls(reciter, s, { forDelete: true }));
+  // نحذف النسختين احتياطًا (قد تكون السورة نُزّلت قبل تسجيل النسخة)
+  await removeFiles(reciter, s, ['qdc', 'base'].map((v) => surahUrlFor(reciter, s, v)));
+  pinVariant(reciter, s, null);
   emit();
 }
 
@@ -69,7 +93,8 @@ async function pump() {
 }
 
 async function run({ reciter, surah }) {
-  const urls = surahUrls(reciter, surah);
+  const variant = variantOf(reciter);
+  const urls = surahUrls(reciter, surah, { variant });
   const abort = new AbortController();
   active = { reciter, surah, done: 0, total: urls.length, bytes: 0, abort };
   emit();
@@ -121,10 +146,11 @@ async function run({ reciter, surah }) {
   const complete = !abort.signal.aborted && failed === 0;
   await db.put('downloads', {
     id, reciter, surah,
-    status: complete ? 'done' : 'partial',
+    status: complete ? 'done' : 'partial', variant,
     files: active.done, total: urls.length,
     bytes: active.bytes, updatedAt: Date.now(),
   });
+  if (complete) pinVariant(reciter, surah, variant);
 }
 
 /** حالة السورة من الكاش مباشرة (للتأكد) */
