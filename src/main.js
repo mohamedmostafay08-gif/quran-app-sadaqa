@@ -194,10 +194,18 @@ function markSubnav() {
 }
 addEventListener('qa:nav', markSubnav);
 
-// نسخة جديدة فعّلت نفسها: نعرض زر «حدّث الآن» (لا نعيد التحميل تلقائيًا حتى لا نقطع القراءة أو التلاوة)
+// نسخة جديدة فعّلت نفسها:
+// — إذا كان التطبيق في الخلفية عند التحديث: أعد التحميل تلقائياً فور فتحه
+// — إذا كان المستخدم يستخدمه فعلياً الآن: اعرض زر «حدّث الآن» حتى لا نقطع القراءة أو التلاوة
 if ('serviceWorker' in navigator) {
   const hadController = !!navigator.serviceWorker.controller;
-  navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) showUpdateBanner(); });
+  let wasHidden = !document.hasFocus();
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') wasHidden = true; });
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) return;
+    if (wasHidden || document.visibilityState !== 'visible') location.reload();
+    else showUpdateBanner();
+  });
 }
 
 function registerSW() {
