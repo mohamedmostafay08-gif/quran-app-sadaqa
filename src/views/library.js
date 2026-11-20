@@ -2,6 +2,7 @@
 import { h, icon, ar } from '../lib/dom.js';
 import { normalize } from '../lib/arabic.js';
 import { mount, topbar, toast, sheet, empty } from '../ui.js';
+import { loadStories, storyNodes, readLabel } from '../features/story.js';
 import { navigate } from '../router.js';
 import { track } from '../features/stats.js';
 
@@ -216,11 +217,17 @@ export async function renderSahabi(params) {
   const byId = new Map([...sahaba.map((x) => [x.id, ['sahaba', x]]), ...qisas.map((x) => [x.id, ['qisas', x]])]);
   const related = s.hadith.map((id) => byId.get(id)).filter(Boolean);
   const go = (n) => navigate(`/sahabi/${(n + list.length) % list.length}`, { replace: true });
+  // القصة السردية (إن وُجدت) بدل الترجمة الموسوعية
+  const stories = await loadStories('sahaba').catch(() => null);
+  const story = stories?.find((x) => x.id === `s${k + 1}`);
+  const storyBody = story ? await storyNodes(story) : null;
   mount(h('div.library.sahabi-page',
     topbar({ title: k === today ? 'صحابي اليوم' : 'سيرة صحابي', back: '#/library', actions: [h('a.icon-btn', { href: '#/sahabi/list', 'aria-label': 'كل الصحابة' }, icon('users'))] }),
-    h('header.sh-head', h('span.eyebrow', k === today ? 'صحابي اليوم' : 'من سِيَر الصحابة'), h('h1', s.name), h('p.muted', 'رضي الله عنه وأرضاه')),
-    h('section.card.sh-bio', ...s.bio.split(/\n\n+/).map((p) => h('p', p)),
-      h('p.small-note', 'المصدر: ', h('a', { href: s.url, target: '_blank', rel: 'noopener' }, 'ويكيبيديا العربية'), ' (CC BY-SA)، مراجَعة على كتب التراجم.')),
+    h('header.sh-head', h('span.eyebrow', k === today ? 'صحابي اليوم' : 'من سِيَر الصحابة'), h('h1', s.name), h('p.muted', story?.title || (/(بنت|أم |عائشة|خديجة|فاطمة|سمية|أسماء|حفصة|نسيبة)/.test(s.name) ? 'رضي الله عنها وأرضاها' : 'رضي الله عنه وأرضاه')),
+      story ? h('small.st-time', readLabel(story)) : null),
+    story ? h('article.card.st-body', ...storyBody)
+      : h('section.card.sh-bio', ...s.bio.split(/\n\n+/).map((p) => h('p', p)),
+        h('p.small-note', 'المصدر: ', h('a', { href: s.url, target: '_blank', rel: 'noopener' }, 'ويكيبيديا العربية'), ' (CC BY-SA)، مراجَعة على كتب التراجم.')),
     related.length ? h('section.sh-related', h('h2.lib-h', 'أحاديث صحيحة ورد فيها ذكره'),
       h('ol.hd-list', related.map(([topic, x]) => h('li', h('a.hd-item', { href: `#/hadith/${topic}/${x.id}` }, h('p.hd-title', x.title), badges(x)))))) : null,
     h('nav.surah-nav', { 'aria-label': 'صحابة آخرون' },

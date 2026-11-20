@@ -4,6 +4,7 @@ import { mount, topbar } from '../ui.js';
 import { getSurahMeta, getSurahText } from '../data.js';
 import { player } from '../audio/player.js';
 import { navigate } from '../router.js';
+import { loadStories, storyNodes, readLabel } from '../features/story.js';
 
 // [المعرّف، الاسم، المواضع: [سورة، من، إلى]]
 export const PROPHETS = [
@@ -46,8 +47,14 @@ export async function renderProphets(params) {
   const [, name, list] = PROPHETS[i];
   const next = PROPHETS[i + 1];
   const box = h('div.pr-passages');
+  const stories = await loadStories('prophets').catch(() => null);
+  const story = stories?.find((x) => x.id === params.id);
+  const storyBody = story ? await storyNodes(story) : null;
   mount(h('div.prophets-page',
-    topbar({ title: name, sub: `${ar(list.length)} ${list.length > 2 && list.length < 11 ? 'مواضع' : 'موضع'} في القرآن`, back: '#/prophets' }),
+    topbar({ title: name, sub: story ? readLabel(story) : `${ar(list.length)} ${list.length > 2 && list.length < 11 ? 'مواضع' : 'موضع'} في القرآن`, back: '#/prophets' }),
+    story ? h('header.sh-head', h('span.eyebrow', 'من قصص الأنبياء'), h('h1', name), h('p.muted', story.title)) : null,
+    story ? h('article.card.st-body', ...storyBody) : null,
+    story ? h('h2.lib-h', 'مواضع القصة في القرآن، قراءةً واستماعًا') : null,
     box,
     next ? h('a.btn.block', { href: `#/prophets/${next[0]}` }, next[1], icon('back')) : null));
   for (const [s, a, b] of list) {

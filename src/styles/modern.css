@@ -532,3 +532,21 @@ body.focus-mode .main { padding-top: 0; }
 .ls-video { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; background: #000; margin: var(--sp-2) 0; }
 .ls-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .ls-topics, .ls-sheikhs { -webkit-mask-image: linear-gradient(to left, #000 88%, transparent); mask-image: linear-gradient(to left, #000 88%, transparent); }
+
+/* القصص السردية */
+.st-time { display: inline-block; margin-top: 4px; color: var(--text-3); }
+.st-body { display: grid; gap: var(--sp-3); padding: var(--sp-4) var(--sp-4) var(--sp-5); margin-bottom: var(--sp-4); }
+.st-p { margin: 0; font-size: 17.5px; line-height: 2.05; }
+.st-h { margin: var(--sp-2) 0 0; font-size: 19px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+.st-h::before { content: '۞'; color: var(--gold); font-size: .85em; }
+.st-ayah { margin: 0; padding: var(--sp-3) var(--sp-3) var(--sp-2); border-radius: var(--radius); background: color-mix(in srgb, var(--gold) 9%, var(--surface)); border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent); }
+.st-ayah blockquote { margin: 0; font-family: var(--font-quran); font-size: 23px; line-height: 2.2; text-align: center; color: var(--text); }
+.st-an { color: var(--gold); font-size: .75em; }
+.st-ayah figcaption, .st-hadith figcaption { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); font-size: 13px; color: var(--text-2); }
+.st-ayah figcaption a { color: var(--text-2); }
+.st-hadith { margin: 0; padding: var(--sp-3); border-radius: var(--radius); background: var(--accent-soft); border-inline-start: 4px solid var(--accent); display: grid; gap: 6px; }
+.st-q { font-size: 12px; font-weight: 700; color: var(--accent); }
+.st-hadith blockquote { margin: 0; font-size: 17px; line-height: 2; font-weight: 500; }
+.st-hadith figcaption { justify-content: flex-start; flex-wrap: wrap; }
+.st-lessons { padding: var(--sp-3); border-radius: var(--radius); background: var(--surface-2); }
+.st-lessons ul { margin: var(--sp-2) 0 0; padding-inline-start: 1.2em; display: grid; gap: 6px; line-height: 1.9; }
