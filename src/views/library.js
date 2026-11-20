@@ -84,7 +84,7 @@ export async function renderLibrary() {
     h('div.lib-grid',
       ...index.filter((t) => t.id === 'sahaba' || t.id === 'qisas').map(topicCard),
       h('a.lib-card', { href: '#/sahabi/list' }, h('span.lib-icon', { 'aria-hidden': 'true' }, icon('user')),
-        h('span.lib-text', h('strong', 'سِيَر الصحابة'), h('small', `${ar(sahabi.length)} صحابيًا وصحابية، صحابي كل يوم`)))),
+        h('span.lib-text', h('strong', 'قصص الصحابة'), h('small', `${ar(sahabi.length)} قصة بالآيات والأحاديث، وصحابي كل يوم`)))),
     h('h2.lib-h', 'تعلّم الوضوء والصلاة'),
     h('div.lib-grid', fiqh.sections.map((s) => h('a.lib-card', { href: `#/guide/${s.id}` },
       h('span.lib-icon', { 'aria-hidden': 'true' }, icon(SECTIONS_ICON[s.id] || 'book')),
@@ -198,6 +198,8 @@ export async function renderSahabi(params) {
   let list, sahaba, qisas;
   try { [list, sahaba, qisas] = await Promise.all([load('sahabi'), load('sahaba'), load('qisas')]); } catch { return offlineEmpty('صحابي اليوم', '#/library'); }
   if (params.i === 'list') {
+    const stories = await loadStories('sahaba').catch(() => []);
+    const hook = (k) => stories.find((x) => x.id === `s${k + 1}`)?.title;
     const input = h('input.note-input', { type: 'search', placeholder: 'ابحث عن صحابي…', 'aria-label': 'ابحث عن صحابي' });
     const ul = h('ul.lib-grid.sh-list');
     const today = dayIndex(list.length);
@@ -205,11 +207,11 @@ export async function renderSahabi(params) {
       const q = normalize(input.value.trim());
       ul.replaceChildren(...list.map((s, k) => [s, k]).filter(([s]) => !q || normalize(s.name).includes(q)).map(([s, k]) => h('li', h('a.lib-card', { href: `#/sahabi/${k}` },
         h('span.lib-icon', { 'aria-hidden': 'true' }, k === today ? icon('star') : icon('user')),
-        h('span.lib-text', h('strong', s.name), h('small', k === today ? 'صحابي اليوم' : `${ar(s.bio.length > 1200 ? Math.round(s.bio.length / 900) + 1 : 1)} دقيقة قراءة`))))));
+        h('span.lib-text', h('strong', s.name), h('small', k === today ? 'صحابي اليوم' : hook(k) || 'سيرة مختصرة'))))));
     };
     input.addEventListener('input', draw);
     draw();
-    return mount(h('div.library', topbar({ title: 'سِيَر الصحابة', sub: `${ar(list.length)} صحابيًا وصحابية`, back: '#/library' }), h('div.hd-tools', input), ul));
+    return mount(h('div.library', topbar({ title: 'قصص الصحابة', sub: `${ar(list.length)} صحابيًا وصحابية`, back: '#/library' }), h('div.hd-tools', input), ul));
   }
   const today = dayIndex(list.length);
   const k = params.i != null && params.i !== '' ? Math.min(list.length - 1, Math.max(0, parseInt(params.i, 10) || 0)) : today;

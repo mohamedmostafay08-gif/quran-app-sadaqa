@@ -76,3 +76,6 @@ export function download(filename, content, type = 'text/plain') {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+/** بعد المزامنة: نعيد القراءة من التخزين */
+export function resetCache() { cache = null; }

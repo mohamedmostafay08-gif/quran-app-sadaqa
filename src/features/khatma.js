@@ -30,6 +30,7 @@ export async function create({ type = 'read', days = 30, startPage = 1 }) {
     donePage: startPage - 1,    // آخر صفحة مكتملة
     log: {},                    // { 'YYYY-MM-DD': pagesRead }
     createdAt: Date.now(),
+    updatedAt: Date.now(),
     finishedAt: null,
   };
   await db.put('khatma', k);
@@ -82,6 +83,7 @@ export async function markUntil(k, page) {
   k.log[d] = (k.log[d] || 0) + delta;
   k.donePage = page;
   if (page >= TOTAL_PAGES) k.finishedAt = Date.now();
+  k.updatedAt = Date.now();
   await db.put('khatma', k);
   return k;
 }

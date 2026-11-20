@@ -51,7 +51,7 @@ async function load() {
   const [{ PROPHETS }, { LESSONS }] = await Promise.all([import('../views/prophets.js'), import('../views/tajweed.js')]);
   const n = normalize;
   cache = {
-    surahs: getSurahs().map((s) => ({ key: n(s.nameAr), href: `#/surah/${s.id}`, title: `سورة ${s.nameAr}`, sub: `${s.ayahCount} آية` })),
+    surahs: getSurahs().map((s) => ({ key: n(s.nameAr), href: `#/surah/${s.id}`, title: `سورة ${s.nameAr}`, sub: `${String(s.ayahCount).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d])} آية` })),
     pages: PAGES.map(([href, title, kw]) => ({ key: n(`${title} ${kw}`), href, title })),
     adhkar: (adhkar?.chapters || []).flatMap((c) => [{ key: n(c.title), href: `#/adhkar/${c.id}`, title: c.title, sub: 'باب من الأذكار' },
       ...c.items.map((it) => ({ key: n(it.text), href: `#/adhkar/${c.id}`, title: clip(it.text), sub: c.title }))]),

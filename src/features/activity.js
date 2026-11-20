@@ -71,3 +71,6 @@ export function initActivity() {
     save();
   });
 }
+
+/** بعد المزامنة: نعيد القراءة من التخزين */
+export function resetCache() { cache = null; }

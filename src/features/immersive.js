@@ -107,6 +107,19 @@ export function setupImmersive({ n, container }) {
   return () => cleanups.forEach((f) => f());
 }
 
+/** منع انطفاء الشاشة (لوضع الصفحات وغيره) — يرجع دالة الإلغاء */
+export function keepScreenOn() {
+  let lock = null;
+  const keep = async () => {
+    if (!settings.get('keepAwake')) return;
+    try { if ('wakeLock' in navigator && document.visibilityState === 'visible') lock = await navigator.wakeLock.request('screen'); } catch { /* غير مدعوم */ }
+  };
+  const onVis = () => { if (document.visibilityState === 'visible') keep(); };
+  keep();
+  document.addEventListener('visibilitychange', onVis);
+  return () => { document.removeEventListener('visibilitychange', onVis); lock?.release?.().catch(() => {}); };
+}
+
 /** تلميح يظهر مرة واحدة لتعريف الإيماءات */
 export function gestureHintOnce() {
   try {

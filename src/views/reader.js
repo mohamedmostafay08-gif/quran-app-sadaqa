@@ -14,10 +14,10 @@ import { shareAudioSheet } from '../features/shareAudio.js';
 import { track } from '../features/stats.js';
 import { setupImmersive, gestureHintOnce } from '../features/immersive.js';
 
-export async function renderReader(params, _q, isStale) {
+export async function renderReader(params, query = {}, isStale) {
   const n = Math.min(114, Math.max(1, parseInt(params.surah, 10) || 1));
   const target = params.ayah ? parseInt(params.ayah, 10) : null;
-  if (settings.get('readMode') === 'pages') { navigate(`/page/${pageOf(n, target || 1)}`, { replace: true }); return; }
+  if (settings.get('readMode') === 'pages' && !query.flow) { navigate(`/page/${pageOf(n, target || 1)}`, { replace: true }); return; }
   const meta = getSurahMeta(n);
   const useTajweed = settings.get('tajweed');
   const transId = settings.get('translation');

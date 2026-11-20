@@ -39,3 +39,6 @@ export function saveLastRead(s, a) {
   if (cur && cur.surah === s && cur.ayah === a) return;
   settings.set('lastRead', { surah: s, ayah: a, at: Date.now() });
 }
+
+/** بعد المزامنة: نعيد القراءة من التخزين */
+export function resetCache() { cache = null; }

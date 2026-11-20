@@ -4,7 +4,8 @@ import * as settings from '../state.js';
 
 const STORES = ['bookmarks', 'notes', 'memorize', 'khatma'];
 // إعدادات لا معنى لنقلها بين الأجهزة
-const SKIP_SETTINGS = new Set(['dataNotice', 'lastListen']);
+// والأسرار الخاصة بالجهاز (رمز المزامنة ومعرّف الجهاز) لا تُكتب في ملف قد يُشارَك
+const SKIP_SETTINGS = new Set(['dataNotice', 'lastListen', 'syncCode', 'deviceToken']);
 
 export async function exportBackup() {
   const stores = {};

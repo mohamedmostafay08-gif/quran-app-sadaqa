@@ -34,6 +34,8 @@ export function navigate(to, { replace = false } = {}) {
 
 let seq = 0;
 async function resolve() {
+  // روابط داخل الصفحة نفسها (مثل «تخطَّ إلى المحتوى» #main) ليست مسارات: لا نغيّر الشاشة
+  if (location.hash && !location.hash.startsWith('#/') && current) return;
   const my = ++seq;
   const match = parse() || parse('#/');
   if (current?.cleanup) { try { current.cleanup(); } catch (e) { console.error(e); } }
@@ -41,7 +43,14 @@ async function resolve() {
   onChange?.(match);
   const mounted = ui.mountCount;
   const sk = setTimeout(() => { if (my === seq && ui.mountCount === mounted) ui.showSkeleton(); }, 160);
-  const result = await match.route.handler(match.params, match.query, () => my !== seq);
+  let result;
+  try { result = await match.route.handler(match.params, match.query, () => my !== seq); }
+  catch (e) {
+    console.error(e);
+    clearTimeout(sk);
+    if (my === seq) ui.showError?.(e);
+    return;
+  }
   clearTimeout(sk);
   if (my !== seq) { result?.cleanup?.(); return; }
   current = result || null;

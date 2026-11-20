@@ -108,7 +108,7 @@ export async function renderGroup(params, query, isStale) {
   };
 
   const run = async (fn) => {
-    try { g = await fn(); draw(); } catch (e) { toast(e.message); g = await G.getGroup(id).catch(() => g); draw(); }
+    try { g = await fn(); draw(); return true; } catch (e) { toast(e.message); g = await G.getGroup(id).catch(() => g); draw(); return false; }
   };
 
   function partSheet(n, p) {
@@ -120,14 +120,14 @@ export async function renderGroup(params, query, isStale) {
         h('p', 'خذ هذا الجزء لتقرأه، وعلّمه «تم» بعد الانتهاء.'),
         name,
         h('div.btn-row',
-          h('button.btn', { type: 'button', onclick: () => { settings.set('groupName', name.value.trim()); close(); run(() => G.takePart(id, n, name.value.trim())).then(() => toast(`الجزء ${ar(n)} معك الآن`)); } }, icon('check'), 'خذ الجزء'),
+          h('button.btn', { type: 'button', onclick: () => { settings.set('groupName', name.value.trim()); close(); run(() => G.takePart(id, n, name.value.trim())).then((ok) => ok && toast(`الجزء ${ar(n)} معك الآن`)); } }, icon('check'), 'خذ الجزء'),
           readLink),
       ) });
     }
     if (p.mine && p.status === 'taken') {
       return sheet({ title: `الجزء ${ar(n)} — معك`, content: (close) => h('div.form',
         h('div.btn-row',
-          h('button.btn', { type: 'button', onclick: () => { close(); run(() => G.donePart(id, n)).then(() => toast('تقبّل الله منك')); } }, icon('check'), 'أتممت القراءة'),
+          h('button.btn', { type: 'button', onclick: () => { close(); run(() => G.donePart(id, n)).then((ok) => ok && toast('تقبّل الله منك')); } }, icon('check'), 'أتممت القراءة'),
           readLink),
         h('button.btn.ghost.danger.block', { type: 'button', onclick: () => { close(); run(() => G.releasePart(id, n)); } }, 'ترك الجزء لغيري'),
       ) });

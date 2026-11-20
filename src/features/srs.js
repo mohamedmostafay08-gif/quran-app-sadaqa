@@ -21,7 +21,7 @@ export async function addRange(surah, from, to) {
   for (let a = from; a <= to; a++) {
     if (existing.has(id(surah, a))) continue;
     // أول مراجعة غدًا
-    items.push({ id: id(surah, a), surah, ayah: a, ease: 2.5, interval: 0, reps: 0, lapses: 0, due: now + DAY / 2, addedAt: now, lastReview: null });
+    items.push({ id: id(surah, a), surah, ayah: a, ease: 2.5, interval: 0, reps: 0, lapses: 0, due: now + DAY / 2, addedAt: now, lastReview: null, updatedAt: now });
   }
   if (items.length) await db.putMany('memorize', items);
   return items.length;
@@ -53,7 +53,7 @@ export function next(item, q) {
     ease = Math.max(1.3, ease + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)));
   }
   const dueAt = interval === 0 ? Date.now() + 10 * 60000 : Date.now() + interval * DAY;
-  return { ...item, ease, interval, reps, lapses, due: dueAt, lastReview: Date.now() };
+  return { ...item, ease, interval, reps, lapses, due: dueAt, lastReview: Date.now(), updatedAt: Date.now() };
 }
 
 export async function grade(item, q) {

@@ -116,10 +116,10 @@ export function mountPlayerBar() {
     if (!od) mpProgress.style.transform = 'scaleX(0)';
     const playIcon = () => (st.status === 'loading' ? h('span.spinner', { 'aria-hidden': 'true' }) : icon(live ? 'pause' : 'play'));
     mpPlay.replaceChildren(playIcon());
-    mpPlay.setAttribute('aria-label', live ? 'إيقاف مؤقت' : 'تشغيل');
+    mpPlay.setAttribute('aria-label', live || st.status === 'loading' ? 'إيقاف مؤقت' : 'تشغيل');
     if (!isOpen) return;
     fpPlay.replaceChildren(playIcon());
-    fpPlay.setAttribute('aria-label', live ? 'إيقاف مؤقت' : 'تشغيل');
+    fpPlay.setAttribute('aria-label', live || st.status === 'loading' ? 'إيقاف مؤقت' : 'تشغيل');
     fpTitle.textContent = st.radio.name;
     fpSub.textContent = st.error || st.radio.sub || 'إذاعة';
     sleepBtn.classList.toggle('on', !!sl);
@@ -178,10 +178,10 @@ export function mountPlayerBar() {
     const playing = st.status === 'playing';
     const playIcon = () => (st.status === 'loading' ? h('span.spinner', { 'aria-hidden': 'true' }) : icon(playing ? 'pause' : 'play'));
     mpPlay.replaceChildren(playIcon());
-    mpPlay.setAttribute('aria-label', playing ? 'إيقاف مؤقت' : 'تشغيل');
+    mpPlay.setAttribute('aria-label', playing || st.status === 'loading' ? 'إيقاف مؤقت' : 'تشغيل');
     if (!isOpen) return;
     fpPlay.replaceChildren(playIcon());
-    fpPlay.setAttribute('aria-label', playing ? 'إيقاف مؤقت' : 'تشغيل');
+    fpPlay.setAttribute('aria-label', playing || st.status === 'loading' ? 'إيقاف مؤقت' : 'تشغيل');
     fpTitle.textContent = `سورة ${m.nameAr}`;
     fpSub.textContent = st.error ? st.error : st.ayah == null ? `${ar(m.ayahCount)} آية` : `${where} من ${ar(m.ayahCount)}`;
     recBtn.replaceChildren(icon('user'), h('span', recName));

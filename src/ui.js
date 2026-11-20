@@ -107,3 +107,9 @@ export function showSkeleton() {
     ...[0, 1, 2, 3].map(() => h('div.sk-row', h('span.sk.sk-dot'), h('div', bar('55%', 14), bar('35%', 10)))),
   ));
 }
+
+/** خطأ غير متوقع في شاشة: رسالة واضحة مع إعادة المحاولة بدل هيكل تحميل لا ينتهي */
+export function showError() {
+  main().replaceChildren(h('section.card', { style: 'margin-top:var(--sp-5)' }, empty('info', 'تعذّر فتح هذه الشاشة', navigator.onLine ? 'حدث خطأ غير متوقع.' : 'قد تحتاج اتصالًا بالإنترنت.',
+    h('div.btn-row', h('button.btn', { type: 'button', onclick: () => dispatchEvent(new HashChangeEvent('hashchange')) }, 'إعادة المحاولة'), h('a.btn.ghost', { href: '#/' }, 'الرئيسية')))));
+}

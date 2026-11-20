@@ -9,7 +9,7 @@ const SUPABASE_KEY = 'sb_publishable_4yIAdvDsyTja323tcEVUvQ_KLxQYg7P';
 const STORES = ['bookmarks', 'notes', 'memorize', 'khatma'];
 // إعدادات خاصة بكل جهاز لا تُنقل
 const LOCAL_ONLY = new Set(['theme', 'fontScale', 'bigUI', 'keepAwake', 'wifiOnly', 'autoDownloadNext', 'adhanInApp', 'deviceToken',
-  'onboarded', 'dataNotice', 'lastBackupAt', 'syncCode', 'prayersDefaultV2', 'fastingDefaultV1', 'preAdhanDefaultV1', 'stats', 'appBadge']);
+  'onboarded', 'dataNotice', 'lastBackupAt', 'syncCode', 'prayersDefaultV2', 'fastingDefaultV1', 'preAdhanDefaultV1', 'stats', 'appBadge', 'prayerLocation']);
 // سجلات تُدمج مفتاحًا بمفتاح بدل الاستبدال
 const MAPS = new Set(['prayerLog', 'adhkarLog', 'badges', 'kidsStars', 'nawawi', 'rateByReciter', 'dhikrLog', 'fastLog', 'lessonProgress']);
 const STAMPED = new Set(['lastRead', 'lastListen', 'lastLesson']); // الأحدث (بحقل at) يفوز
@@ -78,7 +78,19 @@ async function snapshot() {
   return { v: 1, stores, settings: st, activity: lsGet(K.activity, {}), deleted: lsGet(K.deleted, {}) };
 }
 
-const stamp = (r) => Date.parse(r?.updatedAt || r?.createdAt || r?.at || 0) || +r?.updatedAt || +r?.createdAt || +r?.at || 0;
+const num = (v) => (typeof v === 'number' ? v : v ? Date.parse(v) || 0 : 0);
+// أحدث تعديل للسجل: تعديل صريح، أو آخر مراجعة حفظ، أو وقت الإنشاء
+const stamp = (r) => Math.max(num(r?.updatedAt), num(r?.lastReview), num(r?.addedAt), num(r?.createdAt), num(r?.at));
+/** دمج سجلين لنفس العنصر: الأحدث يفوز، والختمة تأخذ أكبر تقدّم وتجمع سجلها اليومي */
+function pick(store, a, b) {
+  if (store === 'khatma') {
+    const [hi, lo] = (a.donePage || 0) >= (b.donePage || 0) ? [a, b] : [b, a];
+    const log = { ...(lo.log || {}) };
+    for (const [d, n] of Object.entries(hi.log || {})) log[d] = Math.max(n, log[d] || 0);
+    return { ...hi, log, finishedAt: hi.finishedAt || lo.finishedAt || null, updatedAt: Math.max(num(a.updatedAt), num(b.updatedAt)) || null };
+  }
+  return stamp(a) >= stamp(b) ? a : b;
+}
 function deepMerge(a, b) { // a = المحلي (يفوز عند التعارض)، b = البعيد
   if (isObj(a) && isObj(b)) { const o = { ...b }; for (const k of Object.keys(a)) o[k] = k in b ? deepMerge(a[k], b[k]) : a[k]; return o; }
   if (Array.isArray(a) && Array.isArray(b)) return [...new Set([...b, ...a].map((x) => JSON.stringify(x)))].map((x) => JSON.parse(x));
@@ -94,7 +106,7 @@ export function merge(local, remote) {
   const stores = {};
   for (const s of STORES) {
     const map = new Map((remote.stores?.[s] || []).map((r) => [String(r.id), r]));
-    for (const r of local.stores?.[s] || []) { const o = map.get(String(r.id)); if (!o || stamp(r) >= stamp(o)) map.set(String(r.id), r); }
+    for (const r of local.stores?.[s] || []) { const o = map.get(String(r.id)); map.set(String(r.id), o ? pick(s, r, o) : r); }
     stores[s] = [...map.values()].filter((r) => { const t = deleted[`${s}|${r.id}`]; return !t || stamp(r) > t; });
   }
 
@@ -179,6 +191,15 @@ export async function stopSync({ wipe = false } = {}) {
   try { localStorage.removeItem(K.at); } catch { /* */ }
 }
 
+/** يمسح النسخ المحفوظة في الذاكرة ويعيد رسم الشاشة (بدون إعادة تحميل التطبيق) */
+export async function refreshAfterSync() {
+  const mods = await Promise.all([import('./bookmarks.js'), import('./notes.js'), import('./activity.js')]).catch(() => []);
+  for (const m of mods) m.resetCache?.();
+  // لا نقاطع القارئ أثناء القراءة أو الاستماع: نعيد رسم الشاشات الخفيفة فقط
+  const r = location.hash.split('/')[1] || '';
+  if (!['surah', 'page', 'focus'].includes(r)) dispatchEvent(new HashChangeEvent('hashchange'));
+}
+
 /** مزامنة تلقائية: عند الفتح، وبعد التعديل بدقيقة، وعند الخروج من التطبيق */
 export function initSync() {
   let timer = 0;
@@ -193,8 +214,8 @@ export function initSync() {
   setTimeout(async () => {
     try {
       const { changed } = await syncNow();
-      // بيانات جديدة من جهاز آخر: نعيد التحميل مرة واحدة لتظهر في كل الصفحات
-      if (changed && !sessionStorage.getItem('qa:sync:reloaded')) { sessionStorage.setItem('qa:sync:reloaded', '1'); location.reload(); }
+      // بيانات جديدة من جهاز آخر: نحدّث الذاكرة ونعيد رسم الشاشة الحالية بدل إعادة تحميل التطبيق
+      if (changed) await refreshAfterSync();
     } catch { /* نحاول في المرة القادمة */ }
   }, 2500);
 }

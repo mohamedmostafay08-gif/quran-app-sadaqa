@@ -1,6 +1,6 @@
 // وضع الصفحات: مصحف المدينة (604 صفحة × 15 سطرًا) بنص مجمع الملك فهد وخطه
 import { h, icon, ar } from '../lib/dom.js';
-import { getSurahMeta, juzOf, pageOf, positionOf, boundariesAt, sajdaAt, quarterLabel } from '../data.js';
+import { getSurahMeta, juzOf, pageOf, positionOf, boundariesAt, sajdaAt, quarterLabel, pageStart } from '../data.js';
 import * as settings from '../state.js';
 import * as bookmarks from '../features/bookmarks.js';
 import * as notes from '../features/notes.js';
@@ -8,6 +8,7 @@ import { player } from '../audio/player.js';
 import { mount, topbar, toast, sheet, posText } from '../ui.js';
 import { recordPage } from '../features/activity.js';
 import { focusPages } from '../features/focus.js';
+import { keepScreenOn } from '../features/immersive.js';
 import { navigate } from '../router.js';
 import { ayahSheet, tajweedLegend } from './reader.js';
 
@@ -16,7 +17,7 @@ let qpcTajweedP = null;
 const getQpcTajweed = () => (qpcTajweedP ||= fetch(new URL('../../public/data/tajweed-qpc.json', import.meta.url)).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).catch((e) => { qpcTajweedP = null; throw e; }));
 const files = new Map();
 let indexP = null;
-const getIndex = () => (indexP ||= fetch(BASE + 'index.json').then((r) => r.json()));
+const getIndex = () => (indexP ||= fetch(BASE + 'index.json').then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).catch((e) => { indexP = null; throw e; }));
 export async function getPage(n) {
   const idx = await getIndex();
   const j = idx[n];
@@ -59,7 +60,11 @@ export async function renderMushaf(params, _q, isStale) {
   const spread = spreadMQ.matches;
   const nums = spread ? (n % 2 ? [n, n + 1] : [n - 1, n]).filter((p) => p >= 1 && p <= 604) : [n];
   let pagesLines;
-  try { pagesLines = await Promise.all(nums.map((p) => getPage(p))); } catch { if (!isStale()) { toast('صفحات المصحف غير متاحة بدون إنترنت قبل تحميلها'); navigate('/quran', { replace: true }); } return; }
+  try { pagesLines = await Promise.all(nums.map((p) => getPage(p))); } catch {
+    // بدون إنترنت وقبل تنزيل الصفحات: نعرض نفس الموضع بالعرض المتصل (النص موجود على الجهاز)
+    if (!isStale()) { const st = pageStart(n); toast('صفحات المصحف تحتاج تنزيلًا مرة واحدة؛ عرضنا لك النص المتصل'); navigate(`/surah/${st.surah}/${st.ayah}?flow=1`, { replace: true }); }
+    return;
+  }
   if (isStale()) return;
   const last = nums[nums.length - 1];
   getPage(Math.min(604, last + 1)).catch(() => {}); // تحميل مسبق
@@ -216,7 +221,8 @@ export async function renderMushaf(params, _q, isStale) {
     wordEl = w ? wrap.querySelector(`.m-w[data-s="${s}"][data-a="${a}"][data-w="${w}"]`) : null;
     wordEl?.classList.add('w-now');
   });
-  return { cleanup() { unsub(); unWord(); removeEventListener('keydown', onKey); spreadMQ.removeEventListener('change', onMQ); clearTimeout(tapTimer); document.body.classList.remove('immersive'); } };
+  const unWake = keepScreenOn();
+  return { cleanup() { unWake(); unsub(); unWord(); removeEventListener('keydown', onKey); spreadMQ.removeEventListener('change', onMQ); clearTimeout(tapTimer); document.body.classList.remove('immersive'); } };
 }
 
 function optionsSheet() {

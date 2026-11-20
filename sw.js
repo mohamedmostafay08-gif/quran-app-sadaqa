@@ -3,12 +3,12 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = 'd93e8ff3d9';
+const VERSION = 'eef4abd6b5';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
 // البيانات الإضافية (الكلمات، التفسير، الصفحات، الترجمات…) تُخزَّن عند أول استخدام في كاش مستقل
-const EXTRAS_VERSION = '858fde3794';
+const EXTRAS_VERSION = '8ab5dda873';
 const EXTRAS_CACHE = 'extras-' + EXTRAS_VERSION;
 const isExtra = (path) => /\/public\/data\/(words|tafsir|tafsir-saadi|mushaf|trans|library)\//.test(path) || /\/public\/data\/(roots|tajweed|tajweed-qpc)\.json$/.test(path);
 const ASSETS = [
@@ -130,6 +130,13 @@ const ASSETS = [
   'public/icons/icon-192.png',
   'public/icons/icon-512.png',
   'public/icons/maskable-512.png',
+  'public/img/miracles/ibrahim-birds.svg',
+  'public/img/miracles/ibrahim-fire.svg',
+  'public/img/miracles/musa-sea.svg',
+  'public/img/miracles/musa-springs.svg',
+  'public/img/miracles/musa-staff.svg',
+  'public/img/miracles/noah-ark.svg',
+  'public/img/miracles/salih-camel.svg',
   'public/lib/adhan.esm.js',
   'public/data/extras.json',
 ];

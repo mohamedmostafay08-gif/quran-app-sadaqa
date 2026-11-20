@@ -101,7 +101,7 @@ function syncCard() {
   const code = settings.get('syncCode');
   const run = async (btn) => {
     btn.disabled = true;
-    try { const { changed } = await Sync.syncNow(); toast(changed ? 'تمت المزامنة، جارٍ التحديث…' : 'بياناتك متزامنة ✓'); if (changed) setTimeout(() => location.reload(), 800); else rerender(); }
+    try { const { changed } = await Sync.syncNow(); toast(changed ? 'تمت المزامنة ووصلت بياناتك ✓' : 'بياناتك متزامنة ✓'); if (changed) await Sync.refreshAfterSync(); rerender(); }
     catch (e) { toast(e.message || 'تعذرت المزامنة'); btn.disabled = false; }
   };
   if (!code) {

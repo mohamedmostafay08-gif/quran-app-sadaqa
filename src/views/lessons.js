@@ -21,7 +21,7 @@ function trackProgress() {
   saver = setInterval(() => {
     const p = player.position();
     if (!p.id?.startsWith('ls:')) { clearInterval(saver); saver = 0; return; }
-    if (p.time < 5) return;
+    if (p.time < 5 || player.state().status !== 'playing') return;
     const all = { ...progress() };
     const done = p.duration && p.time > p.duration - 30;
     all[p.id.slice(3)] = [done ? -1 : Math.round(p.time), Math.round(p.duration), Date.now()];
@@ -79,9 +79,9 @@ export async function renderLessons(params, query = {}) {
     topbar({ title: 'دروس المشايخ', sub: 'تفسير وحديث وسيرة وفقه ومواعظ', back: '#/' }),
     lastS && lastS.kind === 'audio' && lastS.episodes[last.i] ? h('button.card.ls-continue', { type: 'button', onclick: () => playEpisode(data, lastS, last.i) },
       h('span.ls-kind.audio', icon('play')), h('span.ls-t', h('small', 'أكمل الاستماع'), h('strong', lastS.title), h('small', `${data.sheikhs[lastS.sheikh].name} — ${lastS.episodes[last.i][0]}`))) : null,
-    h('div.ls-topics', { role: 'tablist', 'aria-label': 'الموضوعات' },
-      h('a.pb-chip', { href: link(null, sheikh), 'aria-pressed': String(!topic) }, 'الكل'),
-      ...data.topics.filter(([id]) => data.series.some((s) => s.topic === id)).map(([id, name]) => h('a.pb-chip', { href: link(id, sheikh), 'aria-pressed': String(topic === id) }, name))),
+    h('nav.ls-topics', { 'aria-label': 'الموضوعات' },
+      h('a.pb-chip', { href: link(null, sheikh), 'aria-current': !topic ? 'page' : null }, 'الكل'),
+      ...data.topics.filter(([id]) => data.series.some((s) => s.topic === id)).map(([id, name]) => h('a.pb-chip', { href: link(id, sheikh), 'aria-current': topic === id ? 'page' : null }, name))),
     h('div.ls-sheikhs', Object.entries(data.sheikhs).filter(([id]) => data.series.some((s) => s.sheikh === id)).map(([id, sh]) => h('a', { class: `ls-sh${sheikh === id ? ' on' : ''}`, href: link(topic, sheikh === id ? null : id) }, h('span.ls-av', { 'aria-hidden': 'true' }, (sh.short || sh.name).split(' ').pop().replace(/^ال/, '')[0]), h('small', sh.short || sh.name)))),
     list.length ? h('div.ls-list', list.map((s) => seriesCard(data, s))) : h('p.muted', 'لا توجد دروس بهذا الاختيار بعد.'),
   ));
@@ -114,8 +114,9 @@ function renderSeries(data, id) {
     h('ol.ls-eps', s.episodes.map(([t], i) => {
       const pr = p[epId(s.id, i)];
       const done = pr && pr[0] === -1;
-      const playing = cur === 'ls:' + epId(s.id, i);
-      return h('li', h('button', { type: 'button', class: `ls-ep${playing ? ' on' : ''}${done ? ' done' : ''}`, onclick: () => { playEpisode(data, s, i); rerenderSoon(); } },
+      const isCur = cur === 'ls:' + epId(s.id, i);
+      const playing = isCur && ['playing', 'loading'].includes(player.state().status);
+      return h('li', h('button', { type: 'button', 'aria-label': `${playing ? 'إيقاف' : 'تشغيل'}: ${t}`, class: `ls-ep${isCur ? ' on' : ''}${done ? ' done' : ''}`, onclick: () => { if (isCur) player.toggle(); else playEpisode(data, s, i); rerenderSoon(); } },
         h('span.ls-n', done ? '✓' : ar(i + 1)),
         h('span.ls-t', h('strong', t), pr && !done && pr[1] ? h('span.ls-bar', h('span', { style: { width: `${Math.min(100, Math.round((pr[0] / pr[1]) * 100))}%` } })) : null, pr && !done && pr[0] >= 60 ? h('small', `توقفت عند ${fmt(pr[0])}`) : null),
         icon(playing ? 'pause' : 'play')));

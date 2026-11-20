@@ -446,6 +446,8 @@ export const player = {
   toggle() {
     if (st.radio) { if (st.status === 'playing' || st.status === 'loading') { clearTimeout(radioTimer); audio.pause(); st.status = 'paused'; emit(); } else player.resume(); return; }
     if (st.status === 'playing') audio.pause();
+    // أثناء التحميل أو التقطيع: الضغط يوقف (ويلغي أي تحميل جارٍ) بدل أن يعيد التشغيل
+    else if (st.status === 'loading') { loadSeq++; switching = false; audio.pause(); st.status = 'paused'; emit(); }
     else if (st.status === 'paused' && !audio.getAttribute('src')) player.resume();
     else if (st.status === 'idle' && st.surah) player.playFrom(st.surah, st.ayah || 1);
     else player.resume();
