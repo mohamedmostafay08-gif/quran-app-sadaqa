@@ -32,6 +32,11 @@ function wasPlayed(k) { try { return JSON.parse(localStorage.getItem(playedKey()
 export function stopAdhan() {
   if (audio) { audio.pause(); audio.currentTime = 0; }
   box?.remove(); box = null;
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = null;
+    navigator.mediaSession.playbackState = 'none';
+    for (const a of ['play', 'pause', 'stop']) { try { navigator.mediaSession.setActionHandler(a, null); } catch { /* */ } }
+  }
 }
 
 /** يعرض بطاقة الأذان ويحاول تشغيله؛ إن منع المتصفح التشغيل التلقائي يظهر زر «تشغيل الأذان» */
@@ -65,6 +70,15 @@ export function playAdhan(key, voiceId) {
   playBtn.focus();
   audio.currentTime = 0;
   audio.play().catch(() => setBtn()); // قد يمنع المتصفح التشغيل قبل أي لمسة من المستخدم
+  // زر الإيقاف في شريط الإشعارات وشاشة القفل
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({ title, artist: v.by || 'رتّل', album: 'الأذان' });
+    navigator.mediaSession.playbackState = 'playing';
+    const stop = () => stopAdhan();
+    try { navigator.mediaSession.setActionHandler('stop', stop); } catch { /* */ }
+    try { navigator.mediaSession.setActionHandler('pause', stop); } catch { /* */ }
+    try { navigator.mediaSession.setActionHandler('play', () => audio?.play().catch(() => {})); } catch { /* */ }
+  }
 }
 
 /** «فتح» عنصر الصوت بأول لمسة من المستخدم: المتصفحات تمنع التشغيل التلقائي لعنصر لم يُشغَّل بلمسة،
@@ -107,7 +121,10 @@ export function initAdhanScheduler() {
   };
   unlockOnFirstTap();
   setInterval(tick, 20000);
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') tick(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') tick();
+    else if (audio && !audio.paused) stopAdhan(); // إغلاق الأذان حين يُخفى التطبيق
+  });
   settings.subscribe((k) => { if (['notifyPrayers', 'prayerLocation', 'adhanInApp'].includes(k)) tick(); });
   tick();
 }

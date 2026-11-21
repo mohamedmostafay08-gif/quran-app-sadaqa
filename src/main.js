@@ -140,6 +140,10 @@ async function boot() {
   track(isStandalone() ? 'open_installed' : 'open');
   refreshPush();
   initAdhanScheduler();
+  // فتح التطبيق من تنبيه الأذان (URL يحتوي ?adhan=fajr أو #...?adhan=fajr)
+  const _adhanParam = new URLSearchParams(location.search).get('adhan') ||
+    (/[?&]adhan=(\w+)/.exec(location.hash) || [])[1];
+  if (_adhanParam) setTimeout(() => playAdhan(_adhanParam), 800);
   initPrayerNight();
   initActivity();
   initSync();
