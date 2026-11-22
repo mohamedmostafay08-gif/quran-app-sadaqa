@@ -8,16 +8,17 @@ function connectionOk() {
   if (!navigator.onLine) return false;
   if (!settings.get('wifiOnly')) return true;
   const c = navigator.connection;
-  if (!c) return true; // لا يمكن المعرفة (Safari) — نسمح
-  if (c.saveData) return false;
-  if (c.type) return c.type === 'wifi' || c.type === 'ethernet';
-  return true;
+  if (c?.saveData) return false;
+  if (c?.type) return c.type === 'wifi' || c.type === 'ethernet';
+  // نوع الاتصال مجهول (مثل الآيفون): على الموبايل لا ننزّل حتى لا نستهلك الباقة، وعلى الكمبيوتر نسمح
+  return !matchMedia('(pointer: coarse)').matches;
 }
 
 let lastKey = null;
 export function initAutoDownload() {
   player.subscribe(async (st) => {
-    if (!settings.get('autoDownloadNext') || st.status !== 'playing' || !st.surah) return;
+    if (st.status !== 'playing') { if (st.status === 'idle' || st.status === 'paused') lastKey = null; return; }
+    if (!settings.get('autoDownloadNext') || !st.surah) return;
     const key = `${st.reciter}:${st.surah}`;
     if (key === lastKey) return;
     lastKey = key;

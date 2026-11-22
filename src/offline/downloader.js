@@ -8,7 +8,7 @@ import { AUDIO_CACHE, requestPersist, deleteSurah as removeFiles } from './stora
 const CONCURRENCY = 2;
 const queue = [];          // [{ reciter, surah }]
 let active = null;         // { reciter, surah, done, total, bytes, abort }
-const bgfetchIds = new Set(); // `${reciter}:${surah}` handled by Background Fetch
+const bgfetchIds = new Map(); // `${reciter}:${surah}` → معرّف Background Fetch المسجَّل فعلًا
 const listeners = new Set();
 const emit = () => { for (const fn of listeners) fn(status()); };
 
@@ -19,7 +19,7 @@ const emitSoon = () => { if (!soon) soon = setTimeout(() => { soon = 0; emit(); 
 export const status = () => ({
   active: active && { reciter: active.reciter, surah: active.surah, done: active.done + (active.fraction || 0), total: active.total },
   queued: queue.map((q) => ({ ...q })),
-  bgfetching: [...bgfetchIds].map((id) => { const [r, s] = id.split(':'); return { reciter: r, surah: +s }; }),
+  bgfetching: [...bgfetchIds.keys()].map((id) => { const [r, s] = id.split(':'); return { reciter: r, surah: +s }; }),
 });
 
 /** ملفات السورة: الصوت الكامل + توقيت الآيات (التوقيت صغير ويبقى عند الحذف) */
@@ -68,10 +68,11 @@ export function enqueue(reciter, surahs) {
 
 export async function cancel(reciter, s) {
   // إلغاء Background Fetch إن وُجد
-  if (bgfetchIds.has(`${reciter}:${s}`)) {
+  const bgId = bgfetchIds.get(`${reciter}:${s}`);
+  if (bgId) {
     try {
       const reg = await navigator.serviceWorker?.ready;
-      const bgf = await reg?.backgroundFetch?.get(`dl_${reciter}_${s}_${variantOf(reciter)}`);
+      const bgf = await reg?.backgroundFetch?.get(bgId);
       bgf?.abort().catch(() => {});
     } catch {}
     bgfetchIds.delete(`${reciter}:${s}`);
@@ -83,10 +84,9 @@ export async function cancel(reciter, s) {
 }
 export function cancelAll() {
   // إلغاء كل Background Fetches
-  for (const id of bgfetchIds) {
-    const [rec, sur] = id.split(':');
+  for (const bgId of bgfetchIds.values()) {
     navigator.serviceWorker?.ready.then((reg) =>
-      reg?.backgroundFetch?.get(`dl_${rec}_${sur}_${variantOf(rec)}`)?.then((bgf) => bgf?.abort())
+      reg?.backgroundFetch?.get(bgId)?.then((bgf) => bgf?.abort())
     ).catch(() => {});
   }
   bgfetchIds.clear();
@@ -117,7 +117,7 @@ async function _tryBgFetch(reciter, surahs) {
         // نجح التسجيل: نُزيل من الطابور العادي وندير عبر bgfetchIds
         const qi = queue.findIndex((q) => q.reciter === reciter && q.surah === s);
         if (qi >= 0) queue.splice(qi, 1);
-        bgfetchIds.add(`${reciter}:${s}`);
+        bgfetchIds.set(`${reciter}:${s}`, id);
         emit();
       } catch {
         // هذه السورة ستُنزَّل بالطريقة العادية
@@ -228,12 +228,4 @@ async function run({ reciter, surah }) {
     bytes: active.bytes, updatedAt: Date.now(),
   });
   if (complete) pinVariant(reciter, surah, variant);
-}
-
-/** حالة السورة من الكاش مباشرة (للتأكد) */
-export async function verify(reciter, s) {
-  const cache = await caches.open(AUDIO_CACHE);
-  const urls = surahUrls(reciter, s);
-  const hits = await Promise.all(urls.map((u) => cache.match(u)));
-  return hits.filter(Boolean).length === urls.length;
 }

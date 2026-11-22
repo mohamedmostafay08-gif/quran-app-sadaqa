@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = 'e42b8cabff';
+const VERSION = 'a323b4c18f';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -234,9 +234,8 @@ self.addEventListener('notificationclick', (event) => {
       if (adhan) { w.postMessage({ type: 'adhan', key: adhan[1] }); return; }
       return w.navigate(target).catch(() => {});
     }
-    const adhanKey = /[?&]adhan=(\w+)/.exec(event.notification.data?.url || '');
-    const win = await self.clients.openWindow(target);
-    if (adhanKey && win) win.postMessage({ type: 'adhan', key: adhanKey[1] });
+    // التطبيق مغلق: يقرأ main.js معامل adhan من الرابط ويشغّل الأذان
+    return self.clients.openWindow(target);
   })());
 });
 

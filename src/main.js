@@ -143,7 +143,11 @@ async function boot() {
   // فتح التطبيق من تنبيه الأذان (URL يحتوي ?adhan=fajr أو #...?adhan=fajr)
   const _adhanParam = new URLSearchParams(location.search).get('adhan') ||
     (/[?&]adhan=(\w+)/.exec(location.hash) || [])[1];
-  if (_adhanParam) setTimeout(() => playAdhan(_adhanParam), 800);
+  if (_adhanParam) {
+    // نحذف المعامل حتى لا يعود الأذان عند إعادة تحميل الصفحة
+    history.replaceState(null, '', location.pathname + location.hash.replace(/[?&]adhan=\w+/, ''));
+    setTimeout(() => playAdhan(_adhanParam), 800);
+  }
   initPrayerNight();
   initActivity();
   initSync();
@@ -175,11 +179,19 @@ let badgeTimer = 0;
 
 /** الثيم «حسب المغرب»: ليلي من المغرب حتى الفجر، ويُعاد حسابه كل دقيقة */
 function initPrayerNight() {
+  let exact = 0;
   const update = () => {
+    clearTimeout(exact);
     if (getSetting('theme') !== 'prayer') return;
     const loc = getSetting('prayerLocation');
     if (!loc) return setPrayerNight(null);
-    try { const now = new Date(); const t = computeTimes(loc, now); setPrayerNight(now >= t.maghrib || now < t.fajr); } catch { setPrayerNight(null); }
+    try {
+      const now = new Date(); const t = computeTimes(loc, now);
+      setPrayerNight(now >= t.maghrib || now < t.fajr);
+      // تبديل الثيم في لحظة المغرب أو الفجر بالضبط بدل انتظار الفحص الدوري
+      const next = [t.fajr, t.maghrib].filter((d) => d > now).sort((a, b) => a - b)[0];
+      if (next && next - now < 60000) exact = setTimeout(update, next - now + 200);
+    } catch { setPrayerNight(null); }
   };
   update();
   setInterval(update, 60000);

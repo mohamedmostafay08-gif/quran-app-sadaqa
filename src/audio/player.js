@@ -75,7 +75,7 @@ const timingCache = new Map();
 export async function getTimings(reciterId, s) {
   const eff = sourceFor(reciterId, s);
   const key = `${reciterId}:${s}:${eff.words ? 'w' : ''}`;
-  if (timingCache.has(key)) return timingCache.get(key);
+  if (timingCache.has(key)) { const t = timingCache.get(key); timingCache.delete(key); timingCache.set(key, t); return t; }
   const res = await fetch(timingUrl(reciterId, s));
   if (!res.ok) throw new Error('timing ' + res.status);
   const data = await res.json();
