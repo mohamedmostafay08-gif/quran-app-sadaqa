@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https: http:; connect-src 'self' https:; font-src 'self' data:; frame-src https://www.youtube-nocookie.com https://www.youtube.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <title>رتّل — القرآن الكريم مكتوبًا ومسموعًا، مصحف يعمل بدون إنترنت</title>
   <meta name="description" content="رتّل: المصحف الشريف كاملًا بخط مصحف المدينة، وتلاوات أكثر من ١٠٠ قارئ مرتّل ومجوّد، مع الختمة والحفظ والتفسير الميسر ومواقيت الصلاة والأذكار. مجاني وبدون إعلانات ويعمل بدون إنترنت.">
   <meta name="google-site-verification" content="X08-zNfBusMeGg2NTmTB885QOpKe66Kfv11uSZpHapI">
@@ -120,15 +121,7 @@
   <link rel="stylesheet" href="src/styles/features.css">
   <link rel="stylesheet" href="src/styles/modern.css">
   <link rel="stylesheet" href="src/styles/desktop.css">
-  <script>
-    // تطبيق الثيم قبل الرسم لتجنب الوميض
-    try {
-      var s = JSON.parse(localStorage.getItem('qa:boot') || '{}');
-      if (s.theme) document.documentElement.dataset.theme = s.theme;
-      if (s.variant) document.documentElement.dataset.variant = s.variant;
-      if (s.fontScale) document.documentElement.style.setProperty('--quran-scale', s.fontScale);
-    } catch (e) {}
-  </script>
+  <script src="public/lib/boot-theme.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">تخطَّ إلى المحتوى</a>

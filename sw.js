@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = 'a323b4c18f';
+const VERSION = 'bd2d3a0dc8';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -146,6 +146,7 @@ const ASSETS = [
   'public/img/miracles/sulayman-wind.svg',
   'public/img/miracles/yunus-whale.svg',
   'public/lib/adhan.esm.js',
+  'public/lib/boot-theme.js',
   'public/data/extras.json',
 ];
 
