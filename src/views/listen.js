@@ -13,41 +13,53 @@ const radios = () => (radiosP ||= fetch(new URL('../../public/data/radios.json',
 
 /** بطاقة الاستماع: تتابع حالة المشغّل (يُتلى الآن / تابع الاستماع / ابدأ) */
 export function listenCard() {
-  const card = h('section.listen-card', { 'aria-label': 'الاستماع' });
+  // البطاقة تُبنى مرة واحدة، ومع كل آية يتغير النص والأيقونة فقط (الأزرار نفسها تبقى فلا يضيع التركيز)
+  let action = () => {};
+  const reciterName = h('span');
+  const playBtn = h('button.lc-play', { type: 'button', onclick: () => action() });
+  const title = h('strong'), sub = h('small');
+  const card = h('section.listen-card', { 'aria-label': 'الاستماع' },
+    h('div.lc-top',
+      h('span.lc-eyebrow', 'الاستماع'),
+      h('button.lc-reciter', { type: 'button', onclick: () => reciterSheet(), 'aria-label': 'تغيير القارئ' }, icon('user'), reciterName)),
+    h('div.lc-main', playBtn, h('div.lc-text', title, sub)),
+    h('div.lc-actions',
+      h('button.lc-chip', { type: 'button', onclick: async () => { const r = (await radios()).featured[0]; player.playRadio(r); } }, h('i.lc-live'), 'إذاعة القاهرة'),
+      h('a.lc-chip', { href: '#/radio' }, icon('radio'), 'الإذاعات'),
+      h('a.lc-chip', { href: '#/listen' }, icon('play'), 'اختر سورة')));
+  const setText = (el, t) => { if (el.textContent !== t) el.textContent = t; };
+  let iconKey = '';
   const draw = () => {
     const st = player.state();
     const last = settings.get('lastListen');
     const lastRead = settings.get('lastRead');
     const rec = getReciter(settings.get('reciter'));
     const playing = st.status === 'playing' || st.status === 'loading';
-    let title, sub, action;
+    let t, s;
     if (st.radio) {
-      title = st.radio.name; sub = st.radio.ondemand ? (st.radio.sub || '') : playing ? 'بث مباشر الآن' : 'متوقف';
+      t = st.radio.name; s = st.radio.ondemand ? (st.radio.sub || '') : playing ? 'بث مباشر الآن' : 'متوقف';
       action = () => player.toggle();
     } else if (st.surah) {
       const m = getSurahMeta(st.surah);
-      title = `سورة ${m.nameAr}`; sub = (playing ? 'يُتلى الآن' : 'متوقف') + (st.ayah ? `، الآية ${ar(st.ayah)}` : '');
+      t = `سورة ${m.nameAr}`; s = (playing ? 'يُتلى الآن' : 'متوقف') + (st.ayah ? `، الآية ${ar(st.ayah)}` : '');
       action = () => player.toggle();
     } else if (last?.surah) {
       const m = getSurahMeta(last.surah);
-      title = `سورة ${m.nameAr}`; sub = `تابع الاستماع من الآية ${ar(last.ayah || 1)}`;
+      t = `سورة ${m.nameAr}`; s = `تابع الاستماع من الآية ${ar(last.ayah || 1)}`;
       action = () => { player.restore(last); player.resume(); };
     } else {
-      const s = lastRead?.surah || 18;
-      title = `سورة ${getSurahMeta(s).nameAr}`; sub = lastRead ? 'استمع إلى آخر سورة قرأتها' : 'ابدأ الاستماع';
-      action = () => player.playFrom(s, 1);
+      const n = lastRead?.surah || 18;
+      t = `سورة ${getSurahMeta(n).nameAr}`; s = lastRead ? 'استمع إلى آخر سورة قرأتها' : 'ابدأ الاستماع';
+      action = () => player.playFrom(n, 1);
     }
-    card.replaceChildren(
-      h('div.lc-top',
-        h('span.lc-eyebrow', 'الاستماع'),
-        h('button.lc-reciter', { type: 'button', onclick: () => reciterSheet(), 'aria-label': 'تغيير القارئ' }, icon('user'), h('span', st.radio ? (st.radio.ondemand ? 'تفسير' : 'إذاعة') : (getReciter(st.reciter || rec?.id)?.nameAr || rec?.nameAr || '')))),
-      h('div.lc-main',
-        h('button.lc-play', { type: 'button', onclick: action, 'aria-label': playing ? 'إيقاف مؤقت' : 'تشغيل' }, st.status === 'loading' ? h('span.spinner', { 'aria-hidden': 'true' }) : icon(playing ? 'pause' : 'play')),
-        h('div.lc-text', h('strong', title), h('small', sub))),
-      h('div.lc-actions',
-        h('button.lc-chip', { type: 'button', onclick: async () => { const r = (await radios()).featured[0]; player.playRadio(r); } }, h('i.lc-live'), 'إذاعة القاهرة'),
-        h('a.lc-chip', { href: '#/radio' }, icon('radio'), 'الإذاعات'),
-        h('a.lc-chip', { href: '#/listen' }, icon('play'), 'اختر سورة')));
+    setText(title, t); setText(sub, s);
+    setText(reciterName, st.radio ? (st.radio.ondemand ? 'تفسير' : 'إذاعة') : (getReciter(st.reciter || rec?.id)?.nameAr || rec?.nameAr || ''));
+    const k = st.status === 'loading' ? 'loading' : playing ? 'pause' : 'play';
+    if (k !== iconKey) {
+      iconKey = k;
+      playBtn.setAttribute('aria-label', playing ? 'إيقاف مؤقت' : 'تشغيل');
+      playBtn.replaceChildren(k === 'loading' ? h('span.spinner', { 'aria-hidden': 'true' }) : icon(k));
+    }
   };
   card.cleanup = player.subscribe(draw); // تستدعيها الشاشة عند مغادرتها
   draw();
@@ -57,26 +69,37 @@ export function listenCard() {
 // ================= شاشة الاستماع =================
 export function renderListen() {
   const input = h('input.note-input', { type: 'search', placeholder: 'ابحث عن سورة…', 'aria-label': 'ابحث عن سورة للاستماع' });
-  const list = h('ul.ls-surahs');
-  let _prevKey = '';
-  const draw = () => {
-    const q = normalize(input.value.trim());
+  // القائمة تُبنى مرة واحدة؛ مع كل تحديث يتغير صف السورة السابقة والحالية فقط
+  const items = new Map();
+  const isOn = (id) => { const st = player.state(); return st.surah === id && !st.radio; };
+  const paint = (ref) => {
     const st = player.state();
-    const key = `${q}|${st.radio ? '' : st.surah}|${st.status}`;
-    if (key === _prevKey) return;
-    _prevKey = key;
-    list.replaceChildren(...getSurahs().filter((s) => !q || normalize(s.nameAr).includes(q) || String(s.id) === q).map((s) => {
-      const on = st.surah === s.id && !st.radio;
-      return h('li', h('button.ls-item', { type: 'button', class: on ? 'ls-item on' : 'ls-item', onclick: () => (on ? player.toggle() : player.playFrom(s.id, 1)) },
-        h('span.ls-num', ar(s.id)),
-        h('span.ls-name', `سورة ${s.nameAr}`),
-        h('small', `${ar(s.ayahCount)} آية`),
-        icon(on && st.status === 'playing' ? 'pause' : 'play')));
-    }));
+    const on = isOn(ref.s.id);
+    const mode = on ? st.status : 'off';
+    if (mode === ref.mode) return;
+    ref.mode = mode;
+    ref.btn.classList.toggle('on', on);
+    ref.btn.setAttribute('aria-pressed', String(on && st.status === 'playing'));
+    ref.btn.lastChild.replaceWith(icon(on && st.status === 'playing' ? 'pause' : 'play'));
   };
-  input.addEventListener('input', () => { _prevKey = ''; draw(); });
-  const unsub = player.subscribe(draw);
-  draw();
+  const list = h('ul.ls-surahs', getSurahs().map((s) => {
+    const btn = h('button.ls-item', { type: 'button', dataset: { surah: s.id }, onclick: () => (isOn(s.id) ? player.toggle() : player.playFrom(s.id, 1)) },
+      h('span.ls-num', ar(s.id)), h('span.ls-name', `سورة ${s.nameAr}`), h('small', `${ar(s.ayahCount)} آية`), icon('play'));
+    const ref = { s, btn, li: h('li', btn), name: normalize(s.nameAr), mode: null };
+    items.set(s.id, ref);
+    paint(ref);
+    return ref.li;
+  }));
+  input.addEventListener('input', () => {
+    const q = normalize(input.value.trim());
+    for (const ref of items.values()) ref.li.hidden = !!q && !ref.name.includes(q) && String(ref.s.id) !== q;
+  });
+  let lastId = player.state().surah;
+  const unsub = player.subscribe((st) => {
+    if (lastId !== st.surah && items.has(lastId)) paint(items.get(lastId));
+    if (items.has(st.surah)) paint(items.get(st.surah));
+    lastId = st.surah;
+  });
   const lc = listenCard();
   const featured = h('div.ls-radios');
   radios().then((d) => featured.replaceChildren(...d.featured.slice(0, 3).map((r) => h('button.ls-radio', { type: 'button', onclick: () => player.playRadio(r) },

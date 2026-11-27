@@ -15,37 +15,46 @@ export async function renderRadio() {
     mount(h('div', topbar({ title: 'الإذاعة', back: '#/listen' }), h('section.card', empty('radio', 'الإذاعة تحتاج اتصالًا بالإنترنت', 'البث المباشر لا يعمل بدون إنترنت.'))));
     return;
   }
-  const row = (r, big) => {
+  // الصفوف تُبنى مرة واحدة؛ تحديثات المشغّل تغيّر الصف القديم والجديد فقط، فلا يضيع التمرير ولا التركيز
+  const rows = new Map();
+  const paint = (ref) => {
     const st = player.state();
-    const on = st.radio?.id === r.id;
+    const on = st.radio?.id === ref.r.id;
     const playing = on && (st.status === 'playing' || st.status === 'loading');
-    return h('li', { class: `radio-item${big ? ' big' : ''}${on ? ' on' : ''}` },
-      h('button', { type: 'button', 'aria-pressed': String(playing), dataset: { id: r.id }, onclick: () => (on ? player.toggle() : player.playRadio(r)) },
-        h('span.ri-icon', { 'aria-hidden': 'true' }, playing ? h('span.eq', h('i'), h('i'), h('i')) : icon('play')),
-        h('span.ri-text', h('strong', r.name), r.sub ? h('small', r.sub) : null),
-        on && st.status === 'playing' ? h('span.live-dot', 'مباشر') : null,
-      ));
+    const mode = !on ? 'off' : st.status;
+    if (mode === ref.mode) return;
+    ref.mode = mode;
+    ref.li.classList.toggle('on', on);
+    ref.btn.setAttribute('aria-pressed', String(playing));
+    ref.ic.replaceChildren(playing ? h('span.eq', h('i'), h('i'), h('i')) : icon('play'));
+    if (on && st.status === 'playing') ref.btn.append(ref.live); else ref.live.remove();
   };
-  const featured = h('ul.radio-list.featured');
-  const list = h('ul.radio-list');
-  const programs = h('ul.radio-list');
+  const row = (r, big) => {
+    const ic = h('span.ri-icon', { 'aria-hidden': 'true' });
+    const btn = h('button', { type: 'button', dataset: { id: r.id }, onclick: () => (player.state().radio?.id === r.id ? player.toggle() : player.playRadio(r)) },
+      ic, h('span.ri-text', h('strong', r.name), r.sub ? h('small', r.sub) : null));
+    const ref = { r, btn, ic, li: h('li', { class: `radio-item${big ? ' big' : ''}` }, btn), live: h('span.live-dot', 'مباشر'), text: normalize(r.name + ' ' + (r.sub || '')), mode: null };
+    rows.set(r.id, ref);
+    paint(ref);
+    return ref.li;
+  };
+  const featured = h('ul.radio-list.featured', data.featured.map((r) => row(r, true)));
+  const list = h('ul.radio-list', data.reciters.map((r) => row(r)));
+  const programs = h('ul.radio-list', data.programs.map((r) => row(r)));
   const input = h('input.note-input', { type: 'search', placeholder: 'ابحث عن قارئ أو برنامج…', 'aria-label': 'ابحث في الإذاعات' });
-  let _prevKey = '';
-  const draw = () => {
-    const st = player.state();
+  const filter = () => {
     const q = normalize(input.value);
-    const key = `${q}|${st.radio?.id}|${st.status}`;
-    if (key === _prevKey) return;
-    _prevKey = key;
-    const match = (r) => !q || normalize(r.name + ' ' + (r.sub || '')).includes(q);
-    featured.replaceChildren(...data.featured.filter(match).map((r) => row(r, true)));
-    list.replaceChildren(...data.reciters.filter(match).map((r) => row(r)));
-    programs.replaceChildren(...data.programs.filter(match).map((r) => row(r)));
-    for (const ul of [featured, list, programs]) ul.previousElementSibling && (ul.previousElementSibling.hidden = !ul.children.length);
+    for (const ref of rows.values()) ref.li.hidden = !!q && !ref.text.includes(q);
+    for (const ul of [featured, list, programs]) if (ul.previousElementSibling) ul.previousElementSibling.hidden = ![...ul.children].some((li) => !li.hidden);
   };
-  input.addEventListener('input', () => { _prevKey = ''; draw(); });
-  const unsub = player.subscribe(() => draw());
-  draw();
+  input.addEventListener('input', filter);
+  let lastId = player.state().radio?.id;
+  const unsub = player.subscribe((st) => {
+    const id = st.radio?.id;
+    if (lastId !== id && rows.has(lastId)) paint(rows.get(lastId));
+    if (rows.has(id)) paint(rows.get(id));
+    lastId = id;
+  });
   mount(h('div.radio-page',
     topbar({ title: 'الإذاعة', sub: 'بث مباشر على مدار الساعة', back: '#/listen' }),
     h('div.radio-search', input),

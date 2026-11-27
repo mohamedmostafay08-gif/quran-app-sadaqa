@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '15fdc873da';
+const VERSION = 'b95e125041';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -221,7 +221,7 @@ const HASHES = {
   'src/views/kids.js': '54318c1650fc',
   'src/views/lessons.js': '785784deb138',
   'src/views/library.js': 'afb9e1b11fc5',
-  'src/views/listen.js': '07bcd11051df',
+  'src/views/listen.js': 'f61c694f3d99',
   'src/views/memorize.js': '9af230554a1a',
   'src/views/miracles.js': '453726161f1f',
   'src/views/mushaf.js': '7f697b8e84d0',
@@ -231,7 +231,7 @@ const HASHES = {
   'src/views/prophets.js': 'ee784061bc39',
   'src/views/qada.js': '652fd8767eb0',
   'src/views/quiz.js': 'a49311c7b275',
-  'src/views/radio.js': '2d365eabe4cc',
+  'src/views/radio.js': '3031137a5aae',
   'src/views/ramadan.js': 'bfc1d73a78d2',
   'src/views/reader.js': '53b0bb07c217',
   'src/views/search.js': 'fddad38f5daa',
