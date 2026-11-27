@@ -4,6 +4,7 @@ import { h, icon } from '../lib/dom.js';
 import * as settings from '../state.js';
 import * as P from './prayer.js';
 import { player } from '../audio/player.js';
+import { restoreMediaSession } from '../audio/mediaSession.js';
 
 const NAMES = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
 // أصوات الأذان المتاحة
@@ -32,11 +33,7 @@ function wasPlayed(k) { try { return JSON.parse(localStorage.getItem(playedKey()
 export function stopAdhan() {
   if (audio) { audio.pause(); audio.currentTime = 0; }
   box?.remove(); box = null;
-  if ('mediaSession' in navigator) {
-    navigator.mediaSession.metadata = null;
-    navigator.mediaSession.playbackState = 'none';
-    for (const a of ['play', 'pause', 'stop']) { try { navigator.mediaSession.setActionHandler(a, null); } catch { /* */ } }
-  }
+  restoreMediaSession();
 }
 
 /** يعرض بطاقة الأذان ويحاول تشغيله؛ إن منع المتصفح التشغيل التلقائي يظهر زر «تشغيل الأذان» */

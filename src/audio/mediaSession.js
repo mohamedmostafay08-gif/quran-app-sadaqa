@@ -1,11 +1,19 @@
 // أزرار قفل الشاشة وسماعات البلوتوث (Media Session API)
 import { getSurahMeta } from '../data.js';
 
-let rec = null;
+let rec = null, owner = null;
 const ICON = new URL('../../public/icons/icon-512.png', import.meta.url).href;
+
+/** يعيد أزرار شاشة القفل للمشغّل بعد أن يستعيرها الأذان */
+export function restoreMediaSession() {
+  if (!owner) return;
+  setupMediaSession(owner);
+  updateMediaSession(owner.state());
+}
 
 export function setupMediaSession(player) {
   if (!('mediaSession' in navigator)) return;
+  owner = player;
   const ms = navigator.mediaSession;
   const safe = (action, fn) => { try { ms.setActionHandler(action, fn); } catch { /* غير مدعوم */ } };
   safe('play', () => player.resume());
