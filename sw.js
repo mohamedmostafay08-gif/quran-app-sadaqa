@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '1681c2c0f2';
+const VERSION = 'fd3a59415e';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -188,7 +188,7 @@ const HASHES = {
   'src/features/progressCharts.js': '54adecb86133',
   'src/features/push.js': '346597d42faf',
   'src/features/ruqyah.js': 'f6a4e5e2531b',
-  'src/features/ruqyahPlayer.js': '2d9342476ebf',
+  'src/features/ruqyahPlayer.js': '8048acfe1f81',
   'src/features/shareAudio.js': '80b7e2189c68',
   'src/features/shareCard.js': 'd53ad96d54f9',
   'src/features/srs.js': 'ee66c677c98e',
@@ -212,7 +212,7 @@ const HASHES = {
   'src/styles/components.css': 'c29eaf8c7de2',
   'src/styles/desktop.css': '3af1ce9de67a',
   'src/styles/features.css': '8cdea6bd1193',
-  'src/styles/modern.css': '70345f942efb',
+  'src/styles/modern.css': '94890cde2b05',
   'src/styles/themes.css': '60b63673d983',
   'src/ui.js': '8bc2cd16fa60',
   'src/views/about.js': '86e0ef77f8f7',
@@ -245,7 +245,7 @@ const HASHES = {
   'src/views/radio.js': '3031137a5aae',
   'src/views/ramadan.js': 'bfc1d73a78d2',
   'src/views/reader.js': '53b0bb07c217',
-  'src/views/ruqyah.js': '5ba14243b6d7',
+  'src/views/ruqyah.js': '078c2f8d4918',
   'src/views/search.js': '53ade490a636',
   'src/views/settings.js': '5b569833d7e5',
   'src/views/sleep.js': '1b8eed9aedee',
