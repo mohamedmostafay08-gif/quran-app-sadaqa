@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '4087dcbc57';
+const VERSION = '778ed46051';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -48,6 +48,7 @@ const ASSETS = [
   'src/features/stats.js',
   'src/features/story.js',
   'src/features/sync.js',
+  'src/features/tafsirSearch.js',
   'src/features/weekly.js',
   'src/features/whatsNew.js',
   'src/lib/arabic.js',
@@ -154,7 +155,7 @@ const ASSETS = [
 
 // بصمة كل ملف (يملؤها stamp-sw.js)
 const HASHES = {
-  'index.html': '9a7f4152acb0',
+  'index.html': '8d8789a04e24',
   'manifest.webmanifest': '27a0f985d0e6',
   'src/audio/mediaSession.js': 'f1513cd68f40',
   'src/audio/player.js': '55a7203e9466',
@@ -189,9 +190,10 @@ const HASHES = {
   'src/features/stats.js': 'edb52610f21f',
   'src/features/story.js': 'd102d76e42b1',
   'src/features/sync.js': '3dff26474b4f',
+  'src/features/tafsirSearch.js': 'cc8e6126e20d',
   'src/features/weekly.js': '41719a7ad274',
   'src/features/whatsNew.js': '9fd34bd06cc4',
-  'src/lib/arabic.js': 'd267b2704314',
+  'src/lib/arabic.js': 'be9dc1702800',
   'src/lib/dom.js': '4c3bfb175b38',
   'src/main.js': '17c49baed384',
   'src/offline/autoDownload.js': 'd6ef7206644e',
@@ -202,7 +204,7 @@ const HASHES = {
   'src/state.js': '93bb9b0d0c66',
   'src/styles/base.css': 'b75afe71b90a',
   'src/styles/classic.css': '6a0aa81dbc24',
-  'src/styles/components.css': '018ad94a009d',
+  'src/styles/components.css': '25f3660e2aa4',
   'src/styles/desktop.css': '3af1ce9de67a',
   'src/styles/features.css': '8cdea6bd1193',
   'src/styles/modern.css': '56a1dafb5954',
@@ -238,7 +240,7 @@ const HASHES = {
   'src/views/radio.js': '3031137a5aae',
   'src/views/ramadan.js': 'bfc1d73a78d2',
   'src/views/reader.js': '53b0bb07c217',
-  'src/views/search.js': 'fddad38f5daa',
+  'src/views/search.js': '53ade490a636',
   'src/views/settings.js': '5b569833d7e5',
   'src/views/sleep.js': '1b8eed9aedee',
   'src/views/stats.js': '45ff1ed1d1a6',

@@ -5,6 +5,7 @@ import { getSimpleText, getSurahText, getSurahMeta, getSurahs } from '../data.js
 import { mount, topbar, empty } from '../ui.js';
 import { getRoots, decodeLoc, isWordToken } from '../features/extra.js';
 import { searchAll, GROUPS } from '../features/globalSearch.js';
+import { searchTafsir } from '../features/tafsirSearch.js';
 
 const MAX = 200;
 let normCache = null;
@@ -20,10 +21,11 @@ let mode = 'text';
 
 export function renderSearch(_p, query) {
   if (query.root) mode = 'root';
+  else if (query.tafsir) mode = 'tafsir';
   else if (query.q) mode = 'text';
   const input = h('input.search-input', {
     type: 'search', placeholder: '', 'aria-label': 'نص البحث',
-    enterkeyhint: 'search', autocomplete: 'off', value: query.root || query.q || '',
+    enterkeyhint: 'search', autocomplete: 'off', value: query.root || query.tafsir || query.q || '',
   });
   const exact = h('input', { type: 'checkbox', id: 'exact' });
   const status = h('p.search-status', { role: 'status', 'aria-live': 'polite' });
@@ -32,10 +34,11 @@ export function renderSearch(_p, query) {
 
   const run = async () => {
     const q = input.value.trim();
-    history.replaceState(null, '', '#/search' + (q ? `?${mode === 'root' ? 'root' : 'q'}=` + encodeURIComponent(q) : ''));
+    history.replaceState(null, '', '#/search' + (q ? `?${mode === 'text' ? 'q' : mode}=` + encodeURIComponent(q) : ''));
     results.replaceChildren(); global.replaceChildren();
     if (!q) { status.textContent = ''; return; }
     if (mode === 'root') return runRoot(q, status, results, input);
+    if (mode === 'tafsir') return runTafsir(q, status, results, input, exact.checked);
 
     // مرجع مباشر 2:255
     const ref = latinDigits(q).match(/^(\d{1,3})\s*[:：/.\-]\s*(\d{1,3})$/);
@@ -86,10 +89,10 @@ export function renderSearch(_p, query) {
 
   const exactLabel = h('label.check', exact, h('span', 'كلمة كاملة فقط'));
   const applyMode = () => {
-    input.placeholder = mode === 'root' ? 'اكتب الجذر، مثل: رحم أو علم' : 'ابحث في القرآن والأحاديث والأذكار…';
+    input.placeholder = mode === 'root' ? 'اكتب الجذر، مثل: رحم أو علم' : mode === 'tafsir' ? 'ابحث في التفسير الميسر وتفسير السعدي…' : 'ابحث في القرآن والأحاديث والأذكار…';
     exactLabel.hidden = mode === 'root';
   };
-  const modeSeg = h('div.seg', { role: 'tablist', 'aria-label': 'نوع البحث' }, [['text', 'في النص'], ['root', 'بالجذر']].map(([m, label]) => h('button', {
+  const modeSeg = h('div.seg', { role: 'tablist', 'aria-label': 'نوع البحث' }, [['text', 'في النص'], ['tafsir', 'في التفسير'], ['root', 'بالجذر']].map(([m, label]) => h('button', {
     type: 'button', role: 'tab', 'aria-selected': String(mode === m),
     onclick: (e) => { mode = m; for (const b of modeSeg.children) b.setAttribute('aria-selected', String(b === e.currentTarget)); applyMode(); run(); input.focus(); },
   }, label)));
@@ -157,6 +160,27 @@ function resultItem(s, a, text, wordIdx) {
     h('span.result-ref', `سورة ${m.nameAr}، الآية ${ar(a)}`),
     h('p.result-text', { lang: 'ar' }, body),
   ));
+}
+
+// ---------- البحث في التفسير ----------
+async function runTafsir(q, status, results, input, exact) {
+  if (normalize(q).length < 2) { status.textContent = 'اكتب حرفين على الأقل'; return; }
+  status.textContent = 'جارٍ البحث…';
+  let res;
+  try {
+    res = await searchTafsir(q, { exact, onProgress: (d, n) => { if (input.value.trim() === q) status.textContent = `جارٍ تجهيز التفسير للبحث… ${ar(Math.round((d / n) * 100))}٪`; } });
+  } catch { status.textContent = navigator.onLine ? 'تعذّر تحميل التفسير، حاول مرة أخرى.' : 'البحث في التفسير يحتاج تنزيله مرة واحدة؛ اتصل بالإنترنت أو نزّل البيانات من «التنزيلات».'; return; }
+  if (input.value.trim() !== q) return;
+  results.replaceChildren();
+  if (!res.total) {
+    status.textContent = '';
+    results.append(h('li.no-hover', empty('search', 'لا توجد نتائج في التفسير', 'جرّب كلمة أقصر أو بدون "ال" التعريف.')));
+    return;
+  }
+  status.textContent = `في التفسير: ${ar(res.total)} موضعًا` + (res.total > res.hits.length ? ` — يُعرض أول ${ar(res.hits.length)}` : '');
+  results.append(...res.hits.map((x) => h('li', h('a.result', { href: `#/surah/${x.s}/${x.a}` },
+    h('span.result-ref', `${x.name} · سورة ${getSurahMeta(x.s).nameAr}، الآية ${ar(x.a)}`),
+    h('p.result-snippet', x.parts[0], x.parts[1] ? h('mark', x.parts[1]) : null, x.parts[2])))));
 }
 
 // ---------- البحث بالجذر ----------

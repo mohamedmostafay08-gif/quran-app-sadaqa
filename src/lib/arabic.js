@@ -1,7 +1,7 @@
 // أدوات النص العربي: توحيد الحروف وإزالة التشكيل للبحث
 
 // التشكيل وعلامات المصحف والتطويل
-const DIACRITICS = /[ؐ-ًؚ-ٰٟۖ-ۭـ࣓-ࣿ]/g;
+export const DIACRITICS = /[ؐ-ًؚ-ٰٟۖ-ۭـ࣓-ࣿ]/g;
 
 export function stripDiacritics(s) {
   return s.replace(DIACRITICS, '');

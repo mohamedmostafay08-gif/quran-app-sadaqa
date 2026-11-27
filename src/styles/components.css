@@ -213,6 +213,7 @@ kbd { font-family: inherit; background: var(--surface-2); border: 1px solid var(
 .result { display: block; padding: var(--sp-4) var(--sp-3); border-bottom: 1px solid var(--border); color: var(--text); text-decoration: none; border-radius: 8px; }
 .result:hover { background: var(--surface); }
 .result-ref { font-size: var(--fs-sm); font-weight: 700; color: var(--accent); }
+.result-snippet { margin: 4px 0 0; font-size: var(--fs-base); line-height: 1.9; color: var(--text-2); }
 .result-text { font-family: var(--font-quran); font-size: calc(1.3rem * var(--quran-scale)); line-height: 2.1; margin: 2px 0 0; }
 .result-text mark { background: var(--gold-soft); color: inherit; border-radius: 4px; padding: 0 2px; }
 .clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
