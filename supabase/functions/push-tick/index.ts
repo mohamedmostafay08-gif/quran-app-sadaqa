@@ -3,12 +3,14 @@
 // وتذكيرات الجمعة والصيام، والتنبيه قبل الأذان، وأذكار ما بعد الصلاة، وآية الصباح، وقيام الليل لمن فعّلها.
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 import { sendPush } from './webpush.js';
+import { createRateLimiter, clientIp, loadAll, pool } from './limits.js';
 import { Coordinates, CalculationMethod, PrayerTimes, Madhab, HighLatitudeRule } from 'npm:adhan@4.4.3';
 
 const NAMES: Record<string, string> = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
 const WINDOW_BEFORE = 20_000, WINDOW_AFTER = 3 * 60_000; // نافذة الإرسال حول الموعد (يُشغَّل كل دقيقة)
 const APP = 'https://mohamedmostafay08-gif.github.io/quran-app-sadaqa/';
 
+type Due = { key: string; tag: string; ttl?: number; mark?: string; payload: Record<string, unknown> };
 type Sub = { endpoint: string; p256dh: string; auth: string; lat: number; lng: number; tz: string; method: string; madhab: string; prayers: string[]; wird_time: string | null; extras: string[] | null; last_sent: Record<string, string>; fails: number };
 
 /** اليوم الهجري (أم القرى) لتاريخ محلي */
@@ -36,38 +38,72 @@ function prayerTimes(s: Sub, lp: ReturnType<typeof localParts>) {
 let ayahsCache: Promise<{ s: number; a: number; name: string; text: string }[] | null> | null = null;
 const dailyAyahs = () => (ayahsCache ||= fetch(APP + 'public/data/daily-ayahs.json').then((r) => (r.ok ? r.json() : null)).catch(() => null).then((x) => { if (!x) ayahsCache = null; return x; }));
 
+// حماية: حدّ لطلبات الإشعار التجريبي لكل عنوان، ومنع تداخل دورتين في نفس النسخة
+const testLimit = createRateLimiter({ perKey: 5, total: 120, windowMs: 60_000 });
+let ticking = false;
+const MAX_SUBS = +(Deno.env.get('PUSH_MAX_SUBS') || 50_000);
+const TICK_BUDGET_MS = +(Deno.env.get('PUSH_TICK_BUDGET_MS') || 20_000); // pg_net ينتظر ٢٥ ثانية؛ لا نبدأ إرسالًا جديدًا بعد ٢٠
+// الأسرار تُقرأ من Vault مرة كل ٥ دقائق لكل نسخة، لا مع كل طلب
+let cfgCache: { at: number; cfg: any } | null = null;
+const COLUMNS = 'endpoint,p256dh,auth,lat,lng,tz,method,madhab,prayers,wird_time,extras,last_sent,fails';
+
 Deno.serve(async (req) => {
-  const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
-  const { data: cfg, error: cfgErr } = await db.rpc('push_config');
-  if (cfgErr || !cfg?.vapid_private) return new Response('config', { status: 500 });
-  const vapid = { subject: APP, publicKey: cfg.vapid_public, privateKey: cfg.vapid_private };
   const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'content-type, apikey, authorization', 'Content-Type': 'application/json' };
   if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
+  const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: cors });
+
+  // نرفض أي طلب ليس دورة مجدولة ولا إشعارًا تجريبيًا قبل قراءة الأسرار من Vault
+  const body = await req.json().catch(() => ({}));
+  const isTick = req.headers.has('x-tick-key');
+  const testEp = body?.test_endpoint;
+  if (!isTick && !testEp) return new Response('forbidden', { status: 403 });
+  if (!isTick && (typeof testEp !== 'string' || !testEp.startsWith('https://') || testEp.length > 1000)) return json({ ok: false, error: 'bad endpoint' }, 400);
+  if (!isTick && !testLimit(clientIp(req.headers))) return json({ ok: false, error: 'too many requests' }, 429);
+
+  const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
+  if (!cfgCache || Date.now() - cfgCache.at > 300_000) {
+    const { data, error: cfgErr } = await db.rpc('push_config');
+    if (cfgErr || !data?.vapid_private) return new Response('config', { status: 500 });
+    cfgCache = { at: Date.now(), cfg: data };
+  }
+  const cfg = cfgCache.cfg;
+  const vapid = { subject: APP, publicKey: cfg.vapid_public, privateKey: cfg.vapid_private };
 
   // إشعار تجريبي يطلبه المستخدم لجهازه (نقطة الإرسال سرية ولا يعرفها غيره؛ مرة كل ٣٠ ثانية)
-  const body = await req.json().catch(() => ({}));
-  if (body?.test_endpoint) {
-    const { data: s } = await db.from('push_subs').select('*').eq('endpoint', body.test_endpoint).maybeSingle();
-    if (!s) return new Response(JSON.stringify({ ok: false, error: 'not subscribed' }), { status: 404, headers: cors });
+  if (!isTick) {
+    const { data: s } = await db.from('push_subs').select('*').eq('endpoint', testEp).maybeSingle();
+    if (!s) return json({ ok: false, error: 'not subscribed' }, 404);
     const lastTest = Date.parse(s.last_sent?.test || 0);
-    if (Date.now() - lastTest < 30_000) return new Response(JSON.stringify({ ok: false, error: 'too soon' }), { status: 429, headers: cors });
+    if (Date.now() - lastTest < 30_000) return json({ ok: false, error: 'too soon' }, 429);
     const r = await sendPush({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
       JSON.stringify({ title: 'رتّل — إشعار تجريبي', body: 'التنبيهات تعمل على جهازك ✓ اضغط لسماع الأذان', url: '#/prayer?adhan=test', tag: 'test', adhan: true }), { vapid, ttl: 120 });
     await db.from('push_subs').update({ last_sent: { ...(s.last_sent || {}), test: new Date().toISOString() } }).eq('endpoint', s.endpoint);
     const ok = r.status >= 200 && r.status < 300;
     if (r.status === 404 || r.status === 410) await db.from('push_subs').delete().eq('endpoint', s.endpoint);
-    return new Response(JSON.stringify({ ok, status: r.status, error: ok ? undefined : r.text.slice(0, 200) }), { status: ok ? 200 : 502, headers: cors });
+    return json({ ok, status: r.status, error: ok ? undefined : r.text.slice(0, 200) }, ok ? 200 : 502);
   }
 
   if (req.headers.get('x-tick-key') !== cfg.push_tick_key) return new Response('forbidden', { status: 403 });
+  if (ticking) return json({ skipped: 'previous tick still running' }, 202);
+  ticking = true;
+  try { return json(await tick(db, vapid)); } finally { ticking = false; }
+});
 
+async function tick(db: ReturnType<typeof createClient>, vapid: { subject: string; publicKey: string; privateKey: string }) {
+  const started = Date.now();
   const now = new Date();
-  const { data: subs, error } = await db.from('push_subs').select('*').limit(5000);
-  if (error) return new Response(error.message, { status: 500 });
+  // كل المشتركين على صفحات (بدل limit(5000) الذي كان يُسقط الزائد بصمت وبترتيب غير ثابت)
+  const { rows: subs, error, truncated } = await loadAll((from, to) => db.from('push_subs').select(COLUMNS).order('endpoint').range(from, to), { pageSize: 1000, max: MAX_SUBS });
+  if (error) throw new Error(error.message);
+  if (truncated) console.error(`push-tick: وصل عدد المشتركين إلى الحد ${MAX_SUBS}؛ ارفع PUSH_MAX_SUBS أو قسّم الدورة`);
+  else if (subs.length > MAX_SUBS * 0.8) console.warn(`push-tick: ${subs.length} مشترك (أكثر من ٨٠٪ من الحد ${MAX_SUBS})`);
+  const aodList = await dailyAyahs();
 
   let sent = 0, removed = 0;
-  const jobs = (subs as Sub[]).map(async (s) => {
-    const due: { key: string; tag: string; ttl?: number; mark?: string; payload: Record<string, unknown> }[] = [];
+  // المرحلة الأولى (حساب فقط): ما المستحق لكل مشترك الآن
+  const work: { s: Sub; due: Due[]; lp: ReturnType<typeof localParts> }[] = [];
+  for (const s of subs as Sub[]) {
+    const due: Due[] = [];
     let tz = s.tz || 'UTC', lp;
     try { lp = localParts(now, tz); } catch { tz = 'UTC'; lp = localParts(now, tz); } // منطقة زمنية غير صالحة
     if (s.prayers?.length && s.lat != null && s.lng != null) {
@@ -130,7 +166,7 @@ Deno.serve(async (req) => {
     }
     // آية الصباح (٨:٠٠ بتوقيت الجهاز): نفس آية اليوم التي يعرضها التطبيق
     if (ex.includes('aod') && at(8) && s.last_sent?.aod !== lp.date) {
-      const list = await dailyAyahs();
+      const list = aodList;
       if (list?.length) {
         const x = list[Math.floor(Date.UTC(lp.y, lp.m - 1, lp.d) / 86_400_000) % list.length];
         due.push({ key: 'aod', tag: 'aod', ttl: 4 * 3600, payload: { title: `آية اليوم — سورة ${x.name}`, body: `﴿${x.text}﴾`, url: `#/surah/${x.s}/${x.a}`, tag: 'aod' } });
@@ -152,7 +188,11 @@ Deno.serve(async (req) => {
         }
       }
     }
-    if (!due.length) return;
+    if (due.length) work.push({ s, due, lp });
+  }
+
+  // المرحلة الثانية (شبكة): الإرسال بعدد محدود في نفس الوقت وبميزانية زمنية
+  const { skipped } = await pool(work, 32, async ({ s, due, lp }) => {
     const last = { ...(s.last_sent || {}) };
     let gone = false, failed = false;
     for (const d of due) {
@@ -165,7 +205,8 @@ Deno.serve(async (req) => {
     }
     if (gone || (failed && s.fails >= 20)) { await db.from('push_subs').delete().eq('endpoint', s.endpoint); removed++; return; }
     await db.from('push_subs').update({ last_sent: last, fails: failed ? s.fails + 1 : 0 }).eq('endpoint', s.endpoint);
-  });
-  await Promise.allSettled(jobs);
-  return new Response(JSON.stringify({ subs: subs.length, sent, removed }), { headers: { 'Content-Type': 'application/json' } });
-});
+  }, started + TICK_BUDGET_MS);
+  // من لم يُرسَل له لم يُعلَّم، فيُعاد في الدقيقة التالية ضمن نافذة الموعد (٣ دقائق)
+  if (skipped) console.error(`push-tick: انتهت الميزانية الزمنية؛ ${skipped} من ${work.length} مشترك مؤجّل للدورة التالية`);
+  return { subs: subs.length, due: work.length, sent, removed, skipped, truncated, ms: Date.now() - started };
+}

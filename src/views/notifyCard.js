@@ -18,7 +18,7 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
   const testBtn = h('button.btn.ghost.block', { type: 'button', hidden: !((settings.get('notifyPrayers') || []).length || settings.get('wirdTime')), onclick: async () => {
     testBtn.disabled = true; note.textContent = 'جارٍ الإرسال…';
     try { await testPush(); note.textContent = 'تم الإرسال'; }
-    catch (e) { note.textContent = e.message === 'too soon' ? 'حاول بعد نصف دقيقة' : 'تعذر الإرسال'; }
+    catch (e) { note.textContent = e.message === 'too soon' || e.message === 'too many requests' ? 'حاول بعد نصف دقيقة' : 'تعذر الإرسال'; }
     setTimeout(() => { testBtn.disabled = false; }, 30000);
   } }, 'إرسال إشعار تجريبي');
   const save = async (rollback, perm) => {
