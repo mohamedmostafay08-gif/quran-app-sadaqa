@@ -4,11 +4,13 @@ import { h, icon, ar } from '../lib/dom.js';
 import * as settings from '../state.js';
 import { mount, topbar, toast } from '../ui.js';
 import { dayKey } from '../features/activity.js';
+import { hijri } from '../features/prayer.js';
 
 export const KINDS = [['nafl', 'تطوع'], ['qada', 'قضاء'], ['fard', 'فريضة']];
 const LABEL = Object.fromEntries(KINDS);
-const hijriDay = (d) => { try { return +new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { day: 'numeric' }).format(d); } catch { return 0; } };
-const isRamadan = (d) => { try { return +new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { month: 'numeric' }).format(d) === 9; } catch { return false; } };
+// من hijri() نفسها حتى يُطبَّق «تعديل التاريخ الهجري» الذي اختاره المستخدم
+const hijriDay = (d) => hijri(d)?.day || 0;
+const isRamadan = (d) => hijri(d)?.month === 9;
 /** سبب استحباب صيام اليوم (أو null) */
 export function sunnahReason(d = new Date()) {
   const hd = hijriDay(d), wd = d.getDay();

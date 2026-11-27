@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = 'b95e125041';
+const VERSION = '4ff0c57157';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -174,7 +174,7 @@ const HASHES = {
   'src/features/imageCard.js': '83ca53432225',
   'src/features/immersive.js': 'ae65fa1b199f',
   'src/features/install.js': '230a60003539',
-  'src/features/khatma.js': '9e401a3e41cb',
+  'src/features/khatma.js': 'c060e8d822d0',
   'src/features/notes.js': 'd3ccbec4d8f2',
   'src/features/prayer.js': 'a15d2a6bf359',
   'src/features/prayerLog.js': 'edbf2eca0125',
@@ -211,7 +211,7 @@ const HASHES = {
   'src/views/downloads.js': '7638d5def9d3',
   'src/views/duas.js': '61877a14505b',
   'src/views/elder.js': '3ff4305ade7e',
-  'src/views/fasting.js': '984d6c698e0e',
+  'src/views/fasting.js': '7ce6be9a1117',
   'src/views/greetings.js': 'ac2783444be8',
   'src/views/group.js': 'aca60e8ab7df',
   'src/views/help.js': 'a7842b14b008',

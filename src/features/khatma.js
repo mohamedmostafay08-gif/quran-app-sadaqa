@@ -1,6 +1,7 @@
 // خطة الختمة الذكية: ورد يومي بالصفحات يتعدّل تلقائيًا لو فاتك يوم
 import { db } from '../db.js';
 import { pageStart, getSurahMeta } from '../data.js';
+import { hijri } from './prayer.js';
 
 export const TOTAL_PAGES = 604;
 const DAY = 86400000;
@@ -99,10 +100,7 @@ export function streak(k) {
 
 /** أيام رمضان القادم (تقريبي حسب تقويم أم القرى المحسوب في المتصفح) */
 export function daysUntilRamadanEnd() {
-  try {
-    const fmt = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { month: 'numeric', day: 'numeric' });
-    const parts = Object.fromEntries(fmt.formatToParts(new Date()).map((p) => [p.type, p.value]));
-    if (+parts.month === 9) return Math.max(1, 30 - +parts.day + 1);
-  } catch { /* غير مدعوم */ }
+  const hd = hijri();
+  if (hd?.month === 9) return Math.max(1, 30 - hd.day + 1);
   return 30;
 }
