@@ -33,6 +33,7 @@ import { renderLessons } from './views/lessons.js';
 import { renderMiracles } from './views/miracles.js';
 import { renderWhatsNew, checkWhatsNew, bannerSummary } from './features/whatsNew.js';
 import { initAppBadge } from './features/appBadge.js';
+import { initNative } from './features/native.js';
 import { checkBadges } from './features/badges.js';
 import { initActivity } from './features/activity.js';
 import { renderReader } from './views/reader.js';
@@ -152,6 +153,7 @@ async function boot() {
   initActivity();
   initSync();
   initAppBadge();
+  initNative();
   checkWhatsNew().catch(() => {});
   // ضغطة على تنبيه الأذان والتطبيق مفتوح: يصل طلب التشغيل من عامل الخدمة
   navigator.serviceWorker?.addEventListener('message', (e) => { if (e.data?.type === 'adhan') playAdhan(e.data.key); });

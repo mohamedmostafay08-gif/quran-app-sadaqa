@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="green">#0F5C46</color>
+    <color name="green_dark">#0A3F30</color>
+    <style name="Theme.Rattil" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/green_dark</item>
+        <item name="android:navigationBarColor">@color/green_dark</item>
+        <item name="android:windowBackground">@color/green</item>
+    </style>
+</resources>

@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '442c87aa11';
+const VERSION = '6ad30d89db';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -36,6 +36,7 @@ const ASSETS = [
   'src/features/immersive.js',
   'src/features/install.js',
   'src/features/khatma.js',
+  'src/features/native.js',
   'src/features/notes.js',
   'src/features/prayer.js',
   'src/features/prayerLog.js',
@@ -152,7 +153,7 @@ const ASSETS = [
 
 // بصمة كل ملف (يملؤها stamp-sw.js)
 const HASHES = {
-  'index.html': '0a0244550a17',
+  'index.html': '8a49a596f851',
   'manifest.webmanifest': '27a0f985d0e6',
   'src/audio/mediaSession.js': 'f1513cd68f40',
   'src/audio/player.js': '55a7203e9466',
@@ -175,6 +176,7 @@ const HASHES = {
   'src/features/immersive.js': 'ae65fa1b199f',
   'src/features/install.js': '230a60003539',
   'src/features/khatma.js': 'c060e8d822d0',
+  'src/features/native.js': '14819900398c',
   'src/features/notes.js': 'd3ccbec4d8f2',
   'src/features/prayer.js': 'a15d2a6bf359',
   'src/features/prayerLog.js': 'edbf2eca0125',
@@ -189,7 +191,7 @@ const HASHES = {
   'src/features/whatsNew.js': '9fd34bd06cc4',
   'src/lib/arabic.js': 'd267b2704314',
   'src/lib/dom.js': '4c3bfb175b38',
-  'src/main.js': '390fdb58c0d9',
+  'src/main.js': '17c49baed384',
   'src/offline/autoDownload.js': 'd6ef7206644e',
   'src/offline/downloader.js': 'c28423c1cb18',
   'src/offline/extras.js': 'd589a0716900',
@@ -226,7 +228,7 @@ const HASHES = {
   'src/views/miracles.js': '453726161f1f',
   'src/views/mushaf.js': '7f697b8e84d0',
   'src/views/nawawi.js': '7d04424076db',
-  'src/views/notifyCard.js': 'f9b290856e5e',
+  'src/views/notifyCard.js': '8c977b92b2e5',
   'src/views/prayer.js': 'f08a7c3efaad',
   'src/views/prophets.js': 'ee784061bc39',
   'src/views/qada.js': '652fd8767eb0',

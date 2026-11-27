@@ -4,6 +4,7 @@ import * as settings from '../state.js';
 import { toast } from '../ui.js';
 import { pushStatus, syncPush, PUSH_PRAYERS, askPermission, testPush } from '../features/push.js';
 import { playAdhan, preloadAdhan, VOICES } from '../features/adhan.js';
+import { isNativeApp, nativeTest } from '../features/native.js';
 
 const NAMES = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
 const STATUS_MSG = {
@@ -13,15 +14,18 @@ const STATUS_MSG = {
 };
 
 export function notifyCard({ prayers = true, wird = true } = {}) {
-  const status = pushStatus();
+  // داخل تطبيق أندرويد: التطبيق نفسه يجدول الأذان والورد (بلا Web Push)
+  const native = isNativeApp();
+  const status = native ? 'ok' : pushStatus();
   const note = h('p.small-note', { 'aria-live': 'polite' });
   const testBtn = h('button.btn.ghost.block', { type: 'button', hidden: !((settings.get('notifyPrayers') || []).length || settings.get('wirdTime')), onclick: async () => {
     testBtn.disabled = true; note.textContent = 'جارٍ الإرسال…';
-    try { await testPush(); note.textContent = 'تم الإرسال'; }
+    try { await (native ? nativeTest() : testPush()); note.textContent = 'تم الإرسال'; }
     catch (e) { note.textContent = e.message === 'too soon' || e.message === 'too many requests' ? 'حاول بعد نصف دقيقة' : 'تعذر الإرسال'; }
     setTimeout(() => { testBtn.disabled = false; }, 30000);
   } }, 'إرسال إشعار تجريبي');
   const save = async (rollback, perm) => {
+    if (native) { testBtn.hidden = !((settings.get('notifyPrayers') || []).length || settings.get('wirdTime')); toast('تم حفظ التنبيهات'); return; }
     note.textContent = 'جارٍ الحفظ…';
     try {
       if ((await perm) === 'denied') { rollback(); note.textContent = STATUS_MSG.denied; return; }
@@ -57,7 +61,7 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
     const inApp = h('input', { type: 'checkbox', role: 'switch', checked: settings.get('adhanInApp') !== false });
     inApp.addEventListener('change', () => settings.set('adhanInApp', inApp.checked));
     // الأذان مفعّل افتراضيًا؛ يبقى فقط السماح بالإشعارات ليصل والتطبيق مغلق
-    if (pushOk && hasLoc && Notification.permission === 'default' && (settings.get('notifyPrayers') || []).length) {
+    if (pushOk && !native && hasLoc && Notification.permission === 'default' && (settings.get('notifyPrayers') || []).length) {
       const en = h('button.btn.block', { type: 'button', onclick: () => { const perm = askPermission(); save(() => {}, perm).then(() => { if (Notification.permission === 'granted') en.remove(); }); } }, 'تفعيل تنبيه الأذان');
       body.push(en);
     }
@@ -97,8 +101,8 @@ export function notifyCard({ prayers = true, wird = true } = {}) {
         for (const b of preSeg.children) b.setAttribute('aria-checked', String(b === e.currentTarget));
         save(async () => { await settings.set('preAdhan', before); for (const b of preSeg.children) b.setAttribute('aria-checked', String(b.dataset.v === String(before))); }, perm);
       }, dataset: { v } }, label)));
-    body.push(h('div.field', h('span', 'تنبيه قبل الأذان'), preSeg), xt('notifyAfter', 'تذكير بالأذكار بعد الصلاة', 'بعد الأذان بعشر دقائق'));
-    body.push(xt('notifyKahf', 'تذكير يوم الجمعة', 'سورة الكهف صباحًا، وآخر ساعة قبل المغرب'),
+    body.push(h('div.field', h('span', 'تنبيه قبل الأذان'), preSeg));
+    if (!native) body.push(xt('notifyAfter', 'تذكير بالأذكار بعد الصلاة', 'بعد الأذان بعشر دقائق'), xt('notifyKahf', 'تذكير يوم الجمعة', 'سورة الكهف صباحًا، وآخر ساعة قبل المغرب'),
       xt('notifyFasting', 'تذكير بالصيام', 'ليلة الاثنين والخميس، وقبل الأيام البيض'),
       xt('adhkarReminder', 'تذكير بأذكار الصباح والمساء', 'بعد الفجر بنصف ساعة، وبعد العصر بثلث ساعة'),
       xt('notifyAod', 'آية الصباح', 'آية اليوم كل صباح في الثامنة'),
