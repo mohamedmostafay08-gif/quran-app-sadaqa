@@ -428,7 +428,12 @@ export const player = {
     Object.assign(st, { radio: r, surah: null, ayah: null, compare: null, range: null, only: false, untimed: false, fellBack: false });
     startRadio();
   },
-  pause() { audio.pause(); },
+  pause() {
+    if (st.radio) { audio.pause(); return; }
+    // يلغي أي تحميل جارٍ أيضًا، حتى لا يبدأ التشغيل بعد الإيقاف (مؤقت النوم أو الأذان وقت الانتقال بين المقاطع)
+    loadSeq++; switching = false; audio.pause();
+    if (st.status === 'loading') { st.status = 'paused'; emit(); }
+  },
   resume() {
     if (st.radio?.ondemand && audio.getAttribute('src')) { audio.play().catch(() => fail()); return; }
     if (st.radio) { radioTries = 0; startRadio(); return; }

@@ -690,7 +690,7 @@ body.focus-mode .main { padding-top: 0; }
 .rq-picker { display: grid; gap: var(--sp-3); }
 .rq-pgroup { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--sp-2) var(--sp-3) var(--sp-3); margin: 0; display: grid; gap: 2px; min-width: 0; }
 .rq-pgroup legend { display: flex; align-items: center; gap: var(--sp-2); padding: 0 var(--sp-1); }
-.rq-all { min-height: 32px; padding: 0 var(--sp-2); font-size: var(--fs-xs); }
+.rq-all { min-height: 32px; padding: 0 var(--sp-2); font-size: var(--fs-xs); white-space: nowrap; flex-shrink: 0; }
 .rq-pick { display: grid; grid-template-columns: auto 1fr; column-gap: var(--sp-2); align-items: center; min-height: 44px; padding: 4px 0; cursor: pointer; }
 .rq-pick input { width: 20px; height: 20px; accent-color: var(--accent); grid-row: span 2; }
 .rq-pick span { font-weight: 600; }

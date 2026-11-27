@@ -32,7 +32,10 @@ export async function renderRuqyah(_p, query, isStale) {
   const byMushaf = (a, b) => a[0] - b[0] || a[1] - b[1];
   let mode = load('qa:ruqyahMode', 'full') === 'custom' ? 'custom' : 'full';
   let picked;
-  try { picked = new Set(JSON.parse(load('qa:ruqyahPicked', 'null')) || all.map(keyOf)); } catch { picked = new Set(all.map(keyOf)); }
+  // المحفوظ قد يكون تالفًا أو فيه مواضع لم تعد موجودة: نبقي الصالح فقط، وإن لم يبق شيء فالكل
+  try { const v = JSON.parse(load('qa:ruqyahPicked', 'null')); picked = new Set(Array.isArray(v) ? v : []); } catch { picked = new Set(); }
+  picked = new Set(all.map(keyOf).filter((k) => picked.has(k)));
+  if (!picked.size) picked = new Set(all.map(keyOf));
   const playlist = () => (mode === 'full' ? all : all.filter((x) => picked.has(keyOf(x)))).slice().sort(byMushaf);
   // تغيّرت المواضع: إن كانت الرقية تعمل تبدأ القائمة الجديدة فورًا
   const changed = () => {
@@ -46,13 +49,16 @@ export async function renderRuqyah(_p, query, isStale) {
   const now = h('small.rq-now', { 'aria-live': 'polite' });
   const playBtn = h('button.btn.rq-play', { type: 'button' });
   const reciterName = h('span');
+  const reciterBtn = h('button.btn.ghost', { type: 'button', onclick: () => reciterSheet() }, icon('user'), reciterName);
   const fallbackNote = h('p.small-note.rq-fallback', { hidden: true });
   const sleepLabel = h('span');
 
   // قائمة الاختيار: لكل مجموعة زر «الكل» ومربعات للمواضع
   const boxes = [];
-  const groupAll = [];
-  const syncGroup = (g, btn) => { const n = g.items.filter((x) => picked.has(keyOf(x))).length; btn.textContent = n === g.items.length ? 'إلغاء الكل' : 'تحديد الكل'; };
+  const syncGroup = (g, btn) => {
+    const t = g.items.every((x) => picked.has(keyOf(x))) ? 'إلغاء الكل' : 'تحديد الكل';
+    btn.textContent = t; btn.setAttribute('aria-label', `${t}: ${g.title}`);
+  };
   const picker = h('div.rq-picker', VERSE_GROUPS.map((g) => {
     const allBtn = h('button.btn.ghost.rq-all', { type: 'button' });
     const items = g.items.map((x) => {
@@ -73,7 +79,6 @@ export async function renderRuqyah(_p, query, isStale) {
       syncGroup(g, allBtn); changed();
     };
     syncGroup(g, allBtn);
-    groupAll.push(allBtn);
     return h('fieldset.rq-pgroup', h('legend', h('strong', g.title), allBtn), items);
   }));
   const modeSeg = h('div.seg', { role: 'radiogroup', 'aria-label': 'ما يُشغَّل' }, [['full', 'الرقية كاملة'], ['custom', 'اختر المواضع']].map(([v, label]) => h('button', {
@@ -89,12 +94,15 @@ export async function renderRuqyah(_p, query, isStale) {
     const k = playing ? 'pause' : rs.active ? 'resume' : 'start';
     if (k !== btnKey) { btnKey = k; playBtn.replaceChildren(icon(playing ? 'pause' : 'play'), h('span', playing ? 'إيقاف مؤقت' : rs.active ? 'متابعة' : 'استمع للرقية')); }
     const n = playlist().length;
-    now.textContent = rs.active && rs.item ? `${ar(rs.idx + 1)} من ${ar(rs.total)}: ${rs.item[3]}` : mode === 'full' ? `الرقية كاملة: ${ar(n)} موضعًا بترتيب المصحف` : `${ar(n)} ${n === 1 ? 'موضع' : n <= 10 ? 'مواضع' : 'موضعًا'} مختارة`;
+    // لا نعيد كتابة النص إن لم يتغير (المنطقة الحية تُقرأ عند كل كتابة)
+    const set = (el, t) => { if (el.textContent !== t) el.textContent = t; };
+    set(now, rs.active && rs.item ? `${ar(rs.idx + 1)} من ${ar(rs.total)}: ${rs.item[3]}` : mode === 'full' ? `الرقية كاملة: ${ar(n)} موضعًا بترتيب المصحف` : n === 1 ? 'موضع واحد مختار' : n === 2 ? 'موضعان مختاران' : `${ar(n)} ${n <= 10 ? 'مواضع مختارة' : 'موضعًا مختارًا'}`);
     const eff = getReciter(RP.effectiveReciter())?.nameAr || '';
-    reciterName.textContent = eff;
+    set(reciterName, eff);
+    reciterBtn.setAttribute('aria-label', `القارئ: ${eff}، تغيير القارئ`);
     fallbackNote.hidden = !RP.usesFallback();
-    if (RP.usesFallback()) fallbackNote.textContent = `تلاوة «${getReciter(settings.get('reciter'))?.nameAr || ''}» مسجّلة سورًا كاملة بلا توقيت للآيات، فتُشغَّل الرقية بصوت ${eff}. يمكنك اختيار قارئ آخر.`;
-    sleepLabel.textContent = sleepState() ? `مؤقت النوم: ${sleepState()}` : 'مؤقت النوم';
+    if (RP.usesFallback()) set(fallbackNote, `تلاوة «${getReciter(settings.get('reciter'))?.nameAr || ''}» مسجّلة سورًا كاملة بلا توقيت للآيات، فتُشغَّل الرقية بصوت ${eff}. يمكنك اختيار قارئ آخر.`);
+    set(sleepLabel, sleepState() ? `مؤقت النوم: ${sleepState()}` : 'مؤقت النوم');
   };
   playBtn.onclick = () => (RP.state().active ? RP.toggle() : RP.playRuqyah(playlist(), { repeat: repeat.checked }));
   const listenCard = h('section.card.rq-listen',
@@ -104,7 +112,7 @@ export async function renderRuqyah(_p, query, isStale) {
     picker,
     h('label.toggle', h('span', h('strong', 'تكرار الرقية'), h('small', 'تُعاد من أولها بعد انتهائها')), repeat),
     h('div.rq-tools',
-      h('button.btn.ghost', { type: 'button', 'aria-label': 'تغيير القارئ', onclick: () => reciterSheet() }, icon('user'), reciterName),
+      reciterBtn,
       h('button.btn.ghost', { type: 'button', onclick: () => sleepSheet() }, icon('timer'), sleepLabel)),
     fallbackNote);
 
