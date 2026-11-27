@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '6ad30d89db';
+const VERSION = '2387e134bc';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -40,6 +40,7 @@ const ASSETS = [
   'src/features/notes.js',
   'src/features/prayer.js',
   'src/features/prayerLog.js',
+  'src/features/progressCharts.js',
   'src/features/push.js',
   'src/features/shareAudio.js',
   'src/features/shareCard.js',
@@ -153,7 +154,7 @@ const ASSETS = [
 
 // بصمة كل ملف (يملؤها stamp-sw.js)
 const HASHES = {
-  'index.html': '8a49a596f851',
+  'index.html': '9a7f4152acb0',
   'manifest.webmanifest': '27a0f985d0e6',
   'src/audio/mediaSession.js': 'f1513cd68f40',
   'src/audio/player.js': '55a7203e9466',
@@ -180,6 +181,7 @@ const HASHES = {
   'src/features/notes.js': 'd3ccbec4d8f2',
   'src/features/prayer.js': 'a15d2a6bf359',
   'src/features/prayerLog.js': 'edbf2eca0125',
+  'src/features/progressCharts.js': '54adecb86133',
   'src/features/push.js': '346597d42faf',
   'src/features/shareAudio.js': '80b7e2189c68',
   'src/features/shareCard.js': 'cfec99a457ea',
@@ -203,7 +205,7 @@ const HASHES = {
   'src/styles/components.css': '018ad94a009d',
   'src/styles/desktop.css': '3af1ce9de67a',
   'src/styles/features.css': '8cdea6bd1193',
-  'src/styles/modern.css': 'a43b1fddc758',
+  'src/styles/modern.css': 'd467efa02de0',
   'src/styles/themes.css': '60b63673d983',
   'src/ui.js': '8bc2cd16fa60',
   'src/views/about.js': '86e0ef77f8f7',
@@ -239,7 +241,7 @@ const HASHES = {
   'src/views/search.js': 'fddad38f5daa',
   'src/views/settings.js': '25365410769f',
   'src/views/sleep.js': '1b8eed9aedee',
-  'src/views/stats.js': '95158cfc6075',
+  'src/views/stats.js': '45ff1ed1d1a6',
   'src/views/tajweed.js': 'dab2daaebacb',
   'src/views/tasbih.js': '3dccb3bf14e0',
   'src/views/today.js': 'bbd30d89de9d',

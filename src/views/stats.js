@@ -4,6 +4,7 @@ import { mount, topbar } from '../ui.js';
 import { lastDays, streak } from '../features/activity.js';
 import { badgesGrid } from '../features/badges.js';
 import { weeklySection } from '../features/weekly.js';
+import { khatmaProgress, memorizeProgress, streakProgress } from '../features/progressCharts.js';
 
 const DAY = new Intl.DateTimeFormat('ar-EG', { weekday: 'short' });
 const streakLabel = (n) => (n === 0 ? 'ابدأ اليوم بصفحة واحدة' : n === 1 ? 'يوم مع القرآن' : n === 2 ? 'يومان متتاليان مع القرآن' : n <= 10 ? 'أيام متتالية مع القرآن' : 'يومًا متتاليًا مع القرآن');
@@ -16,12 +17,11 @@ export function renderStats() {
   const pagesW = sum(week, 'pages'), minW = sum(week, 'minutes'), tasW = sum(week, 'tasbih');
   const max = Math.max(1, ...week.map((d) => d.pages + d.minutes / 5));
   const tile = (value, label) => h('div.st-tile', h('strong', ar(value)), h('small', label));
+  const progress = h('div.pc-list');
 
   mount(h('div.stats-page',
     topbar({ title: 'إحصائياتي', sub: 'محفوظة على جهازك فقط', back: '#/' }),
-    h('section.card.st-streak',
-      s ? h('strong', ar(s)) : h('span.st-ic', '۞'),
-      h('span', streakLabel(s))),
+    s ? streakProgress() : h('section.card.st-streak', h('span.st-ic', '۞'), h('span', streakLabel(s))),
     weeklySection(),
     h('h2.lib-h', 'آخر ٧ أيام'),
     h('div.st-tiles',
@@ -41,6 +41,10 @@ export function renderStats() {
       tile(sum(month, 'pages'), 'صفحة'),
       tile(sum(month, 'minutes'), 'دقيقة استماع'),
       tile(month.filter((d) => d.pages || d.minutes).length, 'يوم نشاط')),
+    h('h2.lib-h', 'الختمة والحفظ'),
+    progress,
     badgesGrid(),
   ));
+  // الرسوم تحتاج قراءة من قاعدة البيانات، فتُملأ بعد ظهور الشاشة
+  Promise.all([khatmaProgress(), memorizeProgress()]).then((cards) => progress.replaceChildren(...cards)).catch(() => progress.remove());
 }
