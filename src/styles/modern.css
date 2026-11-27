@@ -131,6 +131,10 @@ body::before { background: color-mix(in srgb, var(--surface) 92%, transparent); 
 }
 .tabbar a { color: var(--text-3); font-weight: 600; gap: 4px; }
 .tabbar a svg { box-sizing: content-box; padding: 4px 16px; border-radius: 999px; transition: background .2s; }
+/* سبعة تبويبات: نضيّق حشوة كبسولة الأيقونة على الشاشات الصغيرة حتى تتسع كلها */
+.tabbar a { min-width: 0; }
+@media (max-width: 430px) { .tabbar a svg { padding: 4px 10px; } .tabbar a { margin-inline: 1px; } }
+@media (max-width: 360px) { .tabbar a svg { padding: 4px 6px; } .tabbar { padding-inline: 4px; } }
 .tabbar a[aria-current="page"] { color: var(--accent); }
 .tabbar a[aria-current="page"] svg { background: var(--accent-soft); }
 .tabbar a[aria-current="page"]::before { display: none; }
@@ -656,3 +660,20 @@ body.focus-mode .main { padding-top: 0; }
 .pc-table-wrap { overflow-x: auto; max-height: 240px; overflow-y: auto; margin-top: var(--sp-1); }
 .pc-table table { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
 .pc-table th, .pc-table td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: start; }
+
+/* ===== الرقية الشرعية ===== */
+.rq-listen { display: grid; gap: var(--sp-3); }
+.rq-head { display: flex; align-items: center; gap: var(--sp-3); }
+.rq-head strong { display: block; font-size: var(--fs-md); }
+.rq-now { color: var(--text-2); font-size: var(--fs-sm); }
+.rq-play { justify-content: center; }
+.rq-tools { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.rq-tools .btn { flex: 1 1 140px; justify-content: center; }
+.rq-group { display: grid; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.rq-group .small-note { margin: 0; }
+.rq-evidence { margin: 0; font-size: var(--fs-sm); color: var(--text-2); line-height: 1.8; border-inline-start: 3px solid var(--gold); padding-inline-start: var(--sp-2); }
+.rq-dua { font-size: calc(1.25rem * var(--quran-scale, 1)); }
+.rq-when { color: var(--text-2); font-size: var(--fs-sm); line-height: 1.7; }
+.rq-count { min-height: 40px; padding: 0 var(--sp-3); font-variant-numeric: tabular-nums; }
+.rq-method { margin-top: var(--sp-2); }
+.ruqyah-page .dua-ref { font-weight: 500; }
