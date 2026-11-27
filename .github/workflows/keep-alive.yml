@@ -1,19 +1,49 @@
-# يبقي مشروع Supabase المجاني نشطًا (يتوقف بعد ٧ أيام بدون أي طلبات)، حتى لا تتعطل روابط الختمات الجماعية
+# فحص يومي لخادم Supabase، ويبقيه نشطًا احتياطيًا (المحرّك الأساسي للنشاط هو push-tick كل دقيقة عبر pg_cron).
+# عند الفشل يفتح Issue بعنوان ثابت (يصل إشعار لصاحب المستودع)، ويغلقه تلقائيًا عند عودة الخادم.
+# ملاحظة: GitHub يوقف الجداول بعد ٦٠ يومًا بلا نشاط في المستودع؛ لذلك المراقب الأساسي هو نبضات push-tick
+# إلى Healthchecks.io (السر HEALTHCHECK_URL في الدالة)، وهذا الفحص طبقة ثانية.
 name: keep-alive
 on:
   schedule:
-    - cron: '17 6 * * 1,4'   # الاثنين والخميس
+    - cron: '17 6 * * *'   # يوميًا
   workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
 jobs:
-  ping:
+  check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - name: Ping Supabase
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/keep-alive-check.sh
+          sparse-checkout-cone-mode: false
+      - name: Check Supabase
+        id: check
+        run: bash scripts/keep-alive-check.sh 2>&1 | tee result.txt; exit ${PIPESTATUS[0]}
+      - name: Report failure
+        if: failure() && steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST \
-            'https://lskfbmkesxxgqytjsftk.supabase.co/rest/v1/rpc/khatma_get' \
-            -H 'apikey: sb_publishable_4yIAdvDsyTja323tcEVUvQ_KLxQYg7P' \
-            -H 'Content-Type: application/json' \
-            -d '{"p_id":"keepalive","p_device":"keepalive"}')
-          echo "HTTP $code"
-          test "$code" = "200" || test "$code" = "204"
+          title='تنبيه: خادم Supabase لا يستجيب (keep-alive)'
+          body="فشل الفحص اليومي في $(date -u '+%Y-%m-%d %H:%M UTC').
+
+          \`\`\`
+          $(cat result.txt)
+          \`\`\`
+          التشغيل: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          إن كان المشروع متوقفًا مؤقتًا: افتح لوحة Supabase واضغط Restore."
+          num=$(gh issue list --state open --search "in:title \"$title\"" --json number -q '.[0].number')
+          if [ -n "$num" ]; then gh issue comment "$num" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
+      - name: Close issue when healthy
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title='تنبيه: خادم Supabase لا يستجيب (keep-alive)'
+          for n in $(gh issue list --state open --search "in:title \"$title\"" --json number -q '.[].number'); do
+            gh issue close "$n" --comment "عاد الخادم للعمل: $(cat result.txt | head -1)"
+          done

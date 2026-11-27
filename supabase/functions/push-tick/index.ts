@@ -86,8 +86,24 @@ Deno.serve(async (req) => {
   if (req.headers.get('x-tick-key') !== cfg.push_tick_key) return new Response('forbidden', { status: 403 });
   if (ticking) return json({ skipped: 'previous tick still running' }, 202);
   ticking = true;
-  try { return json(await tick(db, vapid)); } finally { ticking = false; }
+  try {
+    const out = await tick(db, vapid);
+    heartbeat(out.skipped || out.truncated ? '/fail' : '', out);
+    return json(out);
+  } catch (e) {
+    heartbeat('/fail', { error: String(e) });
+    throw e;
+  } finally { ticking = false; }
 });
+
+// نبضة لمراقب خارجي (مثل Healthchecks.io) بعد كل دورة: إن انقطعت النبضات يصل تنبيه بالبريد
+// (توقف المشروع أو pg_cron أو الدالة). اختياري: يُفعَّل بضبط السر HEALTHCHECK_URL
+function heartbeat(suffix: string, info: unknown) {
+  const url = Deno.env.get('HEALTHCHECK_URL');
+  if (!url) return;
+  const p = fetch(url + suffix, { method: 'POST', body: JSON.stringify(info), signal: AbortSignal.timeout(5000) }).catch(() => {});
+  (globalThis as any).EdgeRuntime?.waitUntil?.(p); // حتى لا تُنهى الدالة قبل وصول النبضة بعد الرد
+}
 
 async function tick(db: ReturnType<typeof createClient>, vapid: { subject: string; publicKey: string; privateKey: string }) {
   const started = Date.now();
