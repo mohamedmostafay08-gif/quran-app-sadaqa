@@ -677,3 +677,12 @@ body.focus-mode .main { padding-top: 0; }
 .rq-count { min-height: 40px; padding: 0 var(--sp-3); font-variant-numeric: tabular-nums; }
 .rq-method { margin-top: var(--sp-2); }
 .ruqyah-page .dua-ref { font-weight: 500; }
+.rq-guide { display: grid; gap: var(--sp-2); }
+.rq-sec summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); font-size: var(--fs-md); }
+.rq-sec summary::-webkit-details-marker { display: none; }
+.rq-sec summary::after { content: '+'; color: var(--accent); font-size: 1.3em; line-height: 1; }
+.rq-sec[open] summary::after { content: '−'; }
+.rq-points { list-style: none; margin: var(--sp-3) 0 0; padding: 0; display: grid; gap: var(--sp-3); }
+.rq-points li { display: grid; gap: 4px; padding-inline-start: var(--sp-3); border-inline-start: 3px solid var(--accent-soft); }
+.rq-points p { margin: 0; line-height: 1.9; }
+.rq-points .dua-ref { font-size: var(--fs-xs); }

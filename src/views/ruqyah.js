@@ -6,7 +6,7 @@ import { player, getReciter } from '../audio/player.js';
 import { reciterSheet } from '../audio/playerBar.js';
 import { sleepSheet, sleepState } from '../audio/sleepTimer.js';
 import * as settings from '../state.js';
-import { VERSE_GROUPS, DUAS } from '../features/ruqyah.js';
+import { VERSE_GROUPS, DUAS, GUIDE } from '../features/ruqyah.js';
 import * as RP from '../features/ruqyahPlayer.js';
 
 const TAB_KEY = 'qa:ruqyahTab';
@@ -103,10 +103,16 @@ export async function renderRuqyah(_p, query, isStale) {
         d.count > 1 ? counter(d) : null,
         h('button.icon-btn', { type: 'button', 'aria-label': 'نسخ', onclick: () => copy(`${d.text}\n[${d.source}]`) }, icon('copy'))))))));
 
+  // ===== الدليل =====
+  const guidePane = h('div.rq-pane.rq-guide', GUIDE.map((g, i) => h('details.card.rq-sec', { open: i === 0 },
+    h('summary', h('strong', g.title)),
+    h('ul.rq-points', g.points.map((x) => h('li', h('p', x.t), x.s ? h('small.dua-ref', x.s) : null))))));
+
   // ===== التبويبات =====
   let tab = query.tab || load(TAB_KEY, 'verses');
-  const panes = { verses: versesPane, duas: duasPane };
-  const tabs = h('div.seg', { role: 'tablist', 'aria-label': 'أقسام الرقية' }, [['verses', `الآيات (${ar(all.length)})`], ['duas', `الأدعية (${ar(DUAS.length)})`]].map(([id, label]) => h('button', {
+  if (!['verses', 'duas', 'guide'].includes(tab)) tab = 'verses';
+  const panes = { verses: versesPane, duas: duasPane, guide: guidePane };
+  const tabs = h('div.seg', { role: 'tablist', 'aria-label': 'أقسام الرقية' }, [['verses', `الآيات (${ar(all.length)})`], ['duas', `الأدعية (${ar(DUAS.length)})`], ['guide', 'الدليل']].map(([id, label]) => h('button', {
     type: 'button', role: 'tab', 'aria-selected': String(tab === id),
     onclick: (e) => { tab = id; save(TAB_KEY, id); for (const b of tabs.children) b.setAttribute('aria-selected', String(b === e.currentTarget)); show(); },
   }, label)));
@@ -115,7 +121,7 @@ export async function renderRuqyah(_p, query, isStale) {
 
   mount(h('div.ruqyah-page',
     topbar({ title: 'الرقية الشرعية', sub: 'من القرآن الكريم والسنة الصحيحة' }),
-    listenCard, tabs, versesPane, duasPane));
+    listenCard, tabs, versesPane, duasPane, guidePane));
   paintListen();
   const un1 = RP.subscribe(paintListen), un2 = player.subscribe(paintListen);
   const timer = setInterval(paintListen, 15000);
