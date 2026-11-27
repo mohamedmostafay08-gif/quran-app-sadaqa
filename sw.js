@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '778ed46051';
+const VERSION = 'f324613a6c';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -185,7 +185,7 @@ const HASHES = {
   'src/features/progressCharts.js': '54adecb86133',
   'src/features/push.js': '346597d42faf',
   'src/features/shareAudio.js': '80b7e2189c68',
-  'src/features/shareCard.js': 'cfec99a457ea',
+  'src/features/shareCard.js': 'd53ad96d54f9',
   'src/features/srs.js': 'ee66c677c98e',
   'src/features/stats.js': 'edb52610f21f',
   'src/features/story.js': 'd102d76e42b1',
@@ -204,7 +204,7 @@ const HASHES = {
   'src/state.js': '93bb9b0d0c66',
   'src/styles/base.css': 'b75afe71b90a',
   'src/styles/classic.css': '6a0aa81dbc24',
-  'src/styles/components.css': '25f3660e2aa4',
+  'src/styles/components.css': 'c29eaf8c7de2',
   'src/styles/desktop.css': '3af1ce9de67a',
   'src/styles/features.css': '8cdea6bd1193',
   'src/styles/modern.css': '56a1dafb5954',
