@@ -40,7 +40,7 @@ export const DEFAULTS = {
   adhkarReminder: true,   // تذكير بأذكار الصباح (بعد الفجر) والمساء (بعد العصر)
   adhkarLog: {},          // { 'YYYY-MM-DD': { sabah, masa, nawm } }
   autoNight: false,       // (يُستخدم مع theme = 'prayer')
-  bigUI: false,           // وضع كبار السن: تكبير خط التطبيق كله
+  bigUI: 0,               // حجم خط التطبيق كله: 0 عادي، 1 كبير، 2 كبير جدًا (true القديمة = 1)
   wordHighlight: true,    // تظليل الكلمة المقروءة لأشهر القراء
   sleepMinutes: 20,       // مؤقت روتين النوم
   notifyAod: true,        // آية الصباح إشعارًا (٨ صباحًا)
@@ -106,6 +106,9 @@ export function subscribe(fn) {
 let prayerNight = null;
 export function setPrayerNight(isNight) { prayerNight = isNight; applyVisual(); }
 
+/** مستوى حجم الواجهة 0..2 (يقبل القيمة القديمة true/false) */
+export const uiLevel = () => (state.bigUI === true ? 1 : Math.max(0, Math.min(2, +state.bigUI || 0)));
+
 function applyVisual() {
   const root = document.documentElement;
   // سمات إضافية مبنية على الفاتح أو الليلي: { المعرف: [الأساس، السمة] }
@@ -115,10 +118,12 @@ function applyVisual() {
   if (th === 'auto') delete root.dataset.theme;
   else root.dataset.theme = th;
   if (v) root.dataset.variant = v[1]; else delete root.dataset.variant;
-  root.classList.toggle('big-ui', !!state.bigUI);
+  const ui = uiLevel();
+  root.classList.toggle('big-ui', ui >= 1);
+  root.classList.toggle('huge-ui', ui >= 2);
   // لون شريط الحالة يتبع خلفية الثيم المختار
   // rAF مزدوج: يضمن أن المتصفح طبّق متغيرات CSS قبل القراءة
   requestAnimationFrame(() => requestAnimationFrame(() => { const bg = getComputedStyle(document.body || root).backgroundColor; if (bg) for (const m of document.querySelectorAll('meta[name="theme-color"]')) m.setAttribute('content', bg); }));
   root.style.setProperty('--quran-scale', state.fontScale);
-  try { localStorage.setItem('qa:boot', JSON.stringify({ theme: th === 'auto' ? undefined : th, variant: v?.[1], fontScale: state.fontScale })); } catch (e) { /* خاص/محظور */ }
+  try { localStorage.setItem('qa:boot', JSON.stringify({ theme: th === 'auto' ? undefined : th, variant: v?.[1], fontScale: state.fontScale, ui })); } catch (e) { /* خاص/محظور */ }
 }

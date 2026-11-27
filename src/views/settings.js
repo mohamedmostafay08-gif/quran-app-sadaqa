@@ -43,6 +43,10 @@ export function renderSettings() {
       settings.get('theme') === 'prayer' && !settings.get('prayerLocation') ? h('small.muted', 'حدّد مدينتك من شاشة الصلاة ليعمل «حسب المغرب».') : null,
       h('label.field', h('span', 'حجم خط المصحف'), h('div.range-row', h('span.small', 'أ'), scale, h('span.large', 'أ'))),
       h('p.preview', { lang: 'ar' }, 'ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ'),
+      h('div.field', h('span', 'حجم خط التطبيق'), h('div.seg', { role: 'radiogroup', 'aria-label': 'حجم خط التطبيق' }, [[0, 'عادي'], [1, 'كبير'], [2, 'كبير جدًا']].map(([v, label]) => h('button', {
+        type: 'button', role: 'radio', 'aria-checked': String(settings.uiLevel() === v),
+        onclick: (e) => { settings.set('bigUI', v); for (const b of e.currentTarget.parentElement.children) b.setAttribute('aria-checked', String(b === e.currentTarget)); },
+      }, label)))),
       h('div.field', h('span', 'طريقة العرض'), seg('layout', [['flow', 'متصل كالمصحف'], ['list', 'آية في سطر']])),
       translationPicker(),
       h('div.field', h('span', 'التفسير المفضّل'), seg('tafsir', [['muyassar', 'الميسر'], ['saadi', 'السعدي']])),

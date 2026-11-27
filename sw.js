@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '2387e134bc';
+const VERSION = '4087dcbc57';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -199,13 +199,13 @@ const HASHES = {
   'src/offline/extras.js': 'd589a0716900',
   'src/offline/storage.js': '8bc123b06cb7',
   'src/router.js': 'ead1cba011d9',
-  'src/state.js': '990021ebd503',
+  'src/state.js': '93bb9b0d0c66',
   'src/styles/base.css': 'b75afe71b90a',
   'src/styles/classic.css': '6a0aa81dbc24',
   'src/styles/components.css': '018ad94a009d',
   'src/styles/desktop.css': '3af1ce9de67a',
   'src/styles/features.css': '8cdea6bd1193',
-  'src/styles/modern.css': 'd467efa02de0',
+  'src/styles/modern.css': '56a1dafb5954',
   'src/styles/themes.css': '60b63673d983',
   'src/ui.js': '8bc2cd16fa60',
   'src/views/about.js': '86e0ef77f8f7',
@@ -214,7 +214,7 @@ const HASHES = {
   'src/views/car.js': '685946a6c0d0',
   'src/views/downloads.js': '7638d5def9d3',
   'src/views/duas.js': '61877a14505b',
-  'src/views/elder.js': '3ff4305ade7e',
+  'src/views/elder.js': 'd18f7e3bb41e',
   'src/views/fasting.js': '7ce6be9a1117',
   'src/views/greetings.js': 'ac2783444be8',
   'src/views/group.js': 'aca60e8ab7df',
@@ -239,7 +239,7 @@ const HASHES = {
   'src/views/ramadan.js': 'bfc1d73a78d2',
   'src/views/reader.js': '53b0bb07c217',
   'src/views/search.js': 'fddad38f5daa',
-  'src/views/settings.js': '25365410769f',
+  'src/views/settings.js': '5b569833d7e5',
   'src/views/sleep.js': '1b8eed9aedee',
   'src/views/stats.js': '45ff1ed1d1a6',
   'src/views/tajweed.js': 'dab2daaebacb',
@@ -289,7 +289,7 @@ const HASHES = {
   'public/img/miracles/sulayman-wind.svg': '51a8f7dce425',
   'public/img/miracles/yunus-whale.svg': '7dc4417a060a',
   'public/lib/adhan.esm.js': '951ca9423c16',
-  'public/lib/boot-theme.js': '42c1148aef40',
+  'public/lib/boot-theme.js': '7c9a450c495b',
   'public/data/extras.json': '433f3b8a0a82',
 };
 const EXTRA_HASHES = {
