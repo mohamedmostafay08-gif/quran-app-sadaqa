@@ -3,7 +3,7 @@
  * - الصوت: كاش أولًا من audio-v1 مع دعم Range requests (مهم لـ iOS Safari)
  * يُحدَّث VERSION و ASSETS تلقائيًا بواسطة scripts/stamp-sw.js
  */
-const VERSION = '4ff0c57157';
+const VERSION = '4660c14abe';
 const APP_CACHE = 'app-' + VERSION;
 const AUDIO_CACHE = 'audio-v1';
 const TIMING_CACHE = 'timing-v1';
@@ -157,7 +157,7 @@ const HASHES = {
   'src/audio/mediaSession.js': 'f1513cd68f40',
   'src/audio/player.js': '55a7203e9466',
   'src/audio/playerBar.js': 'f7ebe1bd2bc6',
-  'src/audio/sleepTimer.js': '51c19e0407c0',
+  'src/audio/sleepTimer.js': '90fcf68aa6b5',
   'src/data.js': 'a7b5318c359e',
   'src/db.js': '16fe43098aa5',
   'src/features/activity.js': '8e563f5c2b7b',
