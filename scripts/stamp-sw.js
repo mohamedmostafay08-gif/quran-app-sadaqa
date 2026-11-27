@@ -48,5 +48,10 @@ let sw = fs.readFileSync(swPath, 'utf8');
 sw = sw.replace(/const VERSION = '[^']*';/, `const VERSION = '${version}';`);
 sw = sw.replace(/const EXTRAS_VERSION = '[^']*';/, `const EXTRAS_VERSION = '${exVersion}';`);
 sw = sw.replace(/const ASSETS = \[[\s\S]*?\];/, `const ASSETS = [\n  './',\n${files.map((f) => `  '${f}',`).join('\n')}\n];`);
+// بصمة كل ملف على حدة: عند التحديث ينسخ الـ SW الملفات التي لم تتغير من الكاش القديم ولا ينزّل إلا المتغيّر
+const fileHash = (f) => crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT, f))).digest('hex').slice(0, 12);
+const hashMap = (list) => `{\n${list.map((f) => `  '${f}': '${fileHash(f)}',`).join('\n')}\n}`;
+sw = sw.replace(/const HASHES = \{[\s\S]*?\};/, `const HASHES = ${hashMap(files)};`);
+sw = sw.replace(/const EXTRA_HASHES = \{[\s\S]*?\};/, `const EXTRA_HASHES = ${hashMap(extras)};`);
 fs.writeFileSync(swPath, sw);
 console.log(`sw.js → VERSION ${version}, ${files.length} ملف أساسي، و${extras.length} ملف إضافي (${(exBytes / 1e6).toFixed(1)} م.ب) عند الطلب`);
